@@ -2,8 +2,8 @@
 
 Inputs (from ep_report.py --fgls --nl, render_ep_bars.py, ep_report_extra.py):
   output/ep_report_fgls_nl.csv, output/ep_report_bars.csv, output/ep_report_extra.csv
-Outputs: output/paper/fig1_si_persistence.(png|pdf), fig2_corporate_decomposition.(png|pdf),
-         fig3_saving_rate_current_account.(png|pdf)
+Outputs: output/paper/fig1_si_persistence*.(png|pdf), fig2_corporate_decomposition.(png|pdf),
+         fig3_household_saving_consumption.(png|pdf)   (suffix _lags for the lag-controlled specification)
 All responses are y_{t+h} − y_{t−1}; h = −1 is the reference year and equals zero by construction.
 """
 from pathlib import Path
@@ -118,26 +118,30 @@ def fig2():
 
 
 def fig3():
+    """Figure 3: (a) household saving rate, (b) household consumption — both episode types, raw units."""
     p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
     if not p.exists():
         return
     r = pd.read_csv(p)
+    if "cons_hh" not in set(r["var"]):
+        return
     n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.1))
     for ax, v, ylab, title in ((axes[0], "src_hh", "Percentage points of\ndisposable income", "(a) Household saving rate"),
-                               (axes[1], "ca", "Current account\n(impact own-sector balance = 1)", "(b) Current account")):
+                               (axes[1], "cons_hh", "Percentage points of GDP", "(b) Household consumption")):
         line(ax, r[(r.sector == "hh") & (r["var"] == v)], HH, f"Household episodes (N = {n_hh})")
         line(ax, r[(r.sector == "corp") & (r["var"] == v)], CO, f"Terms-of-trade episodes (N = {n_co})", ls="--")
         finish(ax, ylab)
         ax.set_title(title, loc="left")
     axes[0].legend(loc="center", bbox_to_anchor=(0.55, 0.47))
-    fig.suptitle("Figure 3. Household saving rate and current account responses", x=0.0, ha="left", fontweight="bold", y=1.03)
+    fig.suptitle("Figure 3. Household saving rate and consumption", x=0.0, ha="left", fontweight="bold", y=1.03)
     fig.tight_layout()
-    fig.text(0.0, -0.06, "Notes: (a) Cumulative change in the household gross saving rate per episode, percentage points of gross "
-             "disposable income (not normalized). (b) Cumulative response of national net lending (percent of GDP), normalized by the "
-             "impact response of the originating sector's saving–investment balance. Shaded areas are 68 percent confidence bands "
-             "(country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1.", fontsize=7, wrap=True, va="top")
-    save(fig, "fig3_saving_rate_current_account")
+    fig.text(0.0, -0.06, "Notes: Cumulative change per episode relative to year $-1$, not normalized. (a) Household gross saving over "
+             "gross disposable income. (b) Household final consumption expenditure, percent of nominal GDP. Shaded areas are 68 percent "
+             "confidence bands (country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1"
+             + (", including two lags of the change in the own-sector saving–investment balance." if LAGS else "."),
+             fontsize=7, wrap=True, va="top")
+    save(fig, "fig3_household_saving_consumption")
 
 
 def fig1_variants():
@@ -172,28 +176,8 @@ def fig1_variants():
         save(fig, name)
 
 
-def fig4():
-    p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
-    if not p.exists():
-        return
-    r = pd.read_csv(p)
-    n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
-    fig, ax = plt.subplots(figsize=(5.2, 3.3))
-    line(ax, r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, f"{LAB_HH} (N = {n_hh})")
-    line(ax, r[(r.sector == "corp") & (r["var"] == "src_hh")], CO, f"{LAB_CO} (N = {n_co})", ls="--")
-    finish(ax, "Household saving rate\n(percentage points of disposable income)")
-    ax.legend(loc="center", bbox_to_anchor=(0.55, 0.5))
-    ax.set_title("Figure 4. Household saving rate after saving episodes", loc="left", fontweight="bold")
-    fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
-             "percentage points) per episode relative to year $-1$, not normalized. "
-             "Shaded areas are 68 percent confidence bands from a country-cluster bootstrap (499 replications). " + SPEC,
-             fontsize=7, wrap=True, va="top", transform=ax.transAxes)
-    save(fig, "fig4_household_saving_rate")
-
-
 if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
-    fig4()
     fig1_variants()

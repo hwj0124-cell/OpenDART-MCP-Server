@@ -1,6 +1,7 @@
 """보고서 보조 결과(구간 포함): 가계저축률과 경상수지 반응. 사양은 ep_report --fgls --nl과 같음.
 
 가계저축률(src_hh = 가계 총저축/가처분소득, %p): 정규화 없이 사례 1건당 원단위 반응(γ_h)
+가계 소비(cons_hh, 최종소비지출/GDP, %p): 정규화 없이 원단위 γ_h
 경상수지(ca = 국민경제 순대출, GDP 대비): 시작 연도 원천 부문 S−I 반응(γ_0)으로 나눈 값
 → output/ep_report_extra.csv
 """
@@ -13,7 +14,8 @@ import lp_tools as lt
 from make_report import OUT
 
 K = rp.K
-KEYS = [(s, v, h) for s in ("hh", "corp") for v in ("ca", "src_hh") for h in range(K + 1)]
+KEYS = [(s, v, h) for s in ("hh", "corp") for v in ("ca", "src_hh", "cons_hh") for h in range(K + 1)]
+RAW = ("src_hh", "cons_hh")  # 정규화하지 않는 변수(사례 1건당 원단위 반응)
 
 
 def stats(d):
@@ -21,7 +23,7 @@ def stats(d):
     out = []
     for s, v, h in KEYS:
         g = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], rp.ctrl(s), se=False, w=f"w_{s}")[0][0]
-        out.append(g if v == "src_hh" else g / g0[s])
+        out.append(g if v in RAW else g / g0[s])
     return np.array(out)
 
 
@@ -30,7 +32,7 @@ def main():
     rp.LAGS = "--lags" in sys.argv
     rp.FGLS = rp.WSV = True
     rp.NORM = "nl"
-    rp.HHV, rp.COV = ["nl_hh", "ca", "src_hh"], ["nl_corp", "ca", "src_hh"]
+    rp.HHV, rp.COV = ["nl_hh", "ca", "src_hh", "cons_hh"], ["nl_corp", "ca", "src_hh", "cons_hh"]
     P, d = rp.prepare()
     pt = stats(d)
     bs = lt.cluster_bootstrap(d, stats, reps=499)
