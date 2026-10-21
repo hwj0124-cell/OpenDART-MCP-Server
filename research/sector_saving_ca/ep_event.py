@@ -28,12 +28,18 @@ SPECS = {
     "상품 교역조건, 개선·상승만, 국가·연도FE": (dict(tot="tot_goods_g", dir="up"), ("country", "year")),
     "상품 교역조건, 종속변수 1·99% 윈저화": (dict(tot="tot_goods_g", wins=True), ("country", "year")),
     "상품 교역조건, 아이슬란드 2003 제외": (dict(tot="tot_goods_g", drop_eps=(("ISL", 2003),)), ("country", "year")),
+    "상품 교역조건, 역분산 가중": (dict(tot="tot_goods_g", wls=True), ("country", "year")),
+    "상품·서비스 교역조건, 역분산 가중": (dict(tot="tot_na_g", wls=True), ("country", "year")),
 }
 KEYS = [(s, v, h) for s in VARS for v in VARS[s] for h in range(K + 1)]
 
 
-def gammas(d, fe):
-    return np.array([lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], fe=fe, se=False)[0][0] for s, v, h in KEYS])
+def wcol(s, wls):
+    return f"w_{s}" if wls else None
+
+
+def gammas(d, fe, wls=False):
+    return np.array([lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], fe=fe, se=False, w=wcol(s, wls))[0][0] for s, v, h in KEYS])
 
 
 def ratios(g):
@@ -49,11 +55,14 @@ def run(name, ch, fe, x):
             c = f"{v}_h{h}"
             if h:
                 d[c] = d[c].clip(*d[c].quantile([0.01, 0.99]))
+    wls = ch.get("wls", False)
+    for s in VARS:  # 역분산 가중: 국가별 자기 부문 Δ순자금운용 분산(전 기간)의 역수
+        d[f"w_{s}"] = 1 / d.groupby("country")[f"dx_{s}"].transform("var")
     g, se = [], []
     for s, v, h in KEYS:
-        b, V, n = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], fe=fe)
+        b, V, n = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], fe=fe, w=wcol(s, wls))
         g.append(b[0]); se.append(np.sqrt(V[0, 0]))
-    bs = lt.cluster_bootstrap(d, lambda b: ratios(gammas(b, fe)), reps=499)
+    bs = lt.cluster_bootstrap(d, lambda b: ratios(gammas(b, fe, wls)), reps=499)
     r = ratios(np.array(g))
     out = pd.DataFrame(KEYS, columns=["sector", "var", "h"]).assign(
         spec=name, n_ep=[len(P[s]) for s, _, _ in KEYS], gamma=g, gamma_se=se, ratio=r,

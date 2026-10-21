@@ -54,12 +54,15 @@ def _groups(cl):
     return [np.flatnonzero(codes == k) for k in range(len(uniq))]
 
 
-def ols(d, y, x, controls, fe=("country", "year"), cluster="country", se=True):
-    """y on x (+controls, FE). 반환: (coef[x], cov[x], nobs)"""
-    cols = [y] + list(x) + list(controls)
+def ols(d, y, x, controls, fe=("country", "year"), cluster="country", se=True, w=None):
+    """y on x (+controls, FE). w: 가중치 열 이름(가중최소제곱). 반환: (coef[x], cov[x], nobs)"""
+    cols = [y] + list(x) + list(controls) + ([w] if w else [])
     d = d[cols + list(dict.fromkeys([*fe, cluster]))].dropna(subset=cols)
     X = np.hstack([d[list(x) + list(controls)].to_numpy(float), _fe_matrix(d, fe)])
     Y = d[y].to_numpy(float)
+    if w:
+        sw = np.sqrt(d[w].to_numpy(float))
+        X, Y = X * sw[:, None], Y * sw
     XtX_inv = _inv(X.T @ X)
     b = XtX_inv @ X.T @ Y
     k = len(x)
