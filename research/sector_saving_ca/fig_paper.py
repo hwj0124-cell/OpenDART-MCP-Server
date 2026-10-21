@@ -41,17 +41,18 @@ def with_ref(q, cols=("ratio", "lo68", "hi68")):
     return pd.concat([ref, q[["h", *cols]]], ignore_index=True)
 
 
-def line(ax, q, color, label, ls="-", band=True):
-    q = with_ref(q)
+def line(ax, q, color, label, ls="-", band=True, ref=True):
+    q = with_ref(q) if ref else q[q.h <= HMAX].sort_values("h")
     if band:
         ax.fill_between(q.h, q.lo68, q.hi68, color=color, alpha=0.14, lw=0)
     ax.plot(q.h, q.ratio, color=color, ls=ls, lw=1.6, marker="o", ms=3, label=label)
 
 
-def finish(ax, ylab):
+def finish(ax, ylab, h0=-1):
     ax.axhline(0, color="0.3", lw=0.6)
-    ax.axvline(-1, color="0.75", lw=0.5, ls=":")
-    ax.set_xticks(range(-1, HMAX + 1))
+    if h0 < 0:
+        ax.axvline(-1, color="0.75", lw=0.5, ls=":")
+    ax.set_xticks(range(h0, HMAX + 1))
     ax.set_xlabel(XLAB)
     ax.set_ylabel(ylab)
 
@@ -130,6 +131,34 @@ def fig3():
     save(fig, "fig3_saving_rate_current_account")
 
 
+def fig1_variants():
+    """그림 1 두 가지: 사전 시점 포함(h = −3…6, h = −1 기준 0) / h = 0부터."""
+    p = OUT / "ep_report_leads.csv"
+    if not p.exists():
+        return
+    r = pd.read_csv(p)
+    n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
+    for name, h0 in (("fig1_si_persistence_leads", -3), ("fig1_si_persistence_h0", 0)):
+        fig, ax = plt.subplots(figsize=(5.2, 3.4))
+        for s, col, lab, ls in (("hh", HH, f"{LAB_HH} (N = {n_hh})", "-"), ("corp", CO, f"{LAB_CO} (N = {n_co})", "--")):
+            q = r[r.sector == s]
+            if h0 < 0:  # 기준 시점 h = −1(0)을 끼워 넣음
+                q = pd.concat([q, pd.DataFrame({"h": [-1], "ratio": [0.0], "lo68": [0.0], "hi68": [0.0]})])
+            line(ax, q[q.h >= h0], col, lab, ls=ls, ref=False)
+        finish(ax, "Saving–investment balance\n(impact response = 1)", h0=h0)
+        if h0 < 0:
+            ax.axvspan(h0 - 0.4, -0.5, color="0.93", lw=0, zorder=0)
+        ax.legend(loc="lower left")
+        ax.set_title("Figure 1. Persistence of sectoral saving–investment balances", loc="left", fontweight="bold")
+        pre = (" Years $-3$ and $-2$ are pre-episode responses ($y_{t+h} - y_{t-1}$, shaded area); year $-1$ is the reference year."
+               if h0 < 0 else " Responses are measured relative to year $-1$.")
+        fig.text(0.0, -0.2, "Notes: Cumulative responses of the own-sector saving–investment balance (national-accounts net lending, "
+                 "percent of GDP), normalized by the impact response. Shaded bands are 68 percent confidence bands from a "
+                 "country-cluster bootstrap (499 replications)." + pre + " " + SPEC, fontsize=7, wrap=True, va="top",
+                 transform=ax.transAxes)
+        save(fig, name)
+
+
 def fig4():
     p = OUT / "ep_report_extra.csv"
     if not p.exists():
@@ -154,3 +183,4 @@ if __name__ == "__main__":
     fig2()
     fig3()
     fig4()
+    fig1_variants()
