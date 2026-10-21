@@ -126,6 +126,32 @@ def main():
     hcases = {t: ", ".join(f"{r.country} {r.year}" for r in he[he.type == t].sort_values("size", ascending=False).head(10).itertuples())
               for t, _ in TYPES}
 
+    # 비침체 가계저축률 급등: 변수별 경로(연도평균 제거, 평균 ± 90% 구간)
+    dm = balance(pd.read_csv(HERE / "data" / "panel.csv"))
+    PV = [("hh_rate", "가계저축률 (가처분소득 대비 %p)"), ("sv_hh", "가계저축"), ("cons_hh", "가계소비"),
+          ("inv_hh", "가계투자"), ("nl_hh", "가계 순자금운용"), ("nl_gov", "정부 순자금운용"),
+          ("sv_corp", "기업저축"), ("ca", "경상수지")]
+    for v, _ in PV:
+        dm[v + "_dm"] = dm[v] - dm.groupby("year")[v].transform("mean")
+    dm = dm.set_index(["country", "year"])
+
+    def epath(ep, v):
+        M = [[dm[v + "_dm"].get((r.country, r.year + k), np.nan) - dm[v + "_dm"].get((r.country, r.year - 2), np.nan)
+              for k in range(-2, 7)] for r in ep.itertuples()]
+        P = pd.DataFrame(M, columns=range(-2, 7))
+        m, se = P.mean(), P.std() / np.sqrt(P.notna().sum())
+        return m.values, (m - Z * se).values, (m + Z * se).values, P.notna().sum().values
+    nonrec = he[he.type == "비침체"]
+    panels, ptab = [], []
+    for v, lab in PV:
+        mh, lh, uh, nh = epath(nonrec, v)
+        mp, lp_, up, _ = epath(pe, v)
+        svg = svg_lines([("corp", "", ks, mp, lp_, up), ("hh", "", ks, mh, lh, uh)], "시작 기준 연도 (t)", lab)
+        panels.append(f'<figure><div class="panel-title">{lab}</div>{svg}</figure>')
+        ptab.append(f"<tr><th>{lab}</th>" + "".join(f"<td>{mh[k + 2]:.2f} <span class='ci'>[{lh[k + 2]:.2f}, {uh[k + 2]:.2f}]</span></td>"
+                                                    for k in (0, 3, 6)) + "</tr>")
+    nonrec_n = f"{len(nonrec)}개 (t+6까지 관측 {int(nh[-1])}개)"
+
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")].replace("<title>기업저축·가계저축 경상수지 반응</title>", "<title>경상수지 에피소드 지속성</title>")
     body = (HERE / "episode_template.html").read_text()
@@ -134,7 +160,9 @@ def main():
                  "N_CORP": str(n["기업저축↑"]), "N_HH": str(n["가계저축↑"]), "N_ALL": str(len(f)),
                  "FIG_K1": fig_k1, "FIG_K2": fig_k2, "T_H1": h1rows, **kstats,
                  "FIG_H1": fig_h1, "FIG_H2": fig_h2, "T_HH": "\n".join(hrows), "N_HH_ALL": str(len(he)),
-                 "CASES_NONREC": hcases["비침체"], "CASES_HOUSING": hcases["부동산 붕괴"]}.items():
+                 "CASES_NONREC": hcases["비침체"], "CASES_HOUSING": hcases["부동산 붕괴"],
+                 "NONREC_PANELS": "\n".join(panels), "NONREC_TABLE": "\n".join(ptab), "NONREC_N": nonrec_n,
+                 "N_PROF": str(len(pe))}.items():
         body = body.replace("{{" + k + "}}", v)
     body = body.replace("<td>nan</td>", "<td>–</td>")
     (OUT / "report.html").write_text(style + body)
