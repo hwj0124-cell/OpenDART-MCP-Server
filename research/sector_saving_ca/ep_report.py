@@ -24,28 +24,37 @@ COV = ["sv_corp", "nl_corp", "prof", "div_paid", "inv_corp"]
 KEYS = [("hh", v, h) for v in HHV for h in range(K + 1)] + [("corp", v, h) for v in COV for h in range(K + 1)]
 DIFFS = [("sv", "sv_hh", "sv_corp"), ("nl", "nl_hh", "nl_corp")]
 XL = "h년 후 (t−1 = 0, t = 시작)"
+WSV = False  # True: 국가별 자기 부문 Δ저축 분산의 역수로 가중(--wsv)
+TAG = ""
 
 
 def stats(d):
-    g = {k: lt.ols(d, f"{k[1]}_h{k[2]}", [f"z_{k[0]}"], [], se=False)[0][0] for k in KEYS}
+    g = {k: lt.ols(d, f"{k[1]}_h{k[2]}", [f"z_{k[0]}"], [], se=False, w=f"w_{k[0]}" if WSV else None)[0][0] for k in KEYS}
     r = {k: g[k] / g[(k[0], f"sv_{k[0]}", 0)] for k in KEYS}
     return np.array([r[k] for k in KEYS] + [r[("hh", a, h)] - r[("corp", b, h)] for _, a, b in DIFFS for h in range(K + 1)])
 
 
-def estimate():
+def prepare():
     x = ed.er.panel()
     fc.VARS["hh"], fc.VARS["corp"] = HHV, COV
     P = ed.paths(x, {**el.SPEC, **CH})
     d = fc.design(x, P)
+    for s in ("hh", "corp"):
+        d[f"w_{s}"] = 1 / d.groupby("country")[f"sv_{s}"].transform(lambda v: v.diff().var())
+    return P, d
+
+
+def estimate(reps=499):
+    P, d = prepare()
     pt = stats(d)
-    bs = lt.cluster_bootstrap(d, stats, reps=499)
+    bs = lt.cluster_bootstrap(d, stats, reps=reps) if reps else np.tile(pt, (2, 1))
     lab = [dict(kind="resp", sector=s, var=v, h=h) for s, v, h in KEYS] + \
           [dict(kind="diff", sector="diff", var=n, h=h) for n, _, _ in DIFFS for h in range(K + 1)]
     r = pd.DataFrame(lab).assign(
         ratio=pt, lo68=np.nanpercentile(bs, 16, axis=0), hi68=np.nanpercentile(bs, 84, axis=0),
         lo90=np.nanpercentile(bs, 5, axis=0), hi90=np.nanpercentile(bs, 95, axis=0),
         p=np.minimum(1, 2 * np.minimum((bs <= 0).mean(0), (bs >= 0).mean(0))), n_hh=len(P["hh"]), n_corp=len(P["corp"]))
-    r.to_csv(OUT / "ep_report.csv", index=False)
+    r.to_csv(OUT / f"ep_report{TAG}.csv", index=False)
     return r
 
 
@@ -86,7 +95,9 @@ svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg
     note = ("주: 시작 연도 자기 부문 저축 반응을 1로 정규화한 누적 반응(GDP 대비). 가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 "
             "가처분소득 비중 변화보다 큰 해, 기업 = 교역조건(수출·수입 디플레이터 비율) 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. "
             "시작 연도 자기 부문 자금잉여가 충격과 같은 방향인 사례, 증가·감소는 부호를 맞춰 통합. 국가·연도 고정효과 국소투영")
-    n1 = note + ", 음영은 68% 구간(국가 단위 부트스트랩 499회)."
+    if WSV:
+        note += "(국가별 자기 부문 저축 변화 분산의 역수로 가중)"
+    n1 = note + (", 음영은 68% 구간(국가 단위 부트스트랩 499회)." if r.lo68.ne(r.ratio).any() else ", 점추정치(구간 미산출).")
     n2 = note + ", 점추정치."
     html = (f'<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:900px">'
             f'<section id="F1"><h2 style="font-size:18px">그림 1. 원천별 저축·자금잉여의 지속성</h2>'
@@ -94,20 +105,23 @@ svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg
             f'<section id="F2"><h2 style="font-size:18px">그림 2. 기업 흑자 소멸 경로와 가계 소비행태</h2>'
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{"".join(f2)}</div><p class="ci" style="font-size:12px">{n2}</p></section>'
             f'</main></body></html>')
-    (OUT / "ep_report_figs.html").write_text(html)
+    (OUT / f"ep_report{TAG}_figs.html").write_text(html)
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
         pg = b.new_page(viewport={"width": 900, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1500)
-        pg.locator("#F1").screenshot(path=str(OUT / "ep_report_fig1.png"))
-        pg.locator("#F2").screenshot(path=str(OUT / "ep_report_fig2.png"))
+        pg.locator("#F1").screenshot(path=str(OUT / f"ep_report{TAG}_fig1.png"))
+        pg.locator("#F2").screenshot(path=str(OUT / f"ep_report{TAG}_fig2.png"))
         b.close()
 
 
 if __name__ == "__main__":
     import sys
-    r = pd.read_csv(OUT / "ep_report.csv") if "--render" in sys.argv else estimate()
+    if "--wsv" in sys.argv:
+        WSV, TAG = True, "_wsv"
+    r = pd.read_csv(OUT / f"ep_report{TAG}.csv") if "--render" in sys.argv else \
+        estimate(reps=0 if "--point" in sys.argv else 499)
     render(r)
     q = r[r.kind == "diff"]
     print(q.pivot_table(index="var", columns="h", values=["ratio", "p"]).round(2).to_string())
