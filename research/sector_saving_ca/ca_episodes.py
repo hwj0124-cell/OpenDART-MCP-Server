@@ -23,8 +23,8 @@ from lp_tools import balance
 K = 6
 
 
-def prepare():
-    d = balance(pd.read_csv(ra.HERE / "data" / "panel.csv"))
+def prepare(path=None):
+    d = balance(pd.read_csv(path or ra.HERE / "data" / "panel.csv"))
     g = d.groupby("country")
     d["ret"] = d["sv_corp"] / d["prof"]
     d["x_P"] = g["ret"].shift(1) * g["prof"].diff()

@@ -31,8 +31,8 @@ SPECS = {
 }
 
 
-def panel():
-    d = ce.prepare()
+def panel(path=None):
+    d = ce.prepare(path)
     for s in ("hh", "corp"):
         d[f"invtot_{s}"] = d[f"sv_{s}"] - d[f"nl_{s}"]  # 총투자(재고·자본이전 등 포함)
     return d
