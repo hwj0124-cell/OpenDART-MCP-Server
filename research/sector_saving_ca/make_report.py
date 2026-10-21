@@ -183,6 +183,12 @@ def main():
           f"<td>{r.corp:.2f} <span class='ci'>({r.se_corp:.2f})</span></td><td>{r.hh:.2f} <span class='ci'>({r.se_hh:.2f})</span></td>"
           f"<td class='em'>{r.diff:.2f} <span class='ci'>({r.se_diff:.2f})</span></td></tr>" for r in am.itertuples()]
     tpl = tpl.replace("{{ALT_TABLE}}", "\n".join(s5))
+    tl = pd.read_csv(OUT / "tot_lp.csv")
+    def tser(y, cls):
+        r = tl[tl.outcome == y]
+        return (cls, "", r.h, r.b, r.b - Z * r.se, r.b + Z * r.se)
+    tpl = tpl.replace("{{TOT_A}}", svg_lines([tser("prof", "prof"), tser("ca", "ca"), tser("sv_nat", "gov")], "충격 후 연수", ""))
+    tpl = tpl.replace("{{TOT_B}}", svg_lines([tser("nl_corp", "corp"), tser("nl_gov", "gov"), tser("inv_corp", "prof")], "충격 후 연수", ""))
     ip = pd.read_csv(OUT / "lp_ipw.csv")
     s3 = []
     for name, grp in ip.groupby("sample", sort=False):
