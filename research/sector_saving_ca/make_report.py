@@ -108,7 +108,26 @@ def main():
                     f"<td>{f(c['horizon_dd'])} {ci(c['horizon_dd'])}</td></tr>")
     table = "\n".join(rows)
 
+    # 표본 강건성 표
+    sc = pd.read_csv(OUT / "samples_contrasts.csv")
+    g = lambda r, k: f'{r[k]:.2f} <span class="ci">[{r[k + "_lo"]:.2f}, {r[k + "_hi"]:.2f}]</span>'
+    srows = []
+    for name, grp in sc.groupby("sample", sort=False):
+        b_, p_ = grp[grp.set == "baseline"].iloc[0], grp[grp.set == "profit_propensity"].iloc[0]
+        label = name.split(" (")[0]
+        members = name[len(label):].strip(" ()")
+        sub = f'<div class="ci" style="white-space:normal">{members}</div>' if members else ""
+        srows.append(f"<tr><th>{label}{sub}</th><td>{int(b_.countries)}</td>"
+                     f"<td>{b_.impact_corp_short:.2f} → {b_.impact_corp_medium:.2f}</td>"
+                     f"<td>{b_.impact_hh_short:.2f} → {b_.impact_hh_medium:.2f}</td>"
+                     f"<td class='em'>{g(b_, 'impact_dd')}</td><td class='em'>{g(p_, 'impact_dd')}</td></tr>")
+    loo = pd.read_csv(OUT / "loo.csv")
+    lb, lp = loo[loo.set == "baseline"].impact_dd, loo[loo.set == "profit_propensity"].impact_dd
+
     tpl = (HERE / "report_template.html").read_text()
+    tpl = (tpl.replace("{{SAMPLES}}", "\n".join(srows))
+           .replace("{{LOO_B}}", f"{lb.min():.2f} ~ {lb.max():.2f}")
+           .replace("{{LOO_P}}", f"{lp.min():.2f} ~ {lp.max():.2f}"))
     html = (tpl.replace("{{FIG1}}", fig1).replace("{{FIG1B}}", fig1b)
             .replace("{{FIG2A}}", fig2a).replace("{{FIG2B}}", fig2b)
             .replace("{{FIG3A}}", fig3a).replace("{{FIG3B}}", fig3b)
