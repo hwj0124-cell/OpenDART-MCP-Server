@@ -205,8 +205,8 @@ def main():
             .replace("{{FIG3A}}", fig3a).replace("{{FIG3B}}", fig3b)
             .replace("{{TABLE}}", table)
             .replace("{{N_CORP}}", str(n_ep["corp"])).replace("{{N_HH}}", str(n_ep["hh"])))
-    (OUT / "report.html").write_text(html)
-    print("→", OUT / "report.html")
+    (OUT / "report_regressions.html").write_text(html)
+    print("→", OUT / "report_regressions.html")
 
 
 if __name__ == "__main__":

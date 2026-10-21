@@ -1,0 +1,110 @@
+<main>
+<header>
+  <div class="eyebrow">OECD 부문계정 · 41개국 · 1975–2025 · 경상수지 에피소드 {{N_ALL}}개</div>
+  <h1>경상수지 변화는 어떤 원천일 때 오래 가는가</h1>
+  <blockquote>“이번 흑자는 저축 성향의 변화에 따른 가계저축 증가와 달리 별도의 정책 대응 없이도 배분·지출 과정에서 축소될 것이므로…” — 「반도체發 경상수지 흑자 확대와 IMF 대외부문평가 대응 방향」 Ⅲ-2</blockquote>
+</header>
+
+<section class="verdict">
+  <div><strong>결론: 기업저축이 끌어올린 경상수지 변화가 가계저축이 끌어올린 변화보다 짧게 끝난다는 증거는 에피소드 자료에서도 나오지 않습니다. 오히려 반대입니다.</strong></div>
+  <ul class="key">
+    <li>시작 시점 경상수지 변화의 절반 이상이 기업저축 증가에서 온 에피소드({{N_CORP}}개)는 5년 뒤에도 변화가 그대로 남아 있습니다(중위수 1.03). 가계저축 증가에서 온 에피소드({{N_HH}}개)는 5년 뒤 0.72가 남고, 절반 이상이 3년 안에 절반 넘게 되돌려졌습니다.</li>
+    <li>지속된 에피소드일수록 시작 변화에서 기업 순자금운용의 몫이 큽니다(지속 0.92, 단명 0.53). 그 기업 몫은 이익 증가보다 유보율 상승(배당·지출 억제)에서 왔습니다.</li>
+    <li>판정 기준(2·3·4%p), 위기 연도 제외, 주도 부문 정의를 바꿔도 같은 방향입니다.</li>
+    <li>시사점: 근거를 “어느 부문이 저축했는가”가 아니라 <b>소득 충격이 일시적인가</b>(항상소득 가설)에 두는 편이 이론적으로도 맞고 자료와도 충돌하지 않습니다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>1. 에피소드 정의</h2>
+  <dl class="spec">
+    <dt>에피소드</dt><dd>2년간 경상수지(국민경제 순대출, GNI 대비) 변화가 3%p 이상인 첫 해 t. 흑자 확대와 적자 확대 모두 포함하며, 적자 확대는 부호를 뒤집어 크기로 통일. 같은 국가에서 4년 안에 다시 잡히는 것은 제외</dd>
+    <dt>지속성</dt><dd>R<sub>k</sub> = (CA<sub>t+k</sub> − CA<sub>t−2</sub>) / (CA<sub>t</sub> − CA<sub>t−2</sub>). 시작 변화 중 k년 뒤 남은 비율. R3 &lt; 0.5이면 단명, R5 ≥ 0.5이면 지속</dd>
+    <dt>원천 분해</dt><dd>시작 구간(t−2→t)의 경상수지 변화를 부문 순자금운용(기업·가계·정부·금융)으로 정확히 분해하고, 기업저축은 이익 원천과 유보율 변화로, 가계저축은 성향 원천과 소득 비중 변화로 나눔</dd>
+    <dt>주도 원천</dt><dd>시작 변화의 50% 이상이 기업저축 증가 → “기업저축↑”, 가계저축 증가 → “가계저축↑”</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>2. 원천별로 모아 본 경상수지 경로</h2>
+  <figure><div class="panel-title">경상수지 (t−2 = 0, 시작 시점 t = 1)</div>{{FIG_CA}}
+    <div class="legend"><span><i class="sw corp"></i>기업저축↑ 에피소드 ({{N_CORP}}개)</span><span><i class="sw hh"></i>가계저축↑ 에피소드 ({{N_HH}}개)</span></div>
+    <figcaption><b>그림 1.</b> 에피소드별로 시작 변화를 1로 정규화한 뒤 평균. 음영은 평균의 90% 구간.</figcaption></figure>
+  <figure><div class="panel-title">부문저축 (같은 정규화)</div>{{FIG_SV}}
+    <div class="legend"><span><i class="sw corp"></i>기업 에피소드: 기업저축</span><span><i class="sw corpalt"></i>기업 에피소드: 가계저축</span><span><i class="sw hh"></i>가계 에피소드: 가계저축</span><span><i class="sw hhalt"></i>가계 에피소드: 기업저축</span></div></figure>
+  <div class="tablewrap"><table>
+    <thead><tr><th>주도 원천</th><th>개수</th><th>R3 평균 / 중위수</th><th>R5 평균 / 중위수</th><th>단명 비율</th><th>지속 비율</th></tr></thead>
+    <tbody>
+{{T_MAIN}}
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>3. 역으로: 단명한 에피소드와 지속된 에피소드는 무엇이 달랐나</h2>
+  <p>시작 변화(=1)를 원천별로 나눈 평균입니다. 지속된 에피소드는 기업 순자금운용의 몫이 크고, 그 기업 몫은 이익 증가가 아니라 유보율 상승에서 왔습니다. 이익 원천 몫은 세 그룹 모두 작습니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>원천 (시작 변화 = 1)</th><th>단명</th><th>중간</th><th>지속</th></tr></thead>
+    <tbody>
+{{T_COMP}}
+    </tbody>
+  </table></div>
+  <p style="font-size:13.5px;color:var(--muted);margin-top:8px">총투자는 투자 변화 그 자체(양수 = 투자 증가)로, 음수일수록 투자 감소가 경상수지를 끌어올린 것입니다. 부문 순자금운용 네 항목의 합이 1입니다.</p>
+</section>
+
+<section>
+  <h2>4. 강건성</h2>
+  <h3>판정 기준</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>2년 변화 기준</th><th>주도 원천</th><th>개수</th><th>R3 평균 / 중위수</th><th>R5 평균 / 중위수</th></tr></thead>
+    <tbody>
+{{T_ROB}}
+    </tbody>
+  </table></div>
+  <h3>위기 연도(1997–99, 2008–10, 2020–21) 시작 제외</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>주도 원천</th><th>개수</th><th>R3 평균 / 중위수</th><th>R5 평균 / 중위수</th><th>단명 비율</th><th>지속 비율</th></tr></thead>
+    <tbody>
+{{T_NOCRISIS}}
+    </tbody>
+  </table></div>
+  <h3>부문 순자금운용 기준 주도 부문 (50% 이상)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>주도 부문</th><th>개수</th><th>R3 평균 / 중위수</th><th>R5 평균 / 중위수</th><th>단명 비율</th><th>지속 비율</th></tr></thead>
+    <tbody>
+{{T_DRIVER}}
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>5. 대형 에피소드 15개</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>국가·시작연도</th><th>방향</th><th>크기 (%p)</th><th>주도 원천</th><th>기업저축 몫</th><th>가계저축 몫</th><th>투자 감소 몫</th><th>R3</th><th>R5</th></tr></thead>
+    <tbody>
+{{T_BIG}}
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">대형 에피소드의 다수는 금융위기 뒤 투자 급감과 가계 디레버리징이 겹친 경우(발트3국·한국 1998·아이슬란드)입니다. 반도체 같은 이익 횡재가 주도한 에피소드는 OECD 국가에서 드물어, 3%p 기준에서 이익 원천 몫이 절반을 넘는 경우는 3개뿐입니다.</p>
+</section>
+
+<section>
+  <h2>6. 해석과 제안</h2>
+  <p>기업저축 주도 흑자가 오래가는 것은 “기업저축 과잉(corporate saving glut)” 문헌과 같은 결과입니다. 가계가 기업의 유보이익을 자기 저축처럼 여기지 않는 한(기업 장막), 기업이 유보한 저축은 가계 소비를 늘리지 않고 그대로 남습니다. 반면 OECD 자료에서 가계저축률이 크게 오르는 경우는 대부분 경기 하강기의 예비적 저축이어서 경기 회복과 함께 되돌려집니다.</p>
+  <p>문서의 이론적 근거(Obstfeld–Rogoff의 기간 간 경상수지 이론)는 “기업이냐 가계냐”가 아니라 <b>소득이 항상소득을 일시적으로 웃도는가</b>에 관한 것입니다. 이 점은 IMF가 원유 교역조건을 일시적 요인으로 조정하는 논리와도 같습니다. 따라서 다음 순서가 자료와 충돌하지 않고 IMF 논리와도 맞습니다.</p>
+  <div class="rewrite">
+    <div class="lab">수정안</div>
+    <div class="new">따라서 이번 흑자는 항상소득을 일시적으로 웃도는 가격 프리미엄에서 비롯된 것으로, 기간 간 경상수지 이론에 따르면 프리미엄이 해소되는 과정에서 경상수지 영향도 축소될 것이며, 배당·법인세 등을 통한 배분이 이익 발생에 후행하므로 그 축소는 시차를 두고 나타날 것으로 보아 …</div>
+  </div>
+  <p style="margin-top:12px">“가계저축 증가와 달리”라는 부문 대비는 빼는 것을 권합니다. OECD 자료에서는 기업저축 주도 흑자가 더 오래 지속되었기 때문에, IMF가 같은 자료로 반박할 수 있습니다.</p>
+</section>
+
+<section>
+  <h2>참고</h2>
+  <p>원천별 국소투영(LP), LP-IV, 교역조건·고령화 도구, 장기차분·주기 분해·오차수정모형 등 회귀 분석도 수행했습니다. 그 어느 것에서도 기업저축 주도 경상수지 변화가 가계저축 주도보다 짧다는 결과는 일관되게 나오지 않았습니다. 상세 결과는 저장소의 <code>output/report_regressions.html</code>에 보관되어 있습니다.</p>
+</section>
+
+<footer>
+  자료: OECD Table 14A(DSD_NASEC10@DF_TABLE14), World Bank WDI. 코드: <code>research/sector_saving_ca/ca_episodes.py</code> → <code>make_episode_report.py</code>. 에피소드 목록: <code>output/ca_episodes_thr3.csv</code>.
+</footer>
+</main>
