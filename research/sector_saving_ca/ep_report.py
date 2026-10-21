@@ -19,19 +19,21 @@ from make_report import HERE, OUT, svg_lines
 
 K = ed.K
 CH = dict(tot=fc.TOT, hh_def="cons", base="nl")
-HHV = ["sv_hh", "nl_hh", "yd_hh", "cons_hh"]
-COV = ["sv_corp", "nl_corp", "prof", "div_paid", "div_net", "inv_corp"]
+HHV = ["sv_hh", "nl_hh", "yd_hh", "cons_hh", "invtot_hh", "inv_hh"]
+COV = ["sv_corp", "nl_corp", "prof", "div_paid", "div_net", "invtot_corp", "inv_corp"]
 KEYS = [("hh", v, h) for v in HHV for h in range(K + 1)] + [("corp", v, h) for v in COV for h in range(K + 1)]
 DIFFS = [("sv", "sv_hh", "sv_corp"), ("nl", "nl_hh", "nl_corp")]
 XL = "h년 후 (t−1 = 0, t = 시작)"
 WSV = False  # True: 가중 추정(--wsv: 국가별 자기 부문 Δ저축 분산의 역수, --fgls: 1단계 잔차 분산의 역수)
 FGLS = False
+NORM = "sv"  # 정규화·가중치 기준 변수: "sv"(저축) 또는 "nl"(저축−투자 차, --nl)
+HMAX = 6     # 그림에 보이는 마지막 시점(--h5 → 5)
 TAG = ""
 
 
 def stats(d):
     g = {k: lt.ols(d, f"{k[1]}_h{k[2]}", [f"z_{k[0]}"], [], se=False, w=f"w_{k[0]}" if WSV else None)[0][0] for k in KEYS}
-    r = {k: g[k] / g[(k[0], f"sv_{k[0]}", 0)] for k in KEYS}
+    r = {k: g[k] / g[(k[0], f"{NORM}_{k[0]}", 0)] for k in KEYS}
     return np.array([r[k] for k in KEYS] + [r[("hh", a, h)] - r[("corp", b, h)] for _, a, b in DIFFS for h in range(K + 1)])
 
 
@@ -43,10 +45,11 @@ def prepare():
     d = fc.design(x, P)
     for s in ("hh", "corp"):
         if FGLS:  # 2단계 가중최소제곱: 시작 연도 자기 부문 저축 식(무가중)의 잔차 → 국가별 분산의 역수, 부문 내 모든 식에 공통
-            q = d[[f"sv_{s}_h0", f"z_{s}", "country", "year"]].dropna()
+            y0 = f"{NORM}_{s}_h0"
+            q = d[[y0, f"z_{s}", "country", "year"]].dropna()
             X = np.hstack([q[[f"z_{s}"]].to_numpy(float), lt._fe_matrix(q, ("country", "year"))])
-            b = np.linalg.lstsq(X, q[f"sv_{s}_h0"].to_numpy(float), rcond=None)[0]
-            e = pd.Series(q[f"sv_{s}_h0"].to_numpy(float) - X @ b, index=q.index)
+            b = np.linalg.lstsq(X, q[y0].to_numpy(float), rcond=None)[0]
+            e = pd.Series(q[y0].to_numpy(float) - X @ b, index=q.index)
             d[f"w_{s}"] = 1 / d.country.map(e.groupby(q.country).var())
         else:
             d[f"w_{s}"] = 1 / d.groupby("country")[f"sv_{s}"].transform(lambda v: v.diff().var())
@@ -78,7 +81,7 @@ def render(r):
     n_hh, n_corp = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
 
     def ser(s, v, cls, band=True):
-        q = r[(r.sector == s) & (r["var"] == v)].sort_values("h")
+        q = r[(r.sector == s) & (r["var"] == v) & (r.h <= HMAX)].sort_values("h")
         return (cls, "", q.h.values, q.ratio.values, q.lo68.values if band else None, q.hi68.values if band else None)
 
     def fig(title, series, legend, w=430, h=290):
@@ -88,32 +91,41 @@ def render(r):
                 f'<div class="legend">{leg}</div></figure>')
 
     H, C = f"가계(소비행태 변화, {n_hh}건)", f"기업(교역조건, {n_corp}건)"
-    f1 = [fig("(a) 저축", [ser("hh", "sv_hh", "s1"), ser("corp", "sv_corp", "s2")], [("s1", H), ("s2", C)]),
-          fig("(b) 자금잉여(저축 − 투자)", [ser("hh", "nl_hh", "s1"), ser("corp", "nl_corp", "s2")], [("s1", H), ("s2", C)])]
-    f2 = [fig("(a) 기업: 영업잉여·순배당·고정투자", [ser("corp", "prof", "s1", False), ser("corp", "div_net", "s2", False),
-                                            ser("corp", "inv_corp", "s3", False)],
-              [("s1", "영업잉여"), ("s2", "순배당 지급(지급 − 수취)"), ("s3", "고정투자")]),
-          fig("(b) 가계: 가처분소득·소비", [ser("hh", "yd_hh", "s1", False), ser("hh", "cons_hh", "s2", False)],
-              [("s1", "가처분소득"), ("s2", "소비")])]
+    SI = "저축−투자 차(S−I)"
+    p1 = [fig(f"(a) {SI}", [ser("hh", "nl_hh", "s1"), ser("corp", "nl_corp", "s2")], [("s1", H), ("s2", C)]),
+          fig("(b) 저축", [ser("hh", "sv_hh", "s1"), ser("corp", "sv_corp", "s2")], [("s1", H), ("s2", C)])]
+    if NORM == "sv":
+        p1 = p1[::-1]
+        p1 = [p1[0].replace("(b) 저축", "(a) 저축"), p1[1].replace(f"(a) {SI}", f"(b) {SI}")]
+    f1 = p1
+    f2 = [fig("(a) 기업: 영업잉여·순배당", [ser("corp", "prof", "s1"), ser("corp", "div_net", "s2")],
+              [("s1", "영업잉여"), ("s2", "순배당 지급(지급 − 수취)")]),
+          fig("(b) 기업: 투자", [ser("corp", "invtot_corp", "s1"), ser("corp", "inv_corp", "s2")],
+              [("s1", "투자 등(재고·토지 포함)"), ("s2", "고정투자")]),
+          fig("(c) 가계: 가처분소득·소비", [ser("hh", "yd_hh", "s1"), ser("hh", "cons_hh", "s2")],
+              [("s1", "가처분소득"), ("s2", "소비")]),
+          fig("(d) 가계: 투자", [ser("hh", "invtot_hh", "s1"), ser("hh", "inv_hh", "s2")],
+              [("s1", "투자 등(재고·토지 포함)"), ("s2", "고정투자")])]
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")] + """<style>
 svg .line.s1{stroke:#2459a8;fill:none;stroke-width:2.2} svg .band.s1{fill:#2459a8;opacity:.14} svg .dot.s1{fill:#2459a8}
 svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg .band.s2{fill:#d1701f;opacity:.14} svg .dot.s2{fill:#d1701f}
 svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg .dot.s3{fill:#3b8a4f}
 .sw.s1{border-color:#2459a8} .sw.s2{border-color:#d1701f;border-top-style:dashed} .sw.s3{border-color:#3b8a4f;border-top-style:dotted}</style>"""
-    note = ("주: 시작 연도 자기 부문 저축 반응을 1로 정규화한 누적 반응(GDP 대비). 가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 "
+    base_lab = "저축−투자 차(S−I, 국민계정상 순대출)" if NORM == "nl" else "저축"
+    note = (f"주: 시작 연도 자기 부문 {base_lab} 반응을 1로 정규화한 누적 반응(GDP 대비). 가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 "
             "가처분소득 비중 변화보다 큰 해, 기업 = 교역조건(수출·수입 디플레이터 비율) 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. "
             "시작 연도 자기 부문 자금잉여가 충격과 같은 방향인 사례, 증가·감소는 부호를 맞춰 통합. 국가·연도 고정효과 국소투영")
     if FGLS:
-        note += "(2단계 가중최소제곱: 1단계 저축 식 잔차의 국가별 분산 역수로 가중)"
+        note += f"(2단계 가중최소제곱: 1단계 {'S−I' if NORM == 'nl' else '저축'} 식 잔차의 국가별 분산 역수로 부문별 공통 가중)"
     elif WSV:
         note += "(국가별 자기 부문 저축 변화 분산의 역수로 가중)"
     n1 = note + (", 음영은 68% 구간(국가 단위 부트스트랩 499회)." if r.lo68.ne(r.ratio).any() else ", 점추정치(구간 미산출).")
-    n2 = note + ", 점추정치."
+    n2 = n1
     html = (f'<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:900px">'
-            f'<section id="F1"><h2 style="font-size:18px">그림 1. 원천별 저축·자금잉여의 지속성</h2>'
+            f'<section id="F1"><h2 style="font-size:18px">그림 1. 원천별 저축−투자 차와 저축의 지속성</h2>'
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{"".join(f1)}</div><p class="ci" style="font-size:12px">{n1}</p></section>'
-            f'<section id="F2"><h2 style="font-size:18px">그림 2. 기업 흑자 소멸 경로와 가계 소비행태</h2>'
+            f'<section id="F2"><h2 style="font-size:18px">그림 2. 기업 흑자의 해소 경로(배당·투자)와 가계 소비행태</h2>'
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{"".join(f2)}</div><p class="ci" style="font-size:12px">{n2}</p></section>'
             f'</main></body></html>')
     (OUT / f"ep_report{TAG}_figs.html").write_text(html)
@@ -133,6 +145,10 @@ if __name__ == "__main__":
         WSV, TAG = True, "_wsv"
     if "--fgls" in sys.argv:
         WSV, FGLS, TAG = True, True, "_fgls"
+    if "--nl" in sys.argv:
+        NORM, TAG = "nl", TAG + "_nl"
+    if "--h5" in sys.argv:
+        HMAX = 5
     r = pd.read_csv(OUT / f"ep_report{TAG}.csv") if "--render" in sys.argv else \
         estimate(reps=0 if "--point" in sys.argv else 499)
     render(r)
