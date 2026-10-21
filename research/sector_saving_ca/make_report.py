@@ -37,6 +37,9 @@ def svg_lines(series, xlabel, ylabel, w=640, h=280, xs=None):
                   [f"{X(a):.1f},{Y(b):.1f}" for a, b in zip(x[::-1], np.asarray(l)[::-1])]
             o.append(f'<polygon class="band {cls}" points="{" ".join(pts)}"/>')
     for cls, label, x, y, l, u in series:
+        x, y = np.asarray(x, float), np.asarray(y, float)
+        ok = ~np.isnan(y)  # 결측 연도는 선에서 제외
+        x, y = x[ok], y[ok]
         pts = " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in zip(x, y))
         o.append(f'<polyline class="line {cls}" points="{pts}"/>')
         for a, b in zip(x, y):

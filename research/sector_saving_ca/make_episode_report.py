@@ -93,14 +93,50 @@ def main():
                                        ("dividends_paid", "배당 지급"), ("buyback", "자사주 매입")))
     h1rows += f"\n<tr><th>미지급 법인세(반기말 잔액)</th><td>–</td><td>{tot.loc['2026H1', 'current_tax_liab_end']:.1f}</td></tr>"
 
+    # 가계저축률 급등 에피소드
+    from lp_tools import balance
+    pan = balance(pd.read_csv(HERE / "data" / "panel.csv")).set_index(["country", "year"])
+
+    def absp(ep, v):
+        out = []
+        for r in ep.itertuples():
+            out.append([pan[v].get((r.country, r.year + k), np.nan) - pan[v].get((r.country, r.year - 2), np.nan)
+                        for k in range(-2, 7)])
+        return pd.DataFrame(out, columns=range(-2, 7))
+
+    he = pd.read_csv(OUT / "hh_episodes.csv")
+    pe = pd.read_csv(OUT / "prof_episodes.csv")
+    TYPES = [("비침체", "hh"), ("부동산 붕괴", "gov"), ("경기침체", "prof"), ("코로나", "ca")]
+    ks = np.arange(-2, 7)
+    fig_h1 = svg_lines([(cls, t, ks, np.array([he[he.type == t][f"hh_rate_{k}"].median() for k in ks]), None, None)
+                        for t, cls in TYPES], "에피소드 시작 기준 연도 (t)", "hh_rate")
+    fig_h2 = svg_lines([(cls, t, ks, absp(he[he.type == t], "ca").median().values, None, None)
+                        for t, cls in TYPES[:2]] + [("corp", "이익", ks, absp(pe, "ca").median().values, None, None)],
+                       "에피소드 시작 기준 연도 (t)", "ca_abs")
+    hrows = []
+    for t, _ in TYPES:
+        g = he[he.type == t]
+        ca, cons, nlg = absp(g, "ca").median(), absp(g, "cons_hh").median(), absp(g, "nl_gov").median()
+        fmt = lambda x: "–" if pd.isna(x) else f"{x:.2f}"
+        hrows.append(f"<tr><th>{t}</th><td>{len(g)}</td><td>{fmt(g.hh_rate_3.median())} / {fmt(g.hh_rate_6.median())}</td>"
+                     f"<td>{cons[5]:.1f}</td><td>{ca[0]:.1f} / {ca[3]:.1f} / {ca[5]:.1f}</td><td>{nlg[5]:.1f}</td></tr>".replace("nan", "–"))
+    ca_p, cons_p, nlg_p = absp(pe, "ca").median(), absp(pe, "cons_hh").median(), absp(pe, "nl_gov").median()
+    hrows.append(f"<tr class='weak'><th>(비교) 기업 이익비중 급등</th><td>{len(pe)}</td><td>이익비중 {pe.prof_3.median():.2f} / {pe.prof_6.median():.2f}</td>"
+                 f"<td>{cons_p[5]:.1f}</td><td>{ca_p[0]:.1f} / {ca_p[3]:.1f} / {ca_p[5]:.1f}</td><td>{nlg_p[5]:.1f}</td></tr>")
+    hcases = {t: ", ".join(f"{r.country} {r.year}" for r in he[he.type == t].sort_values("size", ascending=False).head(10).itertuples())
+              for t, _ in TYPES}
+
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")].replace("<title>기업저축·가계저축 경상수지 반응</title>", "<title>경상수지 에피소드 지속성</title>")
     body = (HERE / "episode_template.html").read_text()
     for k, v in {"FIG_CA": fig_ca, "FIG_SV": fig_sv, "T_MAIN": t_main, "T_DRIVER": t_driver, "T_NOCRISIS": t_nocrisis,
                  "T_ROB": "\n".join(rob), "T_COMP": comp, "T_BIG": bigrows,
                  "N_CORP": str(n["기업저축↑"]), "N_HH": str(n["가계저축↑"]), "N_ALL": str(len(f)),
-                 "FIG_K1": fig_k1, "FIG_K2": fig_k2, "T_H1": h1rows, **kstats}.items():
+                 "FIG_K1": fig_k1, "FIG_K2": fig_k2, "T_H1": h1rows, **kstats,
+                 "FIG_H1": fig_h1, "FIG_H2": fig_h2, "T_HH": "\n".join(hrows), "N_HH_ALL": str(len(he)),
+                 "CASES_NONREC": hcases["비침체"], "CASES_HOUSING": hcases["부동산 붕괴"]}.items():
         body = body.replace("{{" + k + "}}", v)
+    body = body.replace("<td>nan</td>", "<td>–</td>")
     (OUT / "report.html").write_text(style + body)
     print("→", OUT / "report.html")
 
