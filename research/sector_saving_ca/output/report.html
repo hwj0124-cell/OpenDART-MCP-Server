@@ -1,0 +1,204 @@
+<title>기업저축·가계저축 경상수지 반응</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 단일 칼럼 연구 메모, 그림은 칼럼 폭 전체. 부문 색은 기업=적갈, 가계=청 */
+:root {
+  --bg: #f5f6f4; --surface: #ffffff; --ink: #1d2327; --muted: #5b6669; --rule: #d9dedb;
+  --corp: #b4472e; --hh: #2a5c9a; --accent: #3d6b5c; --warn-bg: #fbf1e6; --warn: #8a4b12;
+  --prof: #7d6a2c; --ca: #1d2327; --gov: #3d6b5c;
+  --display: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.75 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 34px; }
+main > *, .pair > * { min-width: 0; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+h1 { font: 700 clamp(24px, 5vw, 32px)/1.3 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 600 21px/1.4 var(--display); margin: 0 0 10px; text-wrap: balance; }
+h3 { font: 600 15.5px/1.5 var(--body); margin: 18px 0 6px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+blockquote { margin: 0; padding: 12px 16px; border-left: 3px solid var(--rule); color: var(--muted); background: var(--surface); }
+.verdict { background: var(--warn-bg); color: var(--ink); padding: 16px 18px; border-radius: 4px; display: grid; gap: 8px; }
+.verdict strong { color: var(--warn); }
+ul.key { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .94em; }
+figure { margin: 6px 0 4px; background: var(--surface); border: 1px solid var(--rule); padding: 14px 12px 10px; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+svg { width: 100%; height: auto; display: block; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .zero { stroke: var(--muted); stroke-width: 1; }
+svg .tick, svg .axis { fill: var(--muted); font: 11px var(--mono); }
+svg .axis { font-family: var(--body); font-size: 12px; }
+svg .line { fill: none; stroke-width: 2.4; stroke-linejoin: round; }
+svg .band { stroke: none; opacity: .14; }
+.corp { stroke: var(--corp); fill: var(--corp); } .hh { stroke: var(--hh); fill: var(--hh); }
+svg .line.corpalt { stroke: var(--corp); stroke-dasharray: 5 4; } svg .band.corpalt { fill: var(--corp); opacity: .07; } svg .dot.corpalt { fill: var(--corp); }
+svg .line.hhalt { stroke: var(--hh); stroke-dasharray: 5 4; } svg .band.hhalt { fill: var(--hh); opacity: .07; } svg .dot.hhalt { fill: var(--hh); }
+.prof { stroke: var(--prof); fill: var(--prof); } .ca { stroke: var(--ca); fill: var(--ca); }
+.div { stroke: var(--corp); fill: var(--corp); } .tax { stroke: var(--prof); fill: var(--prof); } .gov { stroke: var(--gov); fill: var(--gov); }
+svg .line.prof, svg .line.ca, svg .line.div, svg .line.tax, svg .line.gov, svg .line.corp, svg .line.hh { fill: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2.5px solid; display: inline-block; }
+.sw.corp { border-color: var(--corp); } .sw.hh { border-color: var(--hh); } .sw.prof { border-color: var(--prof); }
+.sw.ca { border-color: var(--ca); } .sw.div { border-color: var(--corp); } .sw.tax { border-color: var(--prof); } .sw.gov { border-color: var(--gov); }
+.sw.corpalt { border-color: var(--corp); border-top-style: dashed; } .sw.hhalt { border-color: var(--hh); border-top-style: dashed; }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+thead th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+tbody th { font-weight: 500; }
+td { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.em { color: var(--ink); font-weight: 500; }
+.ci { color: var(--muted); font-size: .9em; }
+.rewrite { background: var(--surface); border: 1px solid var(--rule); padding: 14px 16px; display: grid; gap: 10px; }
+.rewrite .lab { font: 500 11.5px var(--mono); letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+.rewrite .new { border-left: 3px solid var(--accent); padding-left: 12px; }
+dl.spec { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+dl.spec dt { color: var(--muted); } dl.spec dd { margin: 0; min-width: 0; }
+@media (max-width: 520px) { dl.spec { grid-template-columns: 1fr; } dl.spec dd { margin-bottom: 6px; } }
+code { font-family: var(--mono); font-size: .9em; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">OECD 부문계정 패널 · 41개국 · 1975–2025</div>
+  <h1>기업저축 증가와 가계저축 증가는 경상수지에 다르게 작용하는가</h1>
+  <blockquote>“이번 흑자는 저축 성향의 변화에 따른 가계저축 증가와 달리 별도의 정책 대응 없이도 배분·지출 과정에서 축소될 것이므로…” — 「반도체發 경상수지 흑자 확대와 IMF 대외부문평가 대응 방향」 Ⅲ-2</blockquote>
+</header>
+
+<section class="verdict">
+  <div><strong>결론: 부문 구분만으로는 뒷받침되지 않습니다.</strong></div>
+  <ul class="key">
+    <li><b>평균적 충격(LP)</b>: 기업저축 1%p 증가의 경상수지 효과는 단기 <span class="num">0.64</span>에서 중기(4–6년) <span class="num">0.21</span>로 줄지만, 가계저축은 <span class="num">0.56 → −0.02</span>로 <b>더 빨리</b> 사라집니다. 문서의 대비와 반대 방향이며 7개 사양 모두 같습니다.</li>
+    <li><b>대규모 에피소드</b>: 기업저축 급증(63건)은 경상수지를 거의 움직이지 못하고 5년 뒤 0으로 돌아가는 반면, 가계저축 급증(61건)은 경상수지를 점차 높입니다. 문서와 같은 방향이지만 신뢰구간이 크게 겹치고 통제변수를 넣으면 차이가 사라집니다.</li>
+    <li><b>배분 경로</b>: 기업이익 증가분 중 기업저축으로 남는 것은 절반 정도이고, 배당·법인세 지급은 1년 뒤에 정점을 찍습니다. “배분이 이익에 후행한다”는 서술은 지지됩니다.</li>
+    <li><b>시사점</b>: “기업저축이라서 일시적”이라는 논리는 IMF가 같은 자료로 반박할 수 있습니다. 근거의 중심을 <b>충격의 일시성(가격 프리미엄)</b>과 <b>배분 시차</b>에 두고, 가계저축과의 대비 문구는 빼거나 약하게 쓰는 편이 안전합니다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>설계</h2>
+  <dl class="spec">
+    <dt>자료</dt><dd>OECD Table 14A 부문별 비금융계정(연간, 명목). 비금융법인(S11), 가계·비영리(S1M), 정부(S13), 국민경제(S1). 실질성장률은 WDI</dd>
+    <dt>경상수지</dt><dd>국민경제 순대출(S1 B9) ≈ 경상수지 + 자본수지. 모든 변수는 GNI 대비 %(추출본에 GDP가 없어 GNI 사용)</dd>
+    <dt>충격</dt><dd>① 부문 총저축(B8G)의 전년 대비 변화, ② 대안: 비금융법인 영업잉여(기업이익) 변화 vs 가계 저축률(저축/가처분소득) 변화</dd>
+    <dt>추정</dt><dd>두 충격을 함께 넣은 패널 국소투영(LP). 국가·연도 고정효과, 2년 시차와 직전 수준 통제, 국가 군집 표준오차. 전가율은 LP-IV(부문저축을 충격으로 도구화)</dd>
+    <dt>검정</dt><dd>단기(0–1년)→중기(4–6년) 전가율 하락폭의 기업−가계 차이. 국가 단위 블록 부트스트랩 499회, 90% 구간</dd>
+    <dt>에피소드</dt><dd>한 부문저축 변화가 상위 10%이고 다른 부문은 중위수 이하인 해(같은 부문은 3년 내 중복 제외). 연도평균을 뺀 사건연구와 에피소드 더미 LP</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>1. 평균적 충격: 기업저축의 경상수지 효과가 오히려 오래 남는다</h2>
+  <p>충격 시점에 부문저축이 1%p 늘 때 경상수지는 기업 <span class="num">0.64</span>, 가계 <span class="num">0.56</span>만큼 늘어 차이가 없습니다. 이후 가계저축 충격의 효과는 4~5년 만에 거의 0이 되고 6년째에는 음(−)으로 돌아서지만, 기업저축 충격은 6년 뒤에도 <span class="num">0.19</span>가 남습니다(6년째 차이 <span class="num">0.34</span>, 90% 구간 <span class="num">[0.17, 0.50]</span>).</p>
+  <p>두 부문저축 자체의 지속성도 비슷합니다(6년 뒤 잔존 비율 기업 <span class="num">0.20</span>, 가계 <span class="num">0.11</span>). 국가별로 보면 기업저축 변화의 변동성이 가계보다 큰 나라는 39개국 중 34%에 그쳐, “기업이익은 변동성이 크다”는 전제도 집계 자료에서는 확인되지 않습니다.</p>
+  <figure>
+    <div class="panel-title">충격 시점 부문저축 1%p 증가당 경상수지 반응 (GNI 대비 %p)</div>
+    <svg viewBox="0 0 640 280" role="img" aria-label="CA 반응"><line class="grid" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">-0.4</text><line class="grid" x1="52" x2="624" y1="204.6" y2="204.6"/><text class="tick" x="46" y="208.6" text-anchor="end">-0.2</text><line class="zero" x1="52" x2="624" y1="173.1" y2="173.1"/><text class="tick" x="46" y="177.1" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="141.7" y2="141.7"/><text class="tick" x="46" y="145.7" text-anchor="end">0.2</text><line class="grid" x1="52" x2="624" y1="110.3" y2="110.3"/><text class="tick" x="46" y="114.3" text-anchor="end">0.4</text><line class="grid" x1="52" x2="624" y1="78.9" y2="78.9"/><text class="tick" x="46" y="82.9" text-anchor="end">0.6</text><line class="grid" x1="52" x2="624" y1="47.4" y2="47.4"/><text class="tick" x="46" y="51.4" text-anchor="end">0.8</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">1</text><text class="tick" x="52.0" y="254" text-anchor="middle">0</text><text class="tick" x="147.3" y="254" text-anchor="middle">1</text><text class="tick" x="242.7" y="254" text-anchor="middle">2</text><text class="tick" x="338.0" y="254" text-anchor="middle">3</text><text class="tick" x="433.3" y="254" text-anchor="middle">4</text><text class="tick" x="528.7" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">충격 후 연수</text><polygon class="band corp" points="52.0,49.8 147.3,46.5 242.7,67.6 338.0,64.6 433.3,105.2 528.7,120.0 624.0,127.8 624.0,160.0 528.7,166.7 433.3,163.0 338.0,148.7 242.7,127.4 147.3,97.1 52.0,94.3"/><polygon class="band hh" points="52.0,55.9 147.3,48.8 242.7,74.1 338.0,96.4 433.3,137.2 528.7,152.5 624.0,176.8 624.0,216.5 528.7,191.8 433.3,180.2 338.0,160.6 242.7,145.5 147.3,123.8 52.0,110.0"/><polyline class="line corp" points="52.0,72.1 147.3,71.8 242.7,97.5 338.0,106.6 433.3,134.1 528.7,143.3 624.0,143.9"/><circle class="dot corp" cx="52.0" cy="72.1" r="2.6"/><circle class="dot corp" cx="147.3" cy="71.8" r="2.6"/><circle class="dot corp" cx="242.7" cy="97.5" r="2.6"/><circle class="dot corp" cx="338.0" cy="106.6" r="2.6"/><circle class="dot corp" cx="433.3" cy="134.1" r="2.6"/><circle class="dot corp" cx="528.7" cy="143.3" r="2.6"/><circle class="dot corp" cx="624.0" cy="143.9" r="2.6"/><polyline class="line hh" points="52.0,82.9 147.3,86.3 242.7,109.8 338.0,128.5 433.3,158.7 528.7,172.2 624.0,196.6"/><circle class="dot hh" cx="52.0" cy="82.9" r="2.6"/><circle class="dot hh" cx="147.3" cy="86.3" r="2.6"/><circle class="dot hh" cx="242.7" cy="109.8" r="2.6"/><circle class="dot hh" cx="338.0" cy="128.5" r="2.6"/><circle class="dot hh" cx="433.3" cy="158.7" r="2.6"/><circle class="dot hh" cx="528.7" cy="172.2" r="2.6"/><circle class="dot hh" cx="624.0" cy="196.6" r="2.6"/></svg>
+    <div class="legend"><span><i class="sw corp"></i>기업(비금융법인) 저축 충격</span><span><i class="sw hh"></i>가계 저축 충격</span></div>
+    <figcaption><b>그림 1.</b> 결합 LP, 아일랜드·룩셈부르크 제외 39개국. 음영은 90% 신뢰구간. 두 충격을 같은 회귀식에 넣어 서로를 통제.</figcaption>
+  </figure>
+  <figure>
+    <div class="panel-title">누적 전가율: 0~h년 누적 경상수지 증가 / 누적 부문저축 증가</div>
+    <svg viewBox="0 0 640 280" role="img" aria-label="누적 전가율"><line class="zero" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="199.3" y2="199.3"/><text class="tick" x="46" y="203.3" text-anchor="end">0.25</text><line class="grid" x1="52" x2="624" y1="162.7" y2="162.7"/><text class="tick" x="46" y="166.7" text-anchor="end">0.5</text><line class="grid" x1="52" x2="624" y1="126.0" y2="126.0"/><text class="tick" x="46" y="130.0" text-anchor="end">0.75</text><line class="grid" x1="52" x2="624" y1="89.3" y2="89.3"/><text class="tick" x="46" y="93.3" text-anchor="end">1</text><line class="grid" x1="52" x2="624" y1="52.7" y2="52.7"/><text class="tick" x="46" y="56.7" text-anchor="end">1.2</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">1.5</text><text class="tick" x="52.0" y="254" text-anchor="middle">0</text><text class="tick" x="147.3" y="254" text-anchor="middle">1</text><text class="tick" x="242.7" y="254" text-anchor="middle">2</text><text class="tick" x="338.0" y="254" text-anchor="middle">3</text><text class="tick" x="433.3" y="254" text-anchor="middle">4</text><text class="tick" x="528.7" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">충격 후 연수</text><polygon class="band corp" points="52.0,120.9 147.3,99.9 242.7,87.2 338.0,67.7 433.3,64.6 528.7,56.9 624.0,46.2 624.0,130.8 528.7,134.7 433.3,136.4 338.0,132.0 242.7,138.1 147.3,145.5 52.0,162.5"/><polygon class="band hh" points="52.0,126.5 147.3,103.3 242.7,84.8 338.0,60.2 433.3,52.7 528.7,54.7 624.0,61.5 624.0,193.0 528.7,180.3 433.3,170.5 338.0,165.1 242.7,171.3 147.3,171.7 52.0,177.1"/><polyline class="line corp" points="52.0,141.7 147.3,122.7 242.7,112.7 338.0,99.8 433.3,100.5 528.7,95.8 624.0,88.5"/><circle class="dot corp" cx="52.0" cy="141.7" r="2.6"/><circle class="dot corp" cx="147.3" cy="122.7" r="2.6"/><circle class="dot corp" cx="242.7" cy="112.7" r="2.6"/><circle class="dot corp" cx="338.0" cy="99.8" r="2.6"/><circle class="dot corp" cx="433.3" cy="100.5" r="2.6"/><circle class="dot corp" cx="528.7" cy="95.8" r="2.6"/><circle class="dot corp" cx="624.0" cy="88.5" r="2.6"/><polyline class="line hh" points="52.0,151.8 147.3,137.5 242.7,128.0 338.0,112.7 433.3,111.6 528.7,117.5 624.0,127.3"/><circle class="dot hh" cx="52.0" cy="151.8" r="2.6"/><circle class="dot hh" cx="147.3" cy="137.5" r="2.6"/><circle class="dot hh" cx="242.7" cy="128.0" r="2.6"/><circle class="dot hh" cx="338.0" cy="112.7" r="2.6"/><circle class="dot hh" cx="433.3" cy="111.6" r="2.6"/><circle class="dot hh" cx="528.7" cy="117.5" r="2.6"/><circle class="dot hh" cx="624.0" cy="127.3" r="2.6"/></svg>
+    <div class="legend"><span><i class="sw corp"></i>기업저축</span><span><i class="sw hh"></i>가계저축</span></div>
+    <figcaption><b>그림 2.</b> 문서의 “시점별 전가율”에 대응. 남아 있는 부문저축 1%p 중 경상수지로 나타나는 비율은 두 부문 모두 0.6~1.0으로 구분되지 않음.</figcaption>
+  </figure>
+  <h3>단기→중기 전가율 하락폭 비교 (부트스트랩 90% 구간)</h3>
+  <p>문서가 맞다면 “하락폭 차이(기업−가계)”가 양(+)이어야 합니다. 일곱 사양 모두 음(−)이거나 0과 구분되지 않습니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>사양</th><th>기업: 단기 → 중기</th><th>가계: 단기 → 중기</th><th>하락폭 차이 (기업−가계)</th><th>중기 누적 전가율 기업 / 가계</th><th>누적 하락폭 차이</th></tr></thead>
+    <tbody>
+<tr><th>기본 (부문저축, 41개국)</th><td>0.63 → 0.18</td><td>0.55 → -0.05</td><td class='em'>-0.15 <span class="ci">[-0.26, 0.01]</span></td><td>0.61 / 0.66</td><td>0.13 <span class="ci">[-0.24, 0.36]</span></td></tr>
+<tr><th>아일랜드·룩셈부르크 제외</th><td>0.64 → 0.21</td><td>0.56 → -0.02</td><td class='em'>-0.14 <span class="ci">[-0.27, 0.02]</span></td><td>0.96 / 0.80</td><td>-0.08 <span class="ci">[-0.27, 0.20]</span></td></tr>
+<tr><th>2020–21년 제외</th><td>0.59 → 0.18</td><td>0.55 → -0.05</td><td class='em'>-0.19 <span class="ci">[-0.30, 0.04]</span></td><td>0.59 / 0.65</td><td>0.11 <span class="ci">[-0.24, 0.37]</span></td></tr>
+<tr><th>당해 실질성장률 통제</th><td>0.67 → 0.22</td><td>0.54 → -0.08</td><td class='em'>-0.17 <span class="ci">[-0.28, 0.01]</span></td><td>0.67 / 0.58</td><td>0.02 <span class="ci">[-0.29, 0.18]</span></td></tr>
+<tr><th>기업이익 vs 가계저축률</th><td>0.45 → -0.01</td><td>0.46 → -0.09</td><td class='em'>-0.09 <span class="ci">[-0.40, 0.26]</span></td><td>0.09 / 0.46</td><td>0.35 <span class="ci">[-0.23, 0.78]</span></td></tr>
+<tr><th>기업이익 vs 가계저축률, IRL·LUX 제외</th><td>0.56 → 0.26</td><td>0.44 → -0.01</td><td class='em'>-0.14 <span class="ci">[-0.38, 0.11]</span></td><td>0.57 / 0.61</td><td>0.13 <span class="ci">[-0.22, 0.66]</span></td></tr>
+<tr><th>기업이익 vs 가계저축률, 2020–21년 제외</th><td>0.27 → -0.03</td><td>0.43 → -0.09</td><td class='em'>-0.21 <span class="ci">[-0.51, 0.22]</span></td><td>0.05 / 0.44</td><td>0.28 <span class="ci">[-0.31, 0.72]</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>2. 대규모 에피소드: 문서와 같은 방향, 그러나 약한 근거</h2>
+  <p>기업저축이 급증한 해에는 같은 해 가계저축이 <span class="num">2.3%p</span> 함께 줄어(소득이 가계에서 기업으로 이동, 에피소드 선정 기준의 영향도 일부 포함) 경상수지는 <span class="num">0.2~0.5%p</span>만 오르고 5년 뒤 0으로 돌아갑니다. 가계저축 급증 뒤에는 경상수지가 6년에 걸쳐 약 <span class="num">1%p</span>까지 오릅니다.</p>
+  <p>다만 가계 에피소드 직전에 경상수지가 하락하던 추세(경기 저점 반등 성격)가 있고, 두 경로의 90% 구간이 전 구간에서 겹칩니다. 직전 추세를 통제한 에피소드 LP에서는 두 부문 사이에 체계적 차이가 나타나지 않습니다. 한국에서는 1999년과 2010년이 기업저축 급증 에피소드로 잡힙니다.</p>
+  <div class="pair">
+    <figure>
+      <div class="panel-title">경상수지 (GNI 대비 %p)</div>
+      <svg viewBox="0 0 640 280" role="img" aria-label="CA 변화"><line class="grid" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">-2</text><line class="grid" x1="52" x2="624" y1="192.0" y2="192.0"/><text class="tick" x="46" y="196.0" text-anchor="end">-1</text><line class="zero" x1="52" x2="624" y1="148.0" y2="148.0"/><text class="tick" x="46" y="152.0" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="104.0" y2="104.0"/><text class="tick" x="46" y="108.0" text-anchor="end">1</text><line class="grid" x1="52" x2="624" y1="60.0" y2="60.0"/><text class="tick" x="46" y="64.0" text-anchor="end">2</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">3</text><text class="tick" x="52.0" y="254" text-anchor="middle">-3</text><text class="tick" x="115.6" y="254" text-anchor="middle">-2</text><text class="tick" x="179.1" y="254" text-anchor="middle">-1</text><text class="tick" x="242.7" y="254" text-anchor="middle">0</text><text class="tick" x="306.2" y="254" text-anchor="middle">1</text><text class="tick" x="369.8" y="254" text-anchor="middle">2</text><text class="tick" x="433.3" y="254" text-anchor="middle">3</text><text class="tick" x="496.9" y="254" text-anchor="middle">4</text><text class="tick" x="560.4" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">에피소드 시작 기준 연도 (t−1 = 0)</text><polygon class="band corp" points="52.0,120.5 115.6,120.2 179.1,148.0 242.7,106.9 306.2,90.9 369.8,98.3 433.3,76.7 496.9,63.1 560.4,86.9 624.0,75.1 624.0,219.1 560.4,217.4 496.9,190.3 433.3,176.7 369.8,181.5 306.2,173.8 242.7,174.6 179.1,148.0 115.6,175.5 52.0,201.9"/><polygon class="band hh" points="52.0,80.1 115.6,102.9 179.1,148.0 242.7,102.8 306.2,62.0 369.8,57.2 433.3,71.2 496.9,64.1 560.4,45.8 624.0,20.2 624.0,180.2 560.4,167.4 496.9,176.1 433.3,186.0 369.8,159.5 306.2,176.2 242.7,167.8 179.1,148.0 115.6,148.2 52.0,141.3"/><polyline class="line corp" points="52.0,161.2 115.6,147.9 179.1,148.0 242.7,140.7 306.2,132.4 369.8,139.9 433.3,126.7 496.9,126.7 560.4,152.1 624.0,147.1"/><circle class="dot corp" cx="52.0" cy="161.2" r="2.6"/><circle class="dot corp" cx="115.6" cy="147.9" r="2.6"/><circle class="dot corp" cx="179.1" cy="148.0" r="2.6"/><circle class="dot corp" cx="242.7" cy="140.7" r="2.6"/><circle class="dot corp" cx="306.2" cy="132.4" r="2.6"/><circle class="dot corp" cx="369.8" cy="139.9" r="2.6"/><circle class="dot corp" cx="433.3" cy="126.7" r="2.6"/><circle class="dot corp" cx="496.9" cy="126.7" r="2.6"/><circle class="dot corp" cx="560.4" cy="152.1" r="2.6"/><circle class="dot corp" cx="624.0" cy="147.1" r="2.6"/><polyline class="line hh" points="52.0,110.7 115.6,125.6 179.1,148.0 242.7,135.3 306.2,119.1 369.8,108.4 433.3,128.6 496.9,120.1 560.4,106.6 624.0,100.2"/><circle class="dot hh" cx="52.0" cy="110.7" r="2.6"/><circle class="dot hh" cx="115.6" cy="125.6" r="2.6"/><circle class="dot hh" cx="179.1" cy="148.0" r="2.6"/><circle class="dot hh" cx="242.7" cy="135.3" r="2.6"/><circle class="dot hh" cx="306.2" cy="119.1" r="2.6"/><circle class="dot hh" cx="369.8" cy="108.4" r="2.6"/><circle class="dot hh" cx="433.3" cy="128.6" r="2.6"/><circle class="dot hh" cx="496.9" cy="120.1" r="2.6"/><circle class="dot hh" cx="560.4" cy="106.6" r="2.6"/><circle class="dot hh" cx="624.0" cy="100.2" r="2.6"/></svg>
+      <div class="legend"><span><i class="sw corp"></i>기업저축 급증</span><span><i class="sw hh"></i>가계저축 급증</span></div>
+    </figure>
+    <figure>
+      <div class="panel-title">부문저축 (GNI 대비 %p)</div>
+      <svg viewBox="0 0 640 280" role="img" aria-label="부문저축 변화"><line class="grid" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">-6</text><line class="grid" x1="52" x2="624" y1="199.3" y2="199.3"/><text class="tick" x="46" y="203.3" text-anchor="end">-4</text><line class="grid" x1="52" x2="624" y1="162.7" y2="162.7"/><text class="tick" x="46" y="166.7" text-anchor="end">-2</text><line class="zero" x1="52" x2="624" y1="126.0" y2="126.0"/><text class="tick" x="46" y="130.0" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="89.3" y2="89.3"/><text class="tick" x="46" y="93.3" text-anchor="end">2</text><line class="grid" x1="52" x2="624" y1="52.7" y2="52.7"/><text class="tick" x="46" y="56.7" text-anchor="end">4</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">6</text><text class="tick" x="52.0" y="254" text-anchor="middle">-3</text><text class="tick" x="115.6" y="254" text-anchor="middle">-2</text><text class="tick" x="179.1" y="254" text-anchor="middle">-1</text><text class="tick" x="242.7" y="254" text-anchor="middle">0</text><text class="tick" x="306.2" y="254" text-anchor="middle">1</text><text class="tick" x="369.8" y="254" text-anchor="middle">2</text><text class="tick" x="433.3" y="254" text-anchor="middle">3</text><text class="tick" x="496.9" y="254" text-anchor="middle">4</text><text class="tick" x="560.4" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">에피소드 시작 기준 연도 (t−1 = 0)</text><polygon class="band corp" points="52.0,92.1 115.6,101.8 179.1,126.0 242.7,50.2 306.2,49.8 369.8,39.6 433.3,49.5 496.9,47.2 560.4,35.8 624.0,28.3 624.0,82.4 560.4,87.8 496.9,89.3 433.3,86.7 369.8,80.7 306.2,86.6 242.7,80.7 179.1,126.0 115.6,118.2 52.0,113.0"/><polygon class="band corpalt" points="52.0,127.8 115.6,126.7 179.1,126.0 242.7,153.5 306.2,152.2 369.8,150.5 433.3,144.8 496.9,147.5 560.4,152.5 624.0,157.7 624.0,202.8 560.4,200.6 496.9,184.9 433.3,179.9 369.8,185.4 306.2,184.9 242.7,184.8 179.1,126.0 115.6,149.3 52.0,147.4"/><polygon class="band hh" points="52.0,98.3 115.6,90.7 179.1,126.0 242.7,65.8 306.2,65.1 369.8,68.3 433.3,77.0 496.9,81.8 560.4,76.0 624.0,70.7 624.0,106.7 560.4,107.3 496.9,107.0 433.3,109.8 369.8,96.6 306.2,91.2 242.7,85.1 179.1,126.0 115.6,122.9 52.0,114.9"/><polygon class="band hhalt" points="52.0,122.1 115.6,124.1 179.1,126.0 242.7,153.6 306.2,137.8 369.8,131.7 433.3,130.4 496.9,124.4 560.4,122.7 624.0,106.1 624.0,146.3 560.4,155.5 496.9,156.4 433.3,168.2 369.8,162.2 306.2,164.7 242.7,169.5 179.1,126.0 115.6,159.4 52.0,144.1"/><polyline class="line corp" points="52.0,102.5 115.6,110.0 179.1,126.0 242.7,65.5 306.2,68.2 369.8,60.1 433.3,68.1 496.9,68.3 560.4,61.8 624.0,55.3"/><circle class="dot corp" cx="52.0" cy="102.5" r="2.6"/><circle class="dot corp" cx="115.6" cy="110.0" r="2.6"/><circle class="dot corp" cx="179.1" cy="126.0" r="2.6"/><circle class="dot corp" cx="242.7" cy="65.5" r="2.6"/><circle class="dot corp" cx="306.2" cy="68.2" r="2.6"/><circle class="dot corp" cx="369.8" cy="60.1" r="2.6"/><circle class="dot corp" cx="433.3" cy="68.1" r="2.6"/><circle class="dot corp" cx="496.9" cy="68.3" r="2.6"/><circle class="dot corp" cx="560.4" cy="61.8" r="2.6"/><circle class="dot corp" cx="624.0" cy="55.3" r="2.6"/><polyline class="line corpalt" points="52.0,137.6 115.6,138.0 179.1,126.0 242.7,169.2 306.2,168.6 369.8,167.9 433.3,162.3 496.9,166.2 560.4,176.5 624.0,180.2"/><circle class="dot corpalt" cx="52.0" cy="137.6" r="2.6"/><circle class="dot corpalt" cx="115.6" cy="138.0" r="2.6"/><circle class="dot corpalt" cx="179.1" cy="126.0" r="2.6"/><circle class="dot corpalt" cx="242.7" cy="169.2" r="2.6"/><circle class="dot corpalt" cx="306.2" cy="168.6" r="2.6"/><circle class="dot corpalt" cx="369.8" cy="167.9" r="2.6"/><circle class="dot corpalt" cx="433.3" cy="162.3" r="2.6"/><circle class="dot corpalt" cx="496.9" cy="166.2" r="2.6"/><circle class="dot corpalt" cx="560.4" cy="176.5" r="2.6"/><circle class="dot corpalt" cx="624.0" cy="180.2" r="2.6"/><polyline class="line hh" points="52.0,106.6 115.6,106.8 179.1,126.0 242.7,75.4 306.2,78.2 369.8,82.4 433.3,93.4 496.9,94.4 560.4,91.7 624.0,88.7"/><circle class="dot hh" cx="52.0" cy="106.6" r="2.6"/><circle class="dot hh" cx="115.6" cy="106.8" r="2.6"/><circle class="dot hh" cx="179.1" cy="126.0" r="2.6"/><circle class="dot hh" cx="242.7" cy="75.4" r="2.6"/><circle class="dot hh" cx="306.2" cy="78.2" r="2.6"/><circle class="dot hh" cx="369.8" cy="82.4" r="2.6"/><circle class="dot hh" cx="433.3" cy="93.4" r="2.6"/><circle class="dot hh" cx="496.9" cy="94.4" r="2.6"/><circle class="dot hh" cx="560.4" cy="91.7" r="2.6"/><circle class="dot hh" cx="624.0" cy="88.7" r="2.6"/><polyline class="line hhalt" points="52.0,133.1 115.6,141.7 179.1,126.0 242.7,161.6 306.2,151.3 369.8,147.0 433.3,149.3 496.9,140.4 560.4,139.1 624.0,126.2"/><circle class="dot hhalt" cx="52.0" cy="133.1" r="2.6"/><circle class="dot hhalt" cx="115.6" cy="141.7" r="2.6"/><circle class="dot hhalt" cx="179.1" cy="126.0" r="2.6"/><circle class="dot hhalt" cx="242.7" cy="161.6" r="2.6"/><circle class="dot hhalt" cx="306.2" cy="151.3" r="2.6"/><circle class="dot hhalt" cx="369.8" cy="147.0" r="2.6"/><circle class="dot hhalt" cx="433.3" cy="149.3" r="2.6"/><circle class="dot hhalt" cx="496.9" cy="140.4" r="2.6"/><circle class="dot hhalt" cx="560.4" cy="139.1" r="2.6"/><circle class="dot hhalt" cx="624.0" cy="126.2" r="2.6"/></svg>
+      <div class="legend"><span><i class="sw corp"></i>기업 에피소드: 기업저축</span><span><i class="sw corpalt"></i>기업 에피소드: 가계저축</span><span><i class="sw hh"></i>가계 에피소드: 가계저축</span><span><i class="sw hhalt"></i>가계 에피소드: 기업저축</span></div>
+    </figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)"><b style="color:var(--ink)">그림 3.</b> 에피소드 시작 전년(t−1) 대비 변화, 연도별 국가평균 제거. 아일랜드·룩셈부르크 제외. 음영은 90% 구간.</p>
+</section>
+
+<section>
+  <h2>3. 기업이익의 배분 경로: 시차 배분은 확인된다</h2>
+  <p>비금융법인 영업잉여가 GNI 대비 1%p 늘면 그해 기업저축은 <span class="num">0.51%p</span>만 늘고 나머지는 이자·배당·세금으로 나갑니다. 배당 지급은 <span class="num">0.19 → 0.29%p</span>(1년 후)로, 법인세 등은 <span class="num">0.04 → 0.08%p</span>로 이익보다 늦게 정점에 이릅니다. 정부 순대출은 첫해 <span class="num">−0.18</span>에서 2년째부터 <span class="num">+0.14~0.20</span>으로 돌아섭니다. 기업이익 자체는 4년 뒤 1/3 수준으로 평균회귀합니다.</p>
+  <p>반면 기업투자는 이익 증가에 반응하지 않았습니다. “증설 투자가 수년에 걸쳐 집행”된다는 경로는 집계 패널에서 확인되지 않으며, 반도체처럼 특정 산업에 집중된 경우에 한정해 주장하는 편이 안전합니다.</p>
+  <div class="pair">
+    <figure>
+      <div class="panel-title">이익·기업저축·경상수지</div>
+      <svg viewBox="0 0 640 280" role="img" aria-label=""><line class="grid" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">-0.25</text><line class="zero" x1="52" x2="624" y1="199.3" y2="199.3"/><text class="tick" x="46" y="203.3" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="162.7" y2="162.7"/><text class="tick" x="46" y="166.7" text-anchor="end">0.25</text><line class="grid" x1="52" x2="624" y1="126.0" y2="126.0"/><text class="tick" x="46" y="130.0" text-anchor="end">0.5</text><line class="grid" x1="52" x2="624" y1="89.3" y2="89.3"/><text class="tick" x="46" y="93.3" text-anchor="end">0.75</text><line class="grid" x1="52" x2="624" y1="52.7" y2="52.7"/><text class="tick" x="46" y="56.7" text-anchor="end">1</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">1.2</text><text class="tick" x="52.0" y="254" text-anchor="middle">0</text><text class="tick" x="147.3" y="254" text-anchor="middle">1</text><text class="tick" x="242.7" y="254" text-anchor="middle">2</text><text class="tick" x="338.0" y="254" text-anchor="middle">3</text><text class="tick" x="433.3" y="254" text-anchor="middle">4</text><text class="tick" x="528.7" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">충격 후 연수</text><polygon class="band prof" points="52.0,52.7 147.3,65.7 242.7,102.4 338.0,118.8 433.3,130.1 528.7,151.9 624.0,164.7 624.0,203.1 528.7,195.6 433.3,169.7 338.0,157.1 242.7,129.0 147.3,81.1 52.0,52.7"/><polygon class="band corp" points="52.0,110.8 147.3,105.2 242.7,112.4 338.0,125.3 433.3,144.3 528.7,154.9 624.0,165.5 624.0,195.9 528.7,197.5 433.3,179.8 338.0,157.9 242.7,175.8 147.3,162.3 52.0,138.9"/><polygon class="band ca" points="52.0,132.6 147.3,131.6 242.7,137.6 338.0,131.0 433.3,138.6 528.7,146.0 624.0,145.5 624.0,195.1 528.7,231.5 433.3,227.6 338.0,216.3 242.7,210.9 147.3,180.5 52.0,184.8"/><polyline class="line prof" points="52.0,52.7 147.3,73.4 242.7,115.7 338.0,138.0 433.3,149.9 528.7,173.7 624.0,183.9"/><circle class="dot prof" cx="52.0" cy="52.7" r="2.6"/><circle class="dot prof" cx="147.3" cy="73.4" r="2.6"/><circle class="dot prof" cx="242.7" cy="115.7" r="2.6"/><circle class="dot prof" cx="338.0" cy="138.0" r="2.6"/><circle class="dot prof" cx="433.3" cy="149.9" r="2.6"/><circle class="dot prof" cx="528.7" cy="173.7" r="2.6"/><circle class="dot prof" cx="624.0" cy="183.9" r="2.6"/><polyline class="line corp" points="52.0,124.8 147.3,133.8 242.7,144.1 338.0,141.6 433.3,162.0 528.7,176.2 624.0,180.7"/><circle class="dot corp" cx="52.0" cy="124.8" r="2.6"/><circle class="dot corp" cx="147.3" cy="133.8" r="2.6"/><circle class="dot corp" cx="242.7" cy="144.1" r="2.6"/><circle class="dot corp" cx="338.0" cy="141.6" r="2.6"/><circle class="dot corp" cx="433.3" cy="162.0" r="2.6"/><circle class="dot corp" cx="528.7" cy="176.2" r="2.6"/><circle class="dot corp" cx="624.0" cy="180.7" r="2.6"/><polyline class="line ca" points="52.0,158.7 147.3,156.1 242.7,174.2 338.0,173.7 433.3,183.1 528.7,188.8 624.0,170.3"/><circle class="dot ca" cx="52.0" cy="158.7" r="2.6"/><circle class="dot ca" cx="147.3" cy="156.1" r="2.6"/><circle class="dot ca" cx="242.7" cy="174.2" r="2.6"/><circle class="dot ca" cx="338.0" cy="173.7" r="2.6"/><circle class="dot ca" cx="433.3" cy="183.1" r="2.6"/><circle class="dot ca" cx="528.7" cy="188.8" r="2.6"/><circle class="dot ca" cx="624.0" cy="170.3" r="2.6"/></svg>
+      <div class="legend"><span><i class="sw prof"></i>기업이익</span><span><i class="sw corp"></i>기업저축</span><span><i class="sw ca"></i>경상수지</span></div>
+    </figure>
+    <figure>
+      <div class="panel-title">배분: 배당·세금·정부수지</div>
+      <svg viewBox="0 0 640 280" role="img" aria-label=""><line class="grid" x1="52" x2="624" y1="236.0" y2="236.0"/><text class="tick" x="46" y="240.0" text-anchor="end">-0.4</text><line class="grid" x1="52" x2="624" y1="192.0" y2="192.0"/><text class="tick" x="46" y="196.0" text-anchor="end">-0.2</text><line class="zero" x1="52" x2="624" y1="148.0" y2="148.0"/><text class="tick" x="46" y="152.0" text-anchor="end">0</text><line class="grid" x1="52" x2="624" y1="104.0" y2="104.0"/><text class="tick" x="46" y="108.0" text-anchor="end">0.2</text><line class="grid" x1="52" x2="624" y1="60.0" y2="60.0"/><text class="tick" x="46" y="64.0" text-anchor="end">0.4</text><line class="grid" x1="52" x2="624" y1="16.0" y2="16.0"/><text class="tick" x="46" y="20.0" text-anchor="end">0.6</text><text class="tick" x="52.0" y="254" text-anchor="middle">0</text><text class="tick" x="147.3" y="254" text-anchor="middle">1</text><text class="tick" x="242.7" y="254" text-anchor="middle">2</text><text class="tick" x="338.0" y="254" text-anchor="middle">3</text><text class="tick" x="433.3" y="254" text-anchor="middle">4</text><text class="tick" x="528.7" y="254" text-anchor="middle">5</text><text class="tick" x="624.0" y="254" text-anchor="middle">6</text><text class="axis" x="338.0" y="274" text-anchor="middle">충격 후 연수</text><polygon class="band div" points="52.0,81.0 147.3,51.5 242.7,78.3 338.0,114.2 433.3,112.5 528.7,62.1 624.0,96.3 624.0,159.2 528.7,136.6 433.3,149.3 338.0,146.5 242.7,127.1 147.3,116.5 52.0,130.6"/><polygon class="band tax" points="52.0,133.3 147.3,118.0 242.7,125.2 338.0,135.3 433.3,131.8 528.7,128.1 624.0,128.7 624.0,144.7 528.7,145.8 433.3,144.7 338.0,148.0 242.7,141.3 147.3,142.3 52.0,144.8"/><polygon class="band gov" points="52.0,154.2 147.3,97.9 242.7,86.9 338.0,86.0 433.3,71.1 528.7,49.1 624.0,62.9 624.0,155.9 528.7,160.9 433.3,147.5 338.0,150.3 242.7,147.6 147.3,160.8 52.0,220.1"/><polyline class="line div" points="52.0,105.8 147.3,84.0 242.7,102.7 338.0,130.3 433.3,130.9 528.7,99.4 624.0,127.8"/><circle class="dot div" cx="52.0" cy="105.8" r="2.6"/><circle class="dot div" cx="147.3" cy="84.0" r="2.6"/><circle class="dot div" cx="242.7" cy="102.7" r="2.6"/><circle class="dot div" cx="338.0" cy="130.3" r="2.6"/><circle class="dot div" cx="433.3" cy="130.9" r="2.6"/><circle class="dot div" cx="528.7" cy="99.4" r="2.6"/><circle class="dot div" cx="624.0" cy="127.8" r="2.6"/><polyline class="line tax" points="52.0,139.0 147.3,130.2 242.7,133.2 338.0,141.6 433.3,138.3 528.7,137.0 624.0,136.7"/><circle class="dot tax" cx="52.0" cy="139.0" r="2.6"/><circle class="dot tax" cx="147.3" cy="130.2" r="2.6"/><circle class="dot tax" cx="242.7" cy="133.2" r="2.6"/><circle class="dot tax" cx="338.0" cy="141.6" r="2.6"/><circle class="dot tax" cx="433.3" cy="138.3" r="2.6"/><circle class="dot tax" cx="528.7" cy="137.0" r="2.6"/><circle class="dot tax" cx="624.0" cy="136.7" r="2.6"/><polyline class="line gov" points="52.0,187.1 147.3,129.4 242.7,117.3 338.0,118.2 433.3,109.3 528.7,105.0 624.0,109.4"/><circle class="dot gov" cx="52.0" cy="187.1" r="2.6"/><circle class="dot gov" cx="147.3" cy="129.4" r="2.6"/><circle class="dot gov" cx="242.7" cy="117.3" r="2.6"/><circle class="dot gov" cx="338.0" cy="118.2" r="2.6"/><circle class="dot gov" cx="433.3" cy="109.3" r="2.6"/><circle class="dot gov" cx="528.7" cy="105.0" r="2.6"/><circle class="dot gov" cx="624.0" cy="109.4" r="2.6"/></svg>
+      <div class="legend"><span><i class="sw div"></i>배당 지급</span><span><i class="sw tax"></i>법인세 등 지급</span><span><i class="sw gov"></i>정부 순대출</span></div>
+    </figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)"><b style="color:var(--ink)">그림 4.</b> 기업이익(영업잉여) GNI 대비 1%p 충격에 대한 반응, 가계 저축률 충격을 함께 통제. 아일랜드·룩셈부르크 제외.</p>
+</section>
+
+<section>
+  <h2>4. 문서에 대한 제안</h2>
+  <p>현재 문장은 “가계저축과 달리”라는 부문 대비에 기대고 있습니다. OECD 패널에서는 이 대비가 성립하지 않고, 가계저축률 충격도 대부분 일시적입니다. IMF가 같은 자료로 반박할 수 있으므로 근거의 중심을 옮기는 편이 좋습니다.</p>
+  <div class="rewrite">
+    <div class="lab">현재</div>
+    <div>따라서 이번 흑자는 저축 성향의 변화에 따른 가계저축 증가와 달리 별도의 정책 대응 없이도 배분·지출 과정에서 축소될 것이므로, …</div>
+    <div class="lab">수정안</div>
+    <div class="new">따라서 이번 흑자는 일시적 가격 프리미엄에서 비롯된 기업이익이 기업저축으로 우선 유보된 결과로, 배당·법인세 등을 통한 배분이 이익 발생에 1년가량 후행하고(OECD 패널 기준) 이 중 외국인 배당은 본원소득 지급으로 경상수지를 직접 축소하므로, 별도의 정책 대응 없이도 시차를 두고 축소될 것이므로, …</div>
+  </div>
+  <p style="margin-top:12px">이렇게 쓰면 이번 분석에서 지지되는 사실(배분의 시차, 이익의 평균회귀)만 근거로 삼고, 지지되지 않는 사실(부문별 지속성 차이)은 피할 수 있습니다. 에피소드 결과는 “대규모 기업저축 급증 시 경상수지 반응이 작고 단기에 그쳤다”는 보조 근거로만 쓰기를 권합니다.</p>
+</section>
+
+<section>
+  <h2>한계</h2>
+  <ul class="key">
+    <li>축약형 식별입니다. 부문저축 변화에는 경기·소득분배·회계 재분류가 섞여 있어 “저축성향의 외생적 변화”를 깨끗하게 분리하지 못합니다. 교역조건을 기업저축의 도구로 써 보았으나 도구가 약했습니다(1단계 F &lt; 1).</li>
+    <li>경상수지 대리변수(S1 B9)에 자본수지가 포함되고, 분모가 GDP가 아닌 GNI입니다.</li>
+    <li>집계 비금융법인 자료라 반도체처럼 소수 기업에 집중된 가격 횡재와 성격이 다를 수 있습니다.</li>
+    <li>고정효과와 시차 종속변수를 함께 쓰는 동적 패널이라 지속성이 다소 과소추정될 수 있습니다(국가당 약 30년).</li>
+  </ul>
+</section>
+
+<footer>
+  자료: OECD Table 14A(DSD_NASEC10@DF_TABLE14), World Bank WDI. 코드: <code>research/sector_saving_ca/</code> (build_panel.py → run_analysis.py → make_report.py). 결과표: <code>output/joint_lp.csv</code>, <code>output/passthrough.csv</code>, <code>output/summary.json</code>.
+</footer>
+</main>

@@ -30,11 +30,15 @@ Z90 = 1.645
 SHOCKS = {
     "baseline": {"corp": "d_sv_corp", "hh": "d_sv_hh"},           # 부문 총저축 변화 (GDP 대비 %p)
     "profit_propensity": {"corp": "d_prof", "hh": "d_hh_rate"},  # 기업이익 vs 가계 저축률
+    # 교역조건 횡재(반도체·원유 가격충격과 유사) → 기업저축으로 정규화. 교역조건은 가계·정부
+    # 소득에도 영향을 주므로 배제제약이 엄밀히 성립하지는 않음: 'ToT 충격 1단위당' 축약형 비교
+    "tot_propensity": {"corp": "tot_g", "hh": "d_hh_rate"},
 }
 OWN = {"corp": "sv_corp", "hh": "sv_hh"}
 OWN_NL = {"corp": "nl_corp", "hh": "nl_hh"}
 OUTCOMES = ["ca", "sv_corp", "sv_hh", "nl_corp", "nl_hh", "nl_gov", "nl_fin",
-            "inv_corp", "inv_hh", "cons_hh", "div_paid", "tax_paid", "prof", "sv_gov"]
+            "inv_corp", "inv_hh", "inv_gov", "cons_hh", "div_paid", "div_recv_hh",
+            "tax_paid", "int_paid", "prof", "sv_gov", "hh_rate"]
 LABEL = {"corp": "Corporate (NFC) saving shock", "hh": "Household saving shock"}
 
 
@@ -45,7 +49,7 @@ def prepare(panel):
         d[f"d_{v}"] = g[v].diff()
     base_ctrl = ["d_sv_corp", "d_sv_hh", "d_ca", "gdp_g"]
     levels = ["sv_corp", "sv_hh", "ca", "prof", "hh_rate"]
-    d = pd.concat([d, lagged(d, base_ctrl + ["d_prof", "d_hh_rate"] + levels, LAGS)], axis=1)
+    d = pd.concat([d, lagged(d, base_ctrl + ["d_prof", "d_hh_rate", "tot_g"] + levels, LAGS)], axis=1)
     lp = {f"{y}_h{h}": add_lp_columns(d, y, h)
           for y in sorted(set(OUTCOMES) | set(OWN.values()) | set(OWN_NL.values())) if y in d
           for h in range(H + 1)}
@@ -61,12 +65,19 @@ def controls_for(shock_set, extra=()):
     if shock_set == "profit_propensity":
         lagvars += ["d_prof", "d_hh_rate"]
         levels += ["prof", "hh_rate"]
+    if shock_set == "tot_propensity":
+        lagvars += ["d_hh_rate", "tot_g"]
+        levels += ["hh_rate"]
     return ([f"L{l}_{v}" for v in lagvars for l in range(1, LAGS + 1)]
             + [f"L1_{v}" for v in levels] + list(extra))
 
 
-def sample(d, drop_years=()):
-    return d[~d["year"].isin(drop_years)] if drop_years else d
+# 다국적기업 회계로 부문계정이 크게 왜곡된 국가 (아일랜드 2015년 'leprechaun' 등)
+MNE_HUBS = ("IRL", "LUX")
+
+
+def sample(d, drop_years=(), drop_countries=()):
+    return d[~d["year"].isin(drop_years) & ~d["country"].isin(drop_countries)]
 
 
 # ---------------------------------------------------------------- 1) 결합 LP
@@ -277,13 +288,15 @@ def main(panel_path, reps):
     variants = {
         "baseline": dict(shock_set="baseline", drop=()),
         "baseline_exCOVID": dict(shock_set="baseline", drop=(2020, 2021)),
+        "baseline_exMNE": dict(shock_set="baseline", drop=(), drop_c=MNE_HUBS),
         "baseline_growthctrl": dict(shock_set="baseline", drop=(), extra=("gdp_g",)),
         "profit_propensity": dict(shock_set="profit_propensity", drop=()),
         "profit_propensity_exCOVID": dict(shock_set="profit_propensity", drop=(2020, 2021)),
+        "profit_propensity_exMNE": dict(shock_set="profit_propensity", drop=(), drop_c=MNE_HUBS),
     }
     all_jl, all_pt = [], []
     for name, v in variants.items():
-        ds = sample(d, v["drop"])
+        ds = sample(d, v["drop"], v.get("drop_c", ()))
         extra = v.get("extra", ())
         jl = joint_lp(ds, v["shock_set"], extra).assign(variant=name)
         pt = passthrough(ds, v["shock_set"], extra).assign(variant=name)
@@ -291,7 +304,7 @@ def main(panel_path, reps):
         all_pt.append(pt)
         fig_passthrough(pt, OUT / f"passthrough_{name}.png", f"Pass-through — {name}")
         fig_joint(jl, ["ca", "sv_corp", "sv_hh", "nl_corp", "nl_hh", "nl_gov",
-                       "inv_corp", "inv_hh", "div_paid", "tax_paid", "cons_hh", "prof"],
+                       "inv_corp", "inv_hh", "div_paid", "div_recv_hh", "tax_paid", "cons_hh"],
                   OUT / f"joint_lp_{name}.png", f"Joint LP responses (pp of GDP) — {name}")
         if reps:
             summary[f"contrasts_{name}"] = bootstrap_contrasts(ds, v["shock_set"], reps, extra)
@@ -299,10 +312,11 @@ def main(panel_path, reps):
     pd.concat(all_jl).to_csv(OUT / "joint_lp.csv", index=False)
     pd.concat(all_pt).to_csv(OUT / "passthrough.csv", index=False)
 
-    for name, ss, drop in [("episodes_baseline", "baseline", ()),
-                           ("episodes_baseline_exCOVID", "baseline", (2020, 2021)),
-                           ("episodes_propensity", "profit_propensity", ())]:
-        ds = sample(d, drop)
+    for name, ss, drop, dc in [("episodes_baseline", "baseline", (), ()),
+                               ("episodes_baseline_exMNE", "baseline", (), MNE_HUBS),
+                               ("episodes_baseline_exCOVID", "baseline", (2020, 2021), ()),
+                               ("episodes_propensity", "profit_propensity", (), MNE_HUBS)]:
+        ds = sample(d, drop, dc)
         ep, thr = define_episodes(ds, ss)
         lst = {s: ds.loc[e == 1, ["country", "year"]].astype({"year": int}).values.tolist()
                for s, e in ep.items()}
