@@ -130,7 +130,27 @@ def fig3():
     save(fig, "fig3_saving_rate_current_account")
 
 
+def fig4():
+    p = OUT / "ep_report_extra.csv"
+    if not p.exists():
+        return
+    r = pd.read_csv(p)
+    n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
+    fig, ax = plt.subplots(figsize=(5.2, 3.3))
+    line(ax, r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, f"{LAB_HH} (N = {n_hh})")
+    line(ax, r[(r.sector == "corp") & (r["var"] == "src_hh")], CO, f"{LAB_CO} (N = {n_co})", ls="--")
+    finish(ax, "Household saving rate\n(percentage points of disposable income)")
+    ax.legend(loc="center", bbox_to_anchor=(0.55, 0.5))
+    ax.set_title("Figure 4. Household saving rate after saving episodes", loc="left", fontweight="bold")
+    fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
+             "percentage points) per episode, not normalized. Year $-1$ is the reference year and equals zero by construction. "
+             "Shaded areas are 68 percent confidence bands from a country-cluster bootstrap (499 replications). " + SPEC,
+             fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+    save(fig, "fig4_household_saving_rate")
+
+
 if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
+    fig4()
