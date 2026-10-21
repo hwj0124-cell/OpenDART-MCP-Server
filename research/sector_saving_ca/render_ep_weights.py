@@ -40,9 +40,15 @@ def estimate(x, denom):
 
 
 def main():
-    r = pd.concat([estimate(ed.er.panel(), "GDP"),
-                   estimate(ed.er.panel(ra.HERE / "data" / "panel_gni.csv"), "GNI")], ignore_index=True)
-    r.to_csv(OUT / "ep_weights.csv", index=False)
+    import sys
+    if len(sys.argv) > 1:  # 다른 패널: python render_ep_weights.py <패널 경로> <파일 꼬리표> <제목 덧붙임>
+        path, tag, title_note = sys.argv[1], "_" + sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else ""
+        r = estimate(ed.er.panel(ra.HERE / path), "GDP")
+    else:
+        tag, title_note = "", ""
+        r = pd.concat([estimate(ed.er.panel(), "GDP"),
+                       estimate(ed.er.panel(ra.HERE / "data" / "panel_gni.csv"), "GNI")], ignore_index=True)
+    r.to_csv(OUT / f"ep_weights{tag}.csv", index=False)
     print(r[r["var"].str.startswith("nl")].pivot_table(index=["var", "case", "denom"], columns="h", values="ratio",
                                                         sort=False).round(2).to_string())
     print(r[(r.denom == "GDP") & ~r["var"].str.startswith("nl")].pivot_table(
@@ -73,15 +79,15 @@ svg .line.c4{stroke:#d1701f;fill:none;stroke-dasharray:6 4} svg .dot.c4{fill:#ff
             "에피소드: 1년 변화 국가별 상·하위 10%, 순자금운용이 충격과 같은 방향, 4년 내 중복 제외, 시작 2020–22 제외, 그해 성장률 ≥ 0. "
             "교역조건은 영업잉여 같은 방향.")
     html = (f'<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:700px">'
-            f'<section id="A"><h2 style="font-size:18px">가중치 × 교역조건 지표: 순자금운용·저축·투자 (GDP 대비)</h2>{"".join(cells)}'
+            f'<section id="A"><h2 style="font-size:18px">가중치 × 교역조건 지표: 순자금운용·저축·투자 (GDP 대비){title_note}</h2>{"".join(cells)}'
             f'<p class="ci" style="font-size:12px">{note}</p></section></main></body></html>')
-    (OUT / "ep_weights_figs.html").write_text(html)
+    (OUT / f"ep_weights{tag}_figs.html").write_text(html)
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
         pg = b.new_page(viewport={"width": 700, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1500)
-        pg.locator("#A").screenshot(path=str(OUT / "ep_weights_fig.png"))
+        pg.locator("#A").screenshot(path=str(OUT / f"ep_weights{tag}_fig.png"))
         b.close()
 
 
