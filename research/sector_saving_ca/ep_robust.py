@@ -7,7 +7,7 @@
 경로: 사례 평균 [sign·(v_{t+k} − v_{t−w})] / 사례 평균 |nl_t − nl_{t−w}|  (평균의 비율; 작은 분모에 덜 민감)
       68% 구간은 사례 단위 부트스트랩 499회. 개별 비율의 평균·중위수도 함께 저장
       v =  v = 순자금운용, 저축, 총투자(= 저축 − 순자금운용; 재고투자·자본이전 포함), 고정투자
-사양: 기본(1년, 연도평균 제거, IRL·LUX 제외) / 2년 정의 / IRL·LUX 포함 / 연도평균 미제거 / 코로나 제외(시작 2019–21) / 상·하위 20%
+사양: 기본(1년, 전체 국가, 연도평균 미제거, 상·하위 10%) / 연도평균 제거 / IRL·LUX 제외 / 2년 정의 / 코로나 제외(시작 2019–21) / 상·하위 20%
 → output/ep_robust.csv
 """
 import numpy as np
@@ -20,12 +20,12 @@ K = 6
 MNE = {"IRL", "LUX"}
 SECT = {"가계 성향": ("nl_hh", "sv_hh", "inv_hh"), "교역조건": ("nl_corp", "sv_corp", "inv_corp")}
 SPECS = {
-    "기본 (1년·평균제거·IRL/LUX 제외·10%)": dict(w=1, demean=True, mne=False, covid=False, q=0.10),
-    "2년 정의": dict(w=2, demean=True, mne=False, covid=False, q=0.10),
-    "IRL·LUX 포함": dict(w=1, demean=True, mne=True, covid=False, q=0.10),
-    "연도평균 미제거": dict(w=1, demean=False, mne=False, covid=False, q=0.10),
-    "코로나 제외": dict(w=1, demean=True, mne=False, covid=True, q=0.10),
-    "상·하위 20%": dict(w=1, demean=True, mne=False, covid=False, q=0.20),
+    "기본 (1년·전체국가·연도평균 미제거·10%)": dict(w=1, demean=False, mne=True, covid=False, q=0.10),
+    "연도평균 제거": dict(w=1, demean=True, mne=True, covid=False, q=0.10),
+    "IRL·LUX 제외": dict(w=1, demean=False, mne=False, covid=False, q=0.10),
+    "2년 정의": dict(w=2, demean=False, mne=True, covid=False, q=0.10),
+    "코로나 제외": dict(w=1, demean=False, mne=True, covid=True, q=0.10),
+    "상·하위 20%": dict(w=1, demean=False, mne=True, covid=False, q=0.20),
 }
 
 
