@@ -71,12 +71,35 @@ def main():
         f"<td>{r.c_sv_corp:.2f}</td><td>{r.c_sv_hh:.2f}</td><td>{-r.c_inv_tot:.2f}</td><td>{r.R3:.2f}</td><td>{r.R5:.2f}</td></tr>"
         for r in big.itertuples())
 
+    # 한국: 두 기업 사이클
+    kf = pd.read_csv(OUT / "korea_firms.csv").set_index("year")
+    yrs = kf.index.values
+    fig_k1 = svg_lines([("corp", "", yrs, kf.f_fcf.values, None, None),
+                        ("hh", "", yrs, kf.sv_hh.values - kf.sv_hh.loc[2014], None, None),
+                        ("ca", "", yrs, kf.ca.values - kf.ca.loc[2014], None, None)], "연도", "k1", xs=yrs)
+    fig_k2 = svg_lines([("prof", "", yrs, kf.f_op_profit.values, None, None),
+                        ("gov", "", yrs, kf.f_tax_paid.values, None, None)], "연도", "k2", xs=yrs)
+    dd = kf.diff().dropna()
+    kstats = dict(
+        K_SD_OP=f"{dd.f_op_profit.std():.2f}", K_SD_HH=f"{dd.sv_hh.std():.2f}", K_SD_NLHH=f"{dd.nl_hh.std():.2f}",
+        K_CORR_CA=f"{dd.f_fcf.corr(dd.ca):.2f}", K_SLOPE_CA=f"{np.polyfit(dd.f_fcf, dd.ca, 1)[0]:.2f}",
+        K_TAX0=f"{kf.f_tax_paid.corr(kf.f_op_profit):.2f}", K_TAX1=f"{kf.f_tax_paid.corr(kf.f_op_profit.shift(1)):.2f}",
+        K_CAPEX1=f"{kf.f_capex.corr(kf.f_op_profit.shift(1)):.2f}")
+    h1 = pd.read_csv(HERE / "data" / "firms" / "firm_h1_2026.csv")
+    tot = h1.groupby("period")[["op_profit", "ocf", "capex", "tax_paid", "tax_expense", "dividends_paid", "buyback", "current_tax_liab_end"]].sum(min_count=1) / 1000
+    h1rows = "\n".join(f"<tr><th>{lab}</th><td>{tot.loc['2025H1', c]:.1f}</td><td>{tot.loc['2026H1', c]:.1f}</td></tr>"
+                        for c, lab in (("op_profit", "영업이익"), ("ocf", "영업현금흐름"), ("capex", "설비투자"),
+                                       ("tax_expense", "법인세비용(발생)"), ("tax_paid", "법인세 납부(현금)"),
+                                       ("dividends_paid", "배당 지급"), ("buyback", "자사주 매입")))
+    h1rows += f"\n<tr><th>미지급 법인세(반기말 잔액)</th><td>–</td><td>{tot.loc['2026H1', 'current_tax_liab_end']:.1f}</td></tr>"
+
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")].replace("<title>기업저축·가계저축 경상수지 반응</title>", "<title>경상수지 에피소드 지속성</title>")
     body = (HERE / "episode_template.html").read_text()
     for k, v in {"FIG_CA": fig_ca, "FIG_SV": fig_sv, "T_MAIN": t_main, "T_DRIVER": t_driver, "T_NOCRISIS": t_nocrisis,
                  "T_ROB": "\n".join(rob), "T_COMP": comp, "T_BIG": bigrows,
-                 "N_CORP": str(n["기업저축↑"]), "N_HH": str(n["가계저축↑"]), "N_ALL": str(len(f))}.items():
+                 "N_CORP": str(n["기업저축↑"]), "N_HH": str(n["가계저축↑"]), "N_ALL": str(len(f)),
+                 "FIG_K1": fig_k1, "FIG_K2": fig_k2, "T_H1": h1rows, **kstats}.items():
         body = body.replace("{{" + k + "}}", v)
     (OUT / "report.html").write_text(style + body)
     print("→", OUT / "report.html")
