@@ -11,7 +11,7 @@ Table 14A 추출본에는 GDP(B1GQ)가 없어 국민총소득(S1 B5G)을 분모�
   div_paid  비금융법인 배당 지급(D42)      div_recv_hh 가계 배당 수취(D42)
   tax_paid  비금융법인 소득세 등(D5) 지급   int_paid 비금융법인 이자 지급(D41)
   inv_corp  비금융법인 총고정자본형성(P51G)  inv_hh  가계   inv_gov 정부
-  cons_hh   가계 최종소비(P3)
+  cons_hh   가계 최종소비(P3)          yd_hh 가계 총가처분소득(B6G)   sv_nat 국민총저축(S1 B8G)
   gdp_g     실질 GDP 성장률(WDI, 없으면 명목 GNI 증가율)   tot_g 교역조건 변화율(WDI)
 """
 from pathlib import Path
@@ -38,6 +38,7 @@ SPEC = [
     ("sv_corp", ["S11"], ["B8G"], BAL),
     ("sv_hh", HH, ["B8G"], BAL),
     ("sv_gov", ["S13"], ["B8G"], BAL),
+    ("sv_nat", ["S1"], ["B8G"], BAL),
     ("yd_hh", HH, ["B6G"], BAL),
     ("prof", ["S11"], ["B2G_B3G", "B2G"], BAL),
     ("div_paid", ["S11"], ["D42"], ["D"]),
@@ -111,7 +112,7 @@ def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
     p = p.sort_values(["country", "year"])
     # 국민경제 순대출: S1 B9, 없으면 −S2 B9
     p["nl_nat"] = p["nl_s1"].fillna(-p["nl_s2"])
-    level = [c for c, *_ in SPEC if c not in ("gdp", "yd_hh", "nl_s1", "nl_s2")] + ["nl_nat"]
+    level = [c for c, *_ in SPEC if c not in ("gdp", "nl_s1", "nl_s2")] + ["nl_nat"]
     out = p[["country", "year"]].copy()
     for c in level:
         out[c] = 100 * p[c] / p["gdp"]
