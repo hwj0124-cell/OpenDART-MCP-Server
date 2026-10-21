@@ -152,6 +152,27 @@ def main():
                                                     for k in (0, 3, 6)) + "</tr>")
     nonrec_n = f"{len(nonrec)}개 (t+6까지 관측 {int(nh[-1])}개)"
 
+    # 부문 자체 지속성: 기업이익 주도 vs 가계
+    sp = pd.read_csv(OUT / "sector_persistence.csv")
+    G = [("가계: 비침체 저축률 급등", "sv_hh", "nl_hh", "hh"), ("기업: 이익 주도 기업저축 급증", "sv_corp", "nl_corp", "corp"),
+         ("기업: 교역조건 횡재", "sv_corp", "nl_corp", "gov")]
+    def sps(g, v, cls):
+        x = sp[(sp.group == g) & (sp["var"] == v) & (sp.k >= 0)]
+        return (cls, "", x.k.values, x["mean"].values, (x["mean"] - Z * x.se.fillna(0)).values, (x["mean"] + Z * x.se.fillna(0)).values)
+    fig_s1 = svg_lines([sps(g, sv, c) for g, sv, _, c in G], "시작 기준 연도 (t)", "own_sv")
+    fig_s2 = svg_lines([sps(g, v, "prof") for g, v in [("기업: 이익 주도 기업저축 급증", "prof")]]
+                       + [sps("기업: 교역조건 횡재", "prof", "gov")], "시작 기준 연도 (t)", "prof")
+    srows = []
+    for g, sv, nl, _ in G + [("기업: 이익비중 급등", "sv_corp", "nl_corp", "")]:
+        def cell(v, k):
+            x = sp[(sp.group == g) & (sp["var"] == v) & (sp.k == k)]
+            return "–" if x.empty or pd.isna(x["mean"].iloc[0]) else f"{x['mean'].iloc[0]:.2f}"
+        n0 = int(sp[(sp.group == g) & (sp["var"] == sv) & (sp.k == 0)].n.iloc[0])
+        n6 = int(sp[(sp.group == g) & (sp["var"] == sv) & (sp.k == 6)].n.iloc[0])
+        pr = f"{cell('prof', 3)} / {cell('prof', 6)}" if g.startswith("기업") else "–"
+        srows.append(f"<tr><th>{g}</th><td>{n0} ({n6})</td><td>{cell(sv, 1)} / {cell(sv, 3)} / {cell(sv, 6)}</td>"
+                     f"<td>{cell(nl, 3)} / {cell(nl, 6)}</td><td>{pr}</td><td>{cell('sv_nat', 3)} / {cell('sv_nat', 6)}</td></tr>")
+
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")].replace("<title>기업저축·가계저축 경상수지 반응</title>", "<title>경상수지 에피소드 지속성</title>")
     body = (HERE / "episode_template.html").read_text()
@@ -162,7 +183,7 @@ def main():
                  "FIG_H1": fig_h1, "FIG_H2": fig_h2, "T_HH": "\n".join(hrows), "N_HH_ALL": str(len(he)),
                  "CASES_NONREC": hcases["비침체"], "CASES_HOUSING": hcases["부동산 붕괴"],
                  "NONREC_PANELS": "\n".join(panels), "NONREC_TABLE": "\n".join(ptab), "NONREC_N": nonrec_n,
-                 "N_PROF": str(len(pe))}.items():
+                 "N_PROF": str(len(pe)), "FIG_S1": fig_s1, "FIG_S2": fig_s2, "T_SECTOR": "\n".join(srows)}.items():
         body = body.replace("{{" + k + "}}", v)
     body = body.replace("<td>nan</td>", "<td>–</td>")
     (OUT / "report.html").write_text(style + body)
