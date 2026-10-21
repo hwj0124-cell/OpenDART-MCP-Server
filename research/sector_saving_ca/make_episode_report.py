@@ -193,6 +193,40 @@ def main():
     cs = pd.read_csv(OUT / "sector_persistence2_cases_q10.csv").set_index(["type", "dir"])
     tot_cases = cs.loc[("교역조건", "증가"), "cases"]
 
+    # 가계 성향 vs 교역조건 (순자금운용 기준): 에피소드 + LP
+    ht_ep = lambda q: s2[q][s2[q].basis == "순자금운용"]
+    fig_c1 = svg_lines([s2ser("순자금운용", "가계 성향", "hh"), s2ser("순자금운용", "교역조건", "gov")], "시작 기준 연도 (t)", "c1")
+    lpc = pd.read_csv(OUT / "compare_hh_tot_lp.csv")
+    def lps(t, q, cls):
+        x = lpc[(lpc.spec == "에피소드 교차항 LP") & (lpc.type == t) & (lpc.q == q)]
+        return (cls, "", x.h.values, x.b.values, (x.b - Z * x.se).values, (x.b + Z * x.se).values)
+    fig_c2 = svg_lines([lps("가계 성향", 10, "hh"), lps("교역조건", 10, "gov")], "시작 기준 연도 (t)", "c2")
+    fig_c3 = svg_lines([lps("가계 성향", 20, "hh"), lps("교역조건", 20, "gov")], "시작 기준 연도 (t)", "c3")
+    crow = []
+    for q in (10, 20):
+        e = ht_ep(q)
+        for k in (1, 3, 6):
+            pass
+        def ep_cell(t, k):
+            x = e[(e.type == t) & (e.dir == "전체") & (e.k == k)].iloc[0]
+            return f"{x['mean']:.2f} <span class='ci'>±{Z * x.se:.2f}</span>"
+        def lp_cell(t, k):
+            x = lpc[(lpc.spec == "에피소드 교차항 LP") & (lpc.type == t) & (lpc.q == q) & (lpc.h == k)].iloc[0]
+            return f"{x.b:.2f} <span class='ci'>±{Z * x.se:.2f}</span>"
+        def diff_cell(k):
+            a_ = lpc[(lpc.spec == "에피소드 교차항 LP") & (lpc.type == "가계 성향") & (lpc.q == q) & (lpc.h == k)].iloc[0]
+            b_ = lpc[(lpc.spec == "에피소드 교차항 LP") & (lpc.type == "교역조건") & (lpc.q == q) & (lpc.h == k)].iloc[0]
+            dif, se_ = a_.b - b_.b, np.sqrt(a_.se ** 2 + b_.se ** 2)
+            return f"{dif:.2f} <span class='ci'>(z {dif / se_:.1f})</span>"
+        for k in (1, 2, 4, 6):
+            crow.append(f"<tr><th>상·하위 {q}% · t+{k}</th><td>{ep_cell('가계 성향', k)}</td><td>{ep_cell('교역조건', k)}</td>"
+                        f"<td>{lp_cell('가계 성향', k)}</td><td>{lp_cell('교역조건', k)}</td><td class='em'>{diff_cell(k)}</td></tr>")
+    ivr = lpc[lpc.spec == "LP-IV 평균 충격"].set_index("h")
+    iv_txt = ", ".join(f"{k}년 뒤 {ivr.loc[k, 'b']:.2f}" for k in (1, 2, 3, 6))
+    iv_F = f"{ivr.loc[1, 'F']:.0f}"
+    nev = {t: int(lpc[(lpc.spec == "에피소드 교차항 LP") & (lpc.type == t) & (lpc.q == 10) & (lpc.h == 0)].n_events.iloc[0])
+           for t in ("가계 성향", "교역조건")}
+
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")].replace("<title>기업저축·가계저축 경상수지 반응</title>", "<title>경상수지 에피소드 지속성</title>")
     body = (HERE / "episode_template.html").read_text()
@@ -204,7 +238,9 @@ def main():
                  "CASES_NONREC": hcases["비침체"], "CASES_HOUSING": hcases["부동산 붕괴"],
                  "NONREC_PANELS": "\n".join(panels), "NONREC_TABLE": "\n".join(ptab), "NONREC_N": nonrec_n,
                  "N_PROF": str(len(pe)), "FIG_S1": fig_s1, "FIG_S2": fig_s2, "T_SECTOR": "\n".join(srows),
-                 "FIG_P1": fig_p1, "FIG_P2": fig_p2, "T_SYM": "\n".join(prow), "TOT_CASES": tot_cases}.items():
+                 "FIG_P1": fig_p1, "FIG_P2": fig_p2, "T_SYM": "\n".join(prow), "TOT_CASES": tot_cases,
+                 "FIG_C1": fig_c1, "FIG_C2": fig_c2, "FIG_C3": fig_c3, "T_CMP": "\n".join(crow), "IV_TXT": iv_txt, "IV_F": iv_F,
+                 "NEV_HH": str(nev["가계 성향"]), "NEV_TOT": str(nev["교역조건"])}.items():
         body = body.replace("{{" + k + "}}", v)
     body = body.replace("<td>nan</td>", "<td>–</td>")
     (OUT / "report.html").write_text(style + body)
