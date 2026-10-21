@@ -178,6 +178,11 @@ def main():
                   f"<td>{pt_('P_ca_46')} / {pt_('H_ca_46')}</td><td>{cell('diff_ca_46')}</td>"
                   f"<td>{pt_('P_prof_46')}</td></tr>")
     tpl = tpl.replace("{{PERSIST_TABLE}}", "\n".join(s4))
+    am = pd.read_csv(OUT / "alt_methods.csv")
+    s5 = [f"<tr><th>{r.method}<div class='ci'>{r.spec}</div></th><td>{r.pair}</td>"
+          f"<td>{r.corp:.2f} <span class='ci'>({r.se_corp:.2f})</span></td><td>{r.hh:.2f} <span class='ci'>({r.se_hh:.2f})</span></td>"
+          f"<td class='em'>{r.diff:.2f} <span class='ci'>({r.se_diff:.2f})</span></td></tr>" for r in am.itertuples()]
+    tpl = tpl.replace("{{ALT_TABLE}}", "\n".join(s5))
     ip = pd.read_csv(OUT / "lp_ipw.csv")
     s3 = []
     for name, grp in ip.groupby("sample", sort=False):
