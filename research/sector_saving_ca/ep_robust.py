@@ -26,6 +26,8 @@ SPECS = {
     "2년 정의": dict(w=2, demean=False, mne=True, covid=False, q=0.10),
     "코로나 제외": dict(w=1, demean=False, mne=True, covid=True, q=0.10),
     "상·하위 20%": dict(w=1, demean=False, mne=True, covid=False, q=0.20),
+    "국가별 상·하위 10%": dict(w=1, demean=False, mne=True, covid=False, q=0.10, by_country=True),
+    "국가별 상·하위 10%, 연도평균 제거": dict(w=1, demean=True, mne=True, covid=False, q=0.10, by_country=True),
 }
 
 
@@ -36,7 +38,7 @@ def panel():
     return d
 
 
-def run(d, w, demean, mne, covid, q):
+def run(d, w, demean, mne, covid, q, by_country=False):
     g = d.groupby("country")
     x = d.copy()
     x["d_hh"] = x.hh_rate - g.hh_rate.shift(w)
@@ -46,9 +48,14 @@ def run(d, w, demean, mne, covid, q):
     vars_ = ["nl_hh", "sv_hh", "inv_hh", "invtot_hh", "nl_corp", "sv_corp", "inv_corp", "invtot_corp"]
     for v in vars_:
         x[v + "_a"] = x[v] - x.groupby("year")[v].transform("mean") if demean else x[v]
-    lo, hi = x.d_hh.quantile(q), x.d_hh.quantile(1 - q)
+    def cut(col):  # 상·하위 q 경계: 전체 국가 통합(기본) 또는 국가별
+        if by_country:
+            gg = x.groupby("country")[col]
+            return gg.transform(lambda s: s.quantile(q)), gg.transform(lambda s: s.quantile(1 - q))
+        return x[col].quantile(q), x[col].quantile(1 - q)
+    lo, hi = cut("d_hh")
     Fh = ((x.d_hh >= hi) | (x.d_hh <= lo)) & (x.gmin >= 0) & ~x.year.isin([2020, 2021])
-    lo, hi = x.tot_w.quantile(q), x.tot_w.quantile(1 - q)
+    lo, hi = cut("tot_w")
     Ft = ((x.tot_w >= hi) & (x.d_prof > 0)) | ((x.tot_w <= lo) & (x.d_prof < 0))
     if not mne:
         Ft &= ~x.country.isin(MNE)
