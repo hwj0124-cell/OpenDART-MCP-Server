@@ -101,11 +101,16 @@ def boot(d, reps, extra=()):
                     p_le0=float(np.mean(draws[:, i] <= 0))) for i, k in enumerate(keys)}
 
 
-def episodes(d, q=0.9, gap=3):
-    """이익 원천 저축이 상위 10%이고 성향 원천은 중위수 이하(그 반대)인 해."""
+def episodes(d, q=0.9, gap=3, strict=False):
+    """이익 원천 저축이 상위 10%이고 성향 원천은 중위수 이하(그 반대)인 해.
+    strict=True: 해당 부문 총저축 변화도 상위 25%여야 함(다른 성분이 상쇄한 경우 제외)."""
     P, Hh = d["x_P"], d["x_H"]
     flags = {"P": (P >= P.quantile(q)) & (Hh <= Hh.median()),
              "H": (Hh >= Hh.quantile(q)) & (P <= P.median())}
+    if strict:
+        dc, dh = P + d["x_R"], Hh + d["x_Y"]
+        flags["P"] &= dc >= dc.quantile(0.75)
+        flags["H"] &= dh >= dh.quantile(0.75)
     ep = {}
     for s, f in flags.items():
         f = f.fillna(False).to_numpy()

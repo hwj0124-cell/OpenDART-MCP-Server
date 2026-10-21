@@ -148,6 +148,14 @@ def main():
     for k, v in figs.items():
         tpl = tpl.replace(k, v)
     tpl = tpl.replace("{{SOURCE_TABLE}}", "\n".join(s2))
+    ip = pd.read_csv(OUT / "lp_ipw.csv")
+    s3 = []
+    for name, grp in ip.groupby("sample", sort=False):
+        gg = grp.set_index("key")
+        cell = lambda k: f'{gg.loc[k, "point"]:.2f} <span class="ci">[{gg.loc[k, "lo90"]:.2f}, {gg.loc[k, "hi90"]:.2f}]</span>'
+        s3.append(f"<tr><th>{name.split(' (')[0]}</th><td>{cell('D_P_ca_short')}</td><td>{cell('D_P_ca_medium')}</td>"
+                  f"<td>{cell('D_H_ca_short')}</td><td>{cell('D_H_ca_medium')}</td><td class='em'>{cell('medium_diff')}</td></tr>")
+    tpl = tpl.replace("{{IPW_TABLE}}", "\n".join(s3))
     tpl = (tpl.replace("{{SAMPLES}}", "\n".join(srows))
            .replace("{{LOO_B}}", f"{lb.min():.2f} ~ {lb.max():.2f}")
            .replace("{{LOO_P}}", f"{lp.min():.2f} ~ {lp.max():.2f}"))
