@@ -26,6 +26,8 @@ SPECS = {
     "상품 교역조건, 국가FE만": (dict(tot="tot_goods_g"), ("country",)),
     "상품·서비스 교역조건, 국가·연도FE": (dict(tot="tot_na_g"), ("country", "year")),
     "상품 교역조건, 개선·상승만, 국가·연도FE": (dict(tot="tot_goods_g", dir="up"), ("country", "year")),
+    "상품 교역조건, 종속변수 1·99% 윈저화": (dict(tot="tot_goods_g", wins=True), ("country", "year")),
+    "상품 교역조건, 아이슬란드 2003 제외": (dict(tot="tot_goods_g", drop_eps=(("ISL", 2003),)), ("country", "year")),
 }
 KEYS = [(s, v, h) for s in VARS for v in VARS[s] for h in range(K + 1)]
 
@@ -42,6 +44,11 @@ def ratios(g):
 def run(name, ch, fe, x):
     P = ed.paths(x, {**el.SPEC, **ch})
     d = el.design(x, P)
+    if ch.get("wins"):  # 종속변수(h기 변화)를 패널 1·99% 분위에서 절단
+        for s, v, h in KEYS:
+            c = f"{v}_h{h}"
+            if h:
+                d[c] = d[c].clip(*d[c].quantile([0.01, 0.99]))
     g, se = [], []
     for s, v, h in KEYS:
         b, V, n = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], fe=fe)
@@ -57,7 +64,7 @@ def run(name, ch, fe, x):
     dd = pd.DataFrame(dict(sector="diff", var="nl_diff", h=range(K + 1), spec=name, ratio=r[ih] - r[ic],
                            lo68=np.nanpercentile(diff, 16, axis=0), hi68=np.nanpercentile(diff, 84, axis=0),
                            lo90=np.nanpercentile(diff, 5, axis=0), hi90=np.nanpercentile(diff, 95, axis=0),
-                           p=2 * np.minimum((diff <= 0).mean(0), (diff >= 0).mean(0))))
+                           p=np.minimum(1, 2 * np.minimum((diff <= 0).mean(0), (diff >= 0).mean(0)))))
     yrs = P["corp"].year.value_counts()
     print(f"== {name}: 가계 {len(P['hh'])}, 교역조건 {len(P['corp'])}건, 교역조건 최다 연도 {yrs.head(3).to_dict()}", flush=True)
     return pd.concat([out, dd], ignore_index=True)
@@ -67,7 +74,13 @@ def main():
     x = ed.er.panel()
     names = sys.argv[1:] or list(SPECS)
     res = pd.concat([run(n, *SPECS[n], x) for n in names], ignore_index=True)
-    res.to_csv(ra.OUT / "ep_event.csv", index=False)
+    path = ra.OUT / "ep_event.csv"
+    if sys.argv[1:] and path.exists():  # 일부 사양만 다시 돌리면 기존 결과에 덮어써 합친다
+        old = pd.read_csv(path)
+        res = pd.concat([old[~old.spec.isin(names)], res], ignore_index=True)
+        res["_o"] = res.spec.map({n: i for i, n in enumerate(SPECS)})
+        res = res.sort_values(["_o"], kind="stable").drop(columns="_o")
+    res.to_csv(path, index=False)
     for n in names:
         r = res[(res.spec == n) & res["var"].isin(["nl_hh", "nl_corp", "nl_diff"])]
         t = r.pivot_table(index="var", columns="h", values="ratio", sort=False).round(2)
