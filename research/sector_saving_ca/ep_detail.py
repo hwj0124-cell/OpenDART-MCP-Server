@@ -12,6 +12,7 @@
   covid         : 시작 연도 제외 목록 (가계·교역조건 공통, 기본 2020–22)
   tot_prof      : 교역조건 사례는 영업잉여 비중이 같은 방향
   balanced      : t+K까지 모두 관측되는 사례만 (시점별 구성 고정)
+  dir           : "both"(기본) = 증가·감소 모두 / "up" = 가계저축률 상승·교역조건 개선만 / "down" = 반대만
   tot           : 교역조건 변화율 변수. "tot_na_g" = 국민계정 수출/수입 디플레이터(상품·서비스, 1970년대~, 기본)
                   "tot_g" = WDI 상품 순교역조건 지수(2006~, 이전 기본)
 값 = 사례 평균[부호·(v_{t+k} − v_{t−1})] / 사례 평균[부호·(nl_t − nl_{t−1})] (시작 = 1). 68% 구간은 사례 부트스트랩 499회.
@@ -58,13 +59,14 @@ def episodes(x, o):
             return gg.transform(lambda s: s.quantile(o["q"])), gg.transform(lambda s: s.quantile(1 - o["q"]))
         return x[col].quantile(o["q"]), x[col].quantile(1 - o["q"])
 
+    up, dn = o.get("dir", "both") in ("both", "up"), o.get("dir", "both") in ("both", "down")
     lo, hi = cut("d_hh")
-    Fh = (x.d_hh >= hi) | (x.d_hh <= lo)
+    Fh = ((x.d_hh >= hi) & up) | ((x.d_hh <= lo) & dn)
     if o["hh_growth"]:
         Fh &= x.gdp_g >= 0
     Fh &= ~x.year.isin(o["covid"])
     lo, hi = cut("tot_x")
-    Ft = (x.tot_x >= hi) | (x.tot_x <= lo)
+    Ft = ((x.tot_x >= hi) & up) | ((x.tot_x <= lo) & dn)
     if o.get("start"):
         Ft &= x.year >= o["start"]
     if o["tot_prof"]:
