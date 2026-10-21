@@ -120,7 +120,7 @@ def fig3():
         line(ax, r[(r.sector == "corp") & (r["var"] == v)], CO, f"Terms-of-trade episodes (N = {n_co})", ls="--")
         finish(ax, ylab)
         ax.set_title(title, loc="left")
-    axes[0].legend(loc="lower left")
+    axes[0].legend(loc="center", bbox_to_anchor=(0.55, 0.47))
     fig.suptitle("Figure 3. Household saving rate and current account responses", x=0.0, ha="left", fontweight="bold", y=1.03)
     fig.tight_layout()
     fig.text(0.0, -0.06, "Notes: (a) Cumulative change in the household gross saving rate per episode, percentage points of gross "
