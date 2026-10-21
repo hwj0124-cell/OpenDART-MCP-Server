@@ -12,6 +12,8 @@
   covid         : 시작 연도 제외 목록 (가계·교역조건 공통, 기본 2020–22)
   tot_prof      : 교역조건 사례는 영업잉여 비중이 같은 방향
   balanced      : t+K까지 모두 관측되는 사례만 (시점별 구성 고정)
+  tot           : 교역조건 변화율 변수. "tot_na_g" = 국민계정 수출/수입 디플레이터(상품·서비스, 1970년대~, 기본)
+                  "tot_g" = WDI 상품 순교역조건 지수(2006~, 이전 기본)
 값 = 사례 평균[부호·(v_{t+k} − v_{t−1})] / 사례 평균[부호·(nl_t − nl_{t−1})] (시작 = 1). 68% 구간은 사례 부트스트랩 499회.
 → output/ep_detail.csv (세부 변수, 기본 사양), output/ep_detail_sens.csv (조건별 순자금운용)
 """
@@ -23,13 +25,16 @@ import run_analysis as ra
 
 K = 6
 BASE = dict(q=0.10, by_country=True, align="same", min_den=0, gap=4, hh_growth=True, covid=(2020, 2021, 2022),
-            tot_prof=True, tot_growth=False, mne=True, balanced=False)
+            tot_prof=True, tot_growth=False, mne=True, balanced=False, tot="tot_na_g")
 # 부문별 세부 변수 (모두 GNI 대비 %)
 VARS = {"hh": ["nl_hh", "sv_hh", "invtot_hh", "inv_hh", "yd_hh", "cons_hh"],
         "corp": ["nl_corp", "sv_corp", "invtot_corp", "inv_corp", "prof", "div_paid", "tax_paid", "int_paid"]}
 SENS = {
     "기본": {},
-    "이전 방식 (순자금운용 부호 정렬·0.3%p 문턱·2020–21만 제외)": dict(align="nl", min_den=0.3, covid=(2020, 2021), covid_tot=False),
+    "교역조건 = WDI 상품지수 (2006~)": dict(tot="tot_g"),
+    "교역조건 = 디플레이터, 2006년 이후만": dict(start=2006),
+    "이전 방식 (순자금운용 부호 정렬·0.3%p 문턱·2020–21만 제외·WDI 상품지수)": dict(
+        align="nl", min_den=0.3, covid=(2020, 2021), covid_tot=False, tot="tot_g"),
     "반대 방향 사례도 포함 (순자금운용 부호 정렬)": dict(align="nl"),
     "모든 사례 충격 부호 정렬": dict(align="shock"),
     "코로나 시기 포함": dict(covid=()),
@@ -45,7 +50,7 @@ SENS = {
 
 def episodes(x, o):
     g = x.groupby("country")
-    x = x.assign(d_hh=x.hh_rate - g.hh_rate.shift(1), d_prof=x.prof - g.prof.shift(1))
+    x = x.assign(d_hh=x.hh_rate - g.hh_rate.shift(1), d_prof=x.prof - g.prof.shift(1), tot_x=x[o["tot"]])
 
     def cut(col):
         if o["by_country"]:
@@ -58,10 +63,12 @@ def episodes(x, o):
     if o["hh_growth"]:
         Fh &= x.gdp_g >= 0
     Fh &= ~x.year.isin(o["covid"])
-    lo, hi = cut("tot_g")
-    Ft = (x.tot_g >= hi) | (x.tot_g <= lo)
+    lo, hi = cut("tot_x")
+    Ft = (x.tot_x >= hi) | (x.tot_x <= lo)
+    if o.get("start"):
+        Ft &= x.year >= o["start"]
     if o["tot_prof"]:
-        Ft &= np.sign(x.d_prof) == np.sign(x.tot_g)
+        Ft &= np.sign(x.d_prof) == np.sign(x.tot_x)
     if o["tot_growth"]:
         Ft &= x.gdp_g >= 0
     if o.get("covid_tot", True):
@@ -69,7 +76,7 @@ def episodes(x, o):
     if not o["mne"]:
         Ft &= ~x.country.isin(er.MNE)
     out = {}
-    for s, F, shock in (("hh", Fh, "d_hh"), ("corp", Ft, "tot_g")):
+    for s, F, shock in (("hh", Fh, "d_hh"), ("corp", Ft, "tot_x")):
         last, eps = {}, []
         sel = x[F.fillna(False)]
         for c, y, sh in zip(sel.country, sel.year, sel[shock]):
@@ -108,7 +115,7 @@ def paths(x, o):
                 for k in range(-1, K + 1):
                     r[f"src_{k}"] = sg * (xp.hh_rate.get((c, y + k), np.nan) - hb)
             else:
-                lv = np.exp(np.log1p(xp.tot_g.loc[c] / 100).cumsum())
+                lv = np.exp(np.log1p(xp[o["tot"]].loc[c] / 100).cumsum())
                 for k in range(-1, K + 1):
                     r[f"src_{k}"] = sg * 100 * (lv.get(y + k, np.nan) / lv.get(y - 1, np.nan) - 1)
             rows.append(r)
@@ -128,6 +135,29 @@ def summarize(E, s, v, rng, norm=True):
     return out
 
 
+def lpiv(x, P):
+    """에피소드 경로 = 패널 LP-IV 확인.
+    도구 z_it = 에피소드 해의 부호(±1), 나머지 0. 내생변수 = nl_t − nl_{t−1}, 종속변수 = nl_{t+h} − nl_{t−1}.
+    (a) 상수 없음 → 사례 평균 비율과 정확히 같음  (b) 상수 포함  (c) 국가·연도 고정효과(+1단계 F)"""
+    import lp_tools as lt
+    out = []
+    for s, E in P.items():
+        z = E.set_index(["country", "year"]).sign
+        d = x[["country", "year", f"nl_{s}"]].copy()
+        g = d.groupby("country")[f"nl_{s}"]
+        d["z"] = [z.get((c, y), 0.0) for c, y in zip(d.country, d.year)]
+        d["dx"] = g.shift(0) - g.shift(1)
+        for h in range(K + 1):
+            d["dy"] = g.shift(-h) - g.shift(1)
+            q = d.dropna(subset=["dx", "dy"])
+            a = (q.z * q.dy).sum() / (q.z * q.dx).sum()
+            zc = q.z - q.z.mean()
+            b = (zc * q.dy).sum() / (zc * q.dx).sum()
+            c, se, nobs, F = lt.iv(q, "dy", "dx", "z", [])
+            out.append(dict(sector=s, h=h, no_const=a, const=b, twfe=c, twfe_se=se, F=F, nobs=nobs))
+    return pd.DataFrame(out)
+
+
 def main():
     x = er.panel()
     rng = np.random.default_rng(0)
@@ -139,6 +169,9 @@ def main():
         rows += summarize(E, s, "src", rng, norm=False)
         E.to_csv(ra.OUT / f"ep_detail_cases_{s}.csv", index=False)
     det = pd.DataFrame(rows)
+    iv = lpiv(x, P)
+    iv.to_csv(ra.OUT / "ep_lpiv.csv", index=False)
+    print(iv.round(2).to_string(index=False))
     det.to_csv(ra.OUT / "ep_detail.csv", index=False)
     sens = []
     for name, ch in SENS.items():

@@ -71,12 +71,12 @@ svg .line.s2{stroke:#d1701f;fill:none;stroke-dasharray:6 4} svg .band.s2{fill:#d
 note = ("값 = 사례 평균[부호 맞춘 v<sub>t+k</sub> − v<sub>t−1</sub>] / 사례 평균[부호 맞춘 시작 시점 순자금운용 변화] (시작 = 1). "
         "모두 GNI 대비 %. 투자 등 = 저축 − 순자금운용 (고정투자 + 재고투자 + 비생산자산 − 순자본이전 수취). 음영 68% 구간(사례 부트스트랩 499회).")
 crit = ("기준: 1년 변화, 국가별 상·하위 10%, 연도평균 미제거, 전체 국가, 시작 시점 순자금운용이 충격과 같은 방향인 사례만, "
-        "같은 나라 4년 내 중복 제외, 시작 2020–22 제외. 가계 성향: 가계저축률 변화, 그해 성장률 ≥ 0. 교역조건: 교역조건 변화, 영업잉여 비중 같은 방향.")
+        "같은 나라 4년 내 중복 제외, 시작 2020–22 제외. 가계 성향: 가계저축률 변화, 그해 성장률 ≥ 0. 교역조건: 교역조건(수출/수입 디플레이터) 변화, 영업잉여 비중 같은 방향.")
 html = f"""<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:900px">
 <section id="A"><h2 style="font-size:18px">세부 변수 반응 (모든 패널 같은 세로축)</h2>{grid(cells)}
 <p class="ci" style="font-size:12px">{crit} {note}</p></section>
 <section id="S"><h2 style="font-size:18px">충격 변수 자체의 경로 (원단위)</h2>{grid(src)}
-<p class="ci" style="font-size:12px">충격 방향으로 부호를 맞춘 평균. 교역조건 자료(WDI)는 2006–2024년.</p></section>
+<p class="ci" style="font-size:12px">충격 방향으로 부호를 맞춘 평균. 교역조건 = WDI 국민계정 수출 디플레이터 / 수입 디플레이터(상품·서비스).</p></section>
 <section id="B"><h2 style="font-size:18px">조건별 민감도: 자기 부문 순자금운용 (같은 세로축)</h2>{grid(sens)}
 <p class="ci" style="font-size:12px">각 패널은 기본 기준에서 조건 하나만 바꾼 것. {note}</p></section>
 </main></body></html>"""

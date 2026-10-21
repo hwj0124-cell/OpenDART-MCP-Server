@@ -12,7 +12,8 @@ Table 14A 추출본에는 GDP(B1GQ)가 없어 국민총소득(S1 B5G)을 분모�
   tax_paid  비금융법인 소득세 등(D5) 지급   int_paid 비금융법인 이자 지급(D41)
   inv_corp  비금융법인 총고정자본형성(P51G)  inv_hh  가계   inv_gov 정부
   cons_hh   가계 최종소비(P3)          yd_hh 가계 총가처분소득(B6G)   sv_nat 국민총저축(S1 B8G)
-  gdp_g     실질 GDP 성장률(WDI, 없으면 명목 GNI 증가율)   tot_g 교역조건 변화율(WDI)
+  gdp_g     실질 GDP 성장률(WDI, 없으면 명목 GNI 증가율)   tot_g 교역조건 변화율(WDI 상품 순교역조건, 2006~)
+  tot_na_g  교역조건 변화율(WDI 국민계정 수출 디플레이터/수입 디플레이터, 상품·서비스, 1970년대~)
 """
 from pathlib import Path
 
@@ -99,6 +100,21 @@ def pick(df, sectors, trans, entries):
     return d.groupby(["REF_AREA", "year"])["OBS_VALUE"].first()
 
 
+def tot_na(folder=RAW / "wb"):
+    """WDI 국민계정 수출입(경상·불변 자국통화) → 수출 디플레이터 / 수입 디플레이터 변화율(%).
+    상품·서비스 포함, 1970년대부터. 반환: country, year, tot_na_g"""
+    def read(code):
+        f = next(Path(folder).glob(f"API_{code}_DS2_*.csv"))
+        w = pd.read_csv(f, skiprows=4).drop(columns=["Country Name", "Indicator Name", "Indicator Code"])
+        w = w.melt(id_vars="Country Code", var_name="year", value_name=code).rename(columns={"Country Code": "country"})
+        w = w[w.year.str.isdigit()].astype({"year": int})
+        return w.set_index(["country", "year"])[code]
+    w = pd.concat([read(c) for c in ("NE.EXP.GNFS.CN", "NE.EXP.GNFS.KN", "NE.IMP.GNFS.CN", "NE.IMP.GNFS.KN")], axis=1)
+    tot = (w["NE.EXP.GNFS.CN"] / w["NE.EXP.GNFS.KN"]) / (w["NE.IMP.GNFS.CN"] / w["NE.IMP.GNFS.KN"])
+    g = 100 * tot.groupby(level=0).pct_change(fill_method=None)
+    return g.rename("tot_na_g").reset_index()
+
+
 def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
     raw = load_raw(nonfin)
     cols = {name: pick(raw, s, t, e) for name, s, t, e in SPEC}
@@ -128,6 +144,8 @@ def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
                         on=["country", "year"], how="left")
         out["gdp_g"] = out["real_gdp_growth"].fillna(out["gdp_g"])
         out = out.drop(columns="real_gdp_growth")
+    if (RAW / "wb").exists():
+        out = out.merge(tot_na(), on=["country", "year"], how="left")
     return out
 
 
