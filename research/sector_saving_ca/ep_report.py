@@ -20,7 +20,7 @@ from make_report import HERE, OUT, svg_lines
 K = ed.K
 CH = dict(tot=fc.TOT, hh_def="cons", base="nl")
 HHV = ["sv_hh", "nl_hh", "yd_hh", "cons_hh"]
-COV = ["sv_corp", "nl_corp", "prof", "div_paid", "inv_corp"]
+COV = ["sv_corp", "nl_corp", "prof", "div_paid", "div_net", "inv_corp"]
 KEYS = [("hh", v, h) for v in HHV for h in range(K + 1)] + [("corp", v, h) for v in COV for h in range(K + 1)]
 DIFFS = [("sv", "sv_hh", "sv_corp"), ("nl", "nl_hh", "nl_corp")]
 XL = "h년 후 (t−1 = 0, t = 시작)"
@@ -36,6 +36,7 @@ def stats(d):
 
 def prepare():
     x = ed.er.panel()
+    x["div_net"] = x.div_paid - x.div_recv_corp  # 순배당: 기업 간 배당(지주회사 등)을 상쇄
     fc.VARS["hh"], fc.VARS["corp"] = HHV, COV
     P = ed.paths(x, {**el.SPEC, **CH})
     d = fc.design(x, P)
@@ -81,9 +82,9 @@ def render(r):
     H, C = f"가계(소비행태 변화, {n_hh}건)", f"기업(교역조건, {n_corp}건)"
     f1 = [fig("(a) 저축", [ser("hh", "sv_hh", "s1"), ser("corp", "sv_corp", "s2")], [("s1", H), ("s2", C)]),
           fig("(b) 자금잉여(저축 − 투자)", [ser("hh", "nl_hh", "s1"), ser("corp", "nl_corp", "s2")], [("s1", H), ("s2", C)])]
-    f2 = [fig("(a) 기업: 영업잉여·배당·고정투자", [ser("corp", "prof", "s1", False), ser("corp", "div_paid", "s2", False),
+    f2 = [fig("(a) 기업: 영업잉여·순배당·고정투자", [ser("corp", "prof", "s1", False), ser("corp", "div_net", "s2", False),
                                             ser("corp", "inv_corp", "s3", False)],
-              [("s1", "영업잉여"), ("s2", "배당 지급"), ("s3", "고정투자")]),
+              [("s1", "영업잉여"), ("s2", "순배당 지급(지급 − 수취)"), ("s3", "고정투자")]),
           fig("(b) 가계: 가처분소득·소비", [ser("hh", "yd_hh", "s1", False), ser("hh", "cons_hh", "s2", False)],
               [("s1", "가처분소득"), ("s2", "소비")])]
     style = (HERE / "report_template.html").read_text()
