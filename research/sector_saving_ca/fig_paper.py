@@ -165,7 +165,9 @@ def fig4_diagnostics():
             ax.plot(q.h, q.ratio, color=col, ls=ls, lw=1.5, marker="o", ms=2.8, label=lab)
         finish(ax, "Response (impact own-sector\nsaving–investment balance = 1)", h0=0)
         ax.set_title(title, loc="left")
-        ax.legend(loc="best", fontsize=7)
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, hi + 0.45 * (hi - lo))  # 범례 자리 확보
+        ax.legend(loc="upper left", fontsize=7, ncol=1)
     fig.suptitle("Figure 4. Diagnostics: components of sectoral saving–investment balances", x=0.0, ha="left",
                  fontweight="bold", y=1.01)
     fig.tight_layout()
