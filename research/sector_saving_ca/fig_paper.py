@@ -65,10 +65,10 @@ def finish(ax, ylab, h0=None):
     ax.set_ylabel(ylab)
 
 
-def save(fig, name):
+def save(fig, name, sfx=None):
     DST.mkdir(exist_ok=True)
     for ext in ("png", "pdf"):
-        fig.savefig(DST / f"{name}{SFX}.{ext}", bbox_inches="tight")
+        fig.savefig(DST / f"{name}{SFX if sfx is None else sfx}.{ext}", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -176,8 +176,52 @@ def fig1_variants():
         save(fig, name)
 
 
+def fig_clean():
+    """Clean-control (LP-DiD) versions of Figures 1 and 2 from output/ep_clean_controls.csv."""
+    p = OUT / "ep_clean_controls.csv"
+    if not p.exists():
+        return
+    r = pd.read_csv(p)
+    band = "lo68" in r
+    note_cc = (" Clean controls: for each horizon $h$, control observations are restricted to country-years with no large shock "
+               "of the same type (top/bottom decile of the episode-defining variable) in the same country during $[t-3, t+h]$.")
+    q = lambda s, v: r[(r.sector == s) & (r["var"] == v)].assign(**({} if band else {"lo68": np.nan, "hi68": np.nan}))
+    fig, ax = plt.subplots(figsize=(5.2, 3.4))
+    line(ax, q("hh", "nl_hh"), HH, LAB_HH, band=band, ref=False)
+    line(ax, q("corp", "nl_corp"), CO, LAB_CO, ls="--", band=band, ref=False)
+    finish(ax, "Saving–investment balance\n(impact response = 1)", h0=0)
+    ax.legend(loc="lower left")
+    ax.set_title("Figure 1 (clean controls). Persistence of sectoral saving–investment balances", loc="left", fontweight="bold")
+    fig.text(0.0, -0.2, "Notes: " + ("Shaded areas are 68 percent confidence bands (country-cluster bootstrap, 499 replications). "
+             if band else "Point estimates. ") + "Responses relative to year $-1$, normalized by the impact response." + note_cc
+             + " " + SPEC, fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+    save(fig, "fig1_si_persistence_clean", sfx="")
+    g = lambda v: q("corp", v).sort_values("h").ratio.values[:HMAX + 1]
+    nl = g("nl_corp")
+    comps = [("Gross operating surplus", g("prof"), "#1f3b73"), ("Net dividends paid (−)", -g("div_net"), "#7a6aa8"),
+             ("Gross capital formation (−)", -g("gcf_corp"), "#b5541c")]
+    comps.append(("Other", nl - sum(v for _, v, _ in comps), "#a6a6a6"))
+    hs = np.arange(len(nl))
+    fig, ax = plt.subplots(figsize=(5.2, 3.4))
+    up, dn = np.zeros(len(hs)), np.zeros(len(hs))
+    for lab, v, col in comps:
+        ax.bar(hs, v, bottom=np.where(v >= 0, up, dn), width=0.6, color=col, alpha=0.85, label=lab, edgecolor="white", linewidth=0.4)
+        up, dn = up + np.clip(v, 0, None), dn + np.clip(v, None, 0)
+    ax.plot(hs, nl, color="black", lw=1.5, marker="o", ms=3.5, mfc="white", label="Saving–investment balance")
+    finish(ax, "Contribution\n(impact saving–investment balance = 1)", h0=0)
+    ax.set_xlim(-0.5, HMAX + 0.5)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, columnspacing=1.2)
+    ax.set_title("Figure 2 (clean controls). Decomposition of the corporate saving–investment balance", loc="left", fontweight="bold")
+    fig.text(0.0, -0.36, "Notes: Point estimates for terms-of-trade episodes; bars sum to the corporate saving–investment balance "
+             "(gross operating surplus − net dividends paid − gross capital formation + other)." + note_cc + " " + SPEC,
+             fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+    save(fig, "fig2_corporate_decomposition_clean", sfx="")
+
+
 if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
     fig1_variants()
+    if LAGS:
+        fig_clean()
