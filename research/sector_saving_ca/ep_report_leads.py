@@ -11,7 +11,10 @@ import ep_report as rp
 import lp_tools as lt
 from make_report import OUT
 
-LEADS = (3, 2)
+import sys
+
+LAGS = "--lags" in sys.argv
+LEADS = (5, 4, 3, 2) if LAGS else (3, 2)  # 시차 통제판: −3·−2는 정의상 0이라 −5·−4로 사전 움직임 점검
 HS = [-k for k in LEADS] + list(range(rp.K + 1))
 KEYS = [(s, h) for s in ("hh", "corp") for h in HS]
 
@@ -23,14 +26,16 @@ def col(s, h):
 def stats(d):
     out = []
     for s in ("hh", "corp"):
-        g0 = lt.ols(d, col(s, 0), [f"z_{s}"], [], se=False, w=f"w_{s}")[0][0]
-        out += [lt.ols(d, col(s, h), [f"z_{s}"], [], se=False, w=f"w_{s}")[0][0] / g0 for h in HS]
+        c = rp.ctrl(s)
+        g0 = lt.ols(d, col(s, 0), [f"z_{s}"], c, se=False, w=f"w_{s}")[0][0]
+        out += [lt.ols(d, col(s, h), [f"z_{s}"], c, se=False, w=f"w_{s}")[0][0] / g0 for h in HS]
     return np.array(out)
 
 
 def main():
     rp.FGLS = rp.WSV = True
     rp.NORM = "nl"
+    rp.LAGS = LAGS
     rp.HHV, rp.COV = ["nl_hh"], ["nl_corp"]
     P, d = rp.prepare()
     for s in ("hh", "corp"):
@@ -42,7 +47,7 @@ def main():
     r = pd.DataFrame(KEYS, columns=["sector", "h"]).assign(
         var=lambda q: "nl_" + q.sector, ratio=pt, lo68=np.nanpercentile(bs, 16, axis=0), hi68=np.nanpercentile(bs, 84, axis=0),
         n_hh=len(P["hh"]), n_corp=len(P["corp"]))
-    r.to_csv(OUT / "ep_report_leads.csv", index=False)
+    r.to_csv(OUT / f"ep_report_leads{'_lags' if LAGS else ''}.csv", index=False)
     print(r.pivot_table(index="sector", columns="h", values="ratio").round(2).to_string())
 
 

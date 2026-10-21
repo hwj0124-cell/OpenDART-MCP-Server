@@ -142,12 +142,13 @@ def fig3():
 
 def fig1_variants():
     """그림 1 두 가지: 사전 시점 포함(h = −3…6, h = −1 기준 0) / h = 0부터."""
-    p = OUT / "ep_report_leads.csv"
+    p = OUT / f"ep_report_leads{SFX}.csv"
     if not p.exists():
         return
     r = pd.read_csv(p)
     n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
-    for name, h0 in (("fig1_si_persistence_leads", -3), ("fig1_si_persistence_h0", 0)):
+    hmin = int(r.h.min())
+    for name, h0 in (("fig1_si_persistence_leads", hmin), ("fig1_si_persistence_h0", 0)):
         fig, ax = plt.subplots(figsize=(5.2, 3.4))
         for s, col, lab, ls in (("hh", HH, f"{LAB_HH} (N = {n_hh})", "-"), ("corp", CO, f"{LAB_CO} (N = {n_co})", "--")):
             q = r[r.sector == s]
@@ -159,8 +160,11 @@ def fig1_variants():
             ax.axvspan(h0 - 0.4, -0.5, color="0.93", lw=0, zorder=0)
         ax.legend(loc="lower left")
         ax.set_title("Figure 1. Persistence of sectoral saving–investment balances", loc="left", fontweight="bold")
-        pre = (" Years $-3$ and $-2$ are pre-episode responses ($y_{t+h} - y_{t-1}$, shaded area); year $-1$ is the reference year."
+        pre = (f" Years ${hmin}$ to $-2$ are pre-episode responses ($y_{{t+h}} - y_{{t-1}}$, shaded area); year $-1$ is the reference year."
                if h0 < 0 else " Responses are measured relative to year $-1$.")
+        if h0 < 0 and LAGS:
+            pre += (" With two lags of the own-sector change controlled for, years $-3$ and $-2$ are zero by construction; "
+                    "years $-5$ and $-4$ test for remaining pre-episode movement.")
         fig.text(0.0, -0.2, "Notes: Cumulative responses of the own-sector saving–investment balance (national-accounts net lending, "
                  "percent of GDP), normalized by the impact response. Shaded bands are 68 percent confidence bands from a "
                  "country-cluster bootstrap (499 replications)." + pre + " " + SPEC, fontsize=7, wrap=True, va="top",
@@ -192,5 +196,4 @@ if __name__ == "__main__":
     fig2()
     fig3()
     fig4()
-    if not LAGS:  # 시차 통제판에서는 사전 시점 반응이 정의상 0이라 그리지 않음
-        fig1_variants()
+    fig1_variants()
