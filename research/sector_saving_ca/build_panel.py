@@ -14,6 +14,7 @@ Table 14A 추출본에는 GDP(B1GQ)가 없어 국민총소득(S1 B5G)을 분모�
   cons_hh   가계 최종소비(P3)          yd_hh 가계 총가처분소득(B6G)   sv_nat 국민총저축(S1 B8G)
   gdp_g     실질 GDP 성장률(WDI, 없으면 명목 GNI 증가율)   tot_g 교역조건 변화율(WDI 상품 순교역조건, 2006~)
   tot_na_g  교역조건 변화율(WDI 국민계정 수출 디플레이터/수입 디플레이터, 상품·서비스, 1970년대~)
+  tot_goods_g 교역조건 변화율(OECD 국민계정 상품 수출 디플레이터/상품 수입 디플레이터, 1970~)
 """
 from pathlib import Path
 
@@ -115,6 +116,17 @@ def tot_na(folder=RAW / "wb"):
     return g.rename("tot_na_g").reset_index()
 
 
+def tot_goods(path=RAW / "oecd" / "goods_trade.csv"):
+    """OECD 국민계정 Table 1(지출 측면) 상품 수출(P61)·수입(P71), 경상(V)·연쇄 실질(L) 자국통화
+    → 상품 수출 디플레이터 / 상품 수입 디플레이터 변화율(%). 반환: country, year, tot_goods_g"""
+    d = pd.read_csv(path, usecols=["REF_AREA", "TRANSACTION", "PRICE_BASE", "TIME_PERIOD", "OBS_VALUE"])
+    w = d.pivot_table(index=["REF_AREA", "TIME_PERIOD"], columns=["TRANSACTION", "PRICE_BASE"], values="OBS_VALUE")
+    tot = (w[("P61", "V")] / w[("P61", "L")]) / (w[("P71", "V")] / w[("P71", "L")])
+    g = 100 * tot.groupby(level=0).pct_change(fill_method=None)
+    g.index.names = ["country", "year"]
+    return g.rename("tot_goods_g").reset_index()
+
+
 def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
     raw = load_raw(nonfin)
     cols = {name: pick(raw, s, t, e) for name, s, t, e in SPEC}
@@ -146,6 +158,8 @@ def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
         out = out.drop(columns="real_gdp_growth")
     if (RAW / "wb").exists():
         out = out.merge(tot_na(), on=["country", "year"], how="left")
+    if (RAW / "oecd" / "goods_trade.csv").exists():
+        out = out.merge(tot_goods(), on=["country", "year"], how="left")
     return out
 
 
