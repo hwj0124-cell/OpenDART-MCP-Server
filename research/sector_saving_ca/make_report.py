@@ -10,14 +10,14 @@ OUT = HERE / "output"
 Z = 1.645
 
 
-def svg_lines(series, xlabel, ylabel, w=640, h=280, xs=None):
-    """series: [(class, label, x, y, lo, hi)] → 반응형 SVG 문자열."""
+def svg_lines(series, xlabel, ylabel, w=640, h=280, xs=None, ylim=None):
+    """series: [(class, label, x, y, lo, hi)] → 반응형 SVG 문자열. ylim=(lo, hi)이면 세로축 고정."""
     ml, mr, mt, mb = 52, 16, 16, 44
     allx = np.concatenate([np.asarray(s[2], float) for s in series])
     ally = np.concatenate([np.concatenate([np.asarray(s[i], float) for i in (3, 4, 5) if s[i] is not None])
                            for s in series])
     x0, x1 = allx.min(), allx.max()
-    lo, hi = min(0, np.nanmin(ally)), max(0, np.nanmax(ally))
+    lo, hi = ylim if ylim is not None else (min(0, np.nanmin(ally)), max(0, np.nanmax(ally)))
     step = [0.1, 0.2, 0.25, 0.5, 1, 2][np.searchsorted([0.6, 1.2, 1.6, 3, 6], hi - lo)]
     lo, hi = np.floor(lo / step) * step, np.ceil(hi / step) * step
     X = lambda v: ml + (v - x0) / (x1 - x0) * (w - ml - mr)
