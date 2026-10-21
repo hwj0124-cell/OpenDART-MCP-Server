@@ -91,7 +91,11 @@ def boot(d, reps, extra=()):
     d = d[list(dict.fromkeys(need))]
     keys = list(contrasts(d, extra))
     point = contrasts(d, extra)
-    draws = cluster_bootstrap(d, lambda bd: [contrasts(bd, extra)[k] for k in keys], reps=reps)
+    def stat(bd):
+        c = contrasts(bd, extra)
+        return [c[k] for k in keys]
+
+    draws = cluster_bootstrap(d, stat, reps=reps)
     return {k: dict(point=point[k], lo90=float(np.nanpercentile(draws[:, i], 5)),
                     hi90=float(np.nanpercentile(draws[:, i], 95)),
                     p_le0=float(np.mean(draws[:, i] <= 0))) for i, k in enumerate(keys)}

@@ -124,7 +124,30 @@ def main():
     loo = pd.read_csv(OUT / "loo.csv")
     lb, lp = loo[loo.set == "baseline"].impact_dd, loo[loo.set == "profit_propensity"].impact_dd
 
+    # 원천별 비교
+    si = pd.read_csv(OUT / "source_irf.csv")
+    def src(sample_prefix, y):
+        r = si[si["sample"].str.startswith(sample_prefix) & (si.outcome == y)]
+        return [("corp", "", r.h, r.b_P, r.b_P - Z * r.se_P, r.b_P + Z * r.se_P),
+                ("hh", "", r.h, r.b_H, r.b_H - Z * r.se_H, r.b_H + Z * r.se_H)]
+    figs = {f"{{{{SRC_{k}}}}}": svg_lines(src(pref, y), "충격 후 연수", y)
+            for k, pref, y in [("CA_W", "MNE", "ca"), ("SN_W", "MNE", "sv_nat"),
+                               ("CA_C", "선진", "ca"), ("SN_C", "선진", "sv_nat")]}
+    sc2 = pd.read_csv(OUT / "source_contrasts.csv")
+    s2 = []
+    for _, r in sc2.iterrows():
+        label = r["sample"].split(" (")[0]
+        s2.append(f"<tr><th>{label}</th><td>{int(r.countries)}</td>"
+                  f"<td>{r.ca_P_short:.2f} → {r.ca_P_medium:.2f}</td>"
+                  f"<td>{r.ca_H_short:.2f} → {r.ca_H_medium:.2f}</td>"
+                  f"<td class='em'>{g(r, 'ca_medium_diff')}</td>"
+                  f"<td>{r.ptc_P:.2f} / {r.ptc_H:.2f}</td>"
+                  f"<td class='em'>{g(r, 'ptc_diff')}</td></tr>")
+
     tpl = (HERE / "report_template.html").read_text()
+    for k, v in figs.items():
+        tpl = tpl.replace(k, v)
+    tpl = tpl.replace("{{SOURCE_TABLE}}", "\n".join(s2))
     tpl = (tpl.replace("{{SAMPLES}}", "\n".join(srows))
            .replace("{{LOO_B}}", f"{lb.min():.2f} ~ {lb.max():.2f}")
            .replace("{{LOO_P}}", f"{lp.min():.2f} ~ {lp.max():.2f}"))
