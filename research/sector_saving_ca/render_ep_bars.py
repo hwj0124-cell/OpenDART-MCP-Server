@@ -15,13 +15,14 @@ import ep_report as rp
 import lp_tools as lt
 from make_report import HERE, OUT, svg_lines
 
-HMAX = int(sys.argv[1]) if len(sys.argv) > 1 else 6
+HMAX = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 6
 K = rp.K
 COL = {"prof": "#2459a8", "div": "#8e6cc0", "inv": "#d1701f", "oth": "#a3a3a3"}
 XL = "h년 후 (t−1 = 0, t = 시작)"
 
 
 def estimate():
+    rp.LAGS = "--lags" in sys.argv
     rp.FGLS = rp.WSV = True
     rp.NORM = "nl"
     rp.HHV, rp.COV = ["nl_hh", "sv_hh"], ["nl_corp", "sv_corp", "prof", "div_net", "gcf_corp"]
@@ -29,13 +30,13 @@ def estimate():
     rows = []
     for s, vs in (("hh", rp.HHV), ("corp", rp.COV)):
         w = f"w_{s}"
-        g0 = lt.ols(d, f"nl_{s}_h0", [f"z_{s}"], [], se=False, w=w)[0][0]
+        g0 = lt.ols(d, f"nl_{s}_h0", [f"z_{s}"], rp.ctrl(s), se=False, w=w)[0][0]
         for v in vs:
             for h in range(K + 1):
                 rows.append(dict(sector=s, var=v, h=h, n=len(P[s]),
-                                 ratio=lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], se=False, w=w)[0][0] / g0))
+                                 ratio=lt.ols(d, f"{v}_h{h}", [f"z_{s}"], rp.ctrl(s), se=False, w=w)[0][0] / g0))
     r = pd.DataFrame(rows)
-    r.to_csv(OUT / "ep_report_bars.csv", index=False)
+    r.to_csv(OUT / f"ep_report_bars{'_lags' if rp.LAGS else ''}.csv", index=False)
     return r
 
 
@@ -79,7 +80,8 @@ def bars(r, title, w=640, h=360):
 def render(r):
     n_hh, n_corp = int(r[r.sector == "hh"].n.iloc[0]), int(r[r.sector == "corp"].n.iloc[0])
     # 왼쪽 패널 68% 구간: 같은 사양의 부트스트랩 결과(ep_report.py --fgls --nl)
-    ci = pd.read_csv(OUT / "ep_report_fgls_nl.csv")
+    sfx = "_lags" if "--lags" in sys.argv else ""
+    ci = pd.read_csv(OUT / f"ep_report_fgls_nl{sfx}.csv")
     ci = ci[ci.kind == "resp"]
     q = lambda s, v: ci[(ci.sector == s) & (ci["var"] == v) & (ci.h <= HMAX)].sort_values("h")
     for s, v in (("hh", "nl_hh"), ("corp", "nl_corp")):  # 점추정치가 그림 오른쪽과 같은 사양인지 확인
@@ -120,19 +122,19 @@ svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg
             + sec("A", "그림 1. 원천별 저축−투자 차(S−I)의 지속성", left, note_a)
             + sec("B", "그림 2. 기업 저축−투자 차의 해소 경로", right, note_b)
             + '</main></body></html>')
-    (OUT / "ep_report_bars.html").write_text(html)
+    (OUT / f"ep_report_bars{sfx}.html").write_text(html)
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
         pg = b.new_page(viewport={"width": 700, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1200)
-        pg.locator("#A").screenshot(path=str(OUT / "ep_report_bars_a.png"))
-        pg.locator("#B").screenshot(path=str(OUT / "ep_report_bars_b.png"))
+        pg.locator("#A").screenshot(path=str(OUT / f"ep_report_bars{sfx}_a.png"))
+        pg.locator("#B").screenshot(path=str(OUT / f"ep_report_bars{sfx}_b.png"))
         b.close()
 
 
 if __name__ == "__main__":
-    r = pd.read_csv(OUT / "ep_report_bars.csv") if "--render" in sys.argv else estimate()
+    r = pd.read_csv(OUT / f"ep_report_bars{'_lags' if '--lags' in sys.argv else ''}.csv") if "--render" in sys.argv else estimate()
     render(r)
     c = r[r.sector == "corp"].pivot_table(index="var", columns="h", values="ratio").round(2)
     c.loc["기타"] = (c.loc["nl_corp"] - c.loc["prof"] + c.loc["div_net"] + c.loc["gcf_corp"]).round(2)

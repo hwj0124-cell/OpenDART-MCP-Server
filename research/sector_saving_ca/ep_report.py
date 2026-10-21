@@ -28,11 +28,16 @@ WSV = False  # True: 가중 추정(--wsv: 국가별 자기 부문 Δ저축 분�
 FGLS = False
 NORM = "sv"  # 정규화·가중치 기준 변수: "sv"(저축) 또는 "nl"(저축−투자 차, --nl)
 HMAX = 6     # 그림에 보이는 마지막 시점(--h5 → 5)
+LAGS = False  # True(--lags): 자기 부문 S−I 변화의 사건 전 2개 시차(Δy_{t−1}, Δy_{t−2})를 모든 식에 통제
+
+
+def ctrl(s):
+    return [f"dl1_{s}", f"dl2_{s}"] if LAGS else []
 TAG = ""
 
 
 def stats(d):
-    g = {k: lt.ols(d, f"{k[1]}_h{k[2]}", [f"z_{k[0]}"], [], se=False, w=f"w_{k[0]}" if WSV else None)[0][0] for k in KEYS}
+    g = {k: lt.ols(d, f"{k[1]}_h{k[2]}", [f"z_{k[0]}"], ctrl(k[0]), se=False, w=f"w_{k[0]}" if WSV else None)[0][0] for k in KEYS}
     r = {k: g[k] / g[(k[0], f"{NORM}_{k[0]}", 0)] for k in KEYS}
     return np.array([r[k] for k in KEYS] + [r[("hh", a, h)] - r[("corp", b, h)] for _, a, b in DIFFS for h in range(K + 1)])
 
@@ -44,10 +49,12 @@ def prepare():
     P = ed.paths(x, {**el.SPEC, **CH})
     d = fc.design(x, P)
     for s in ("hh", "corp"):
+        gd = d.groupby("country")[f"nl_{s}"].diff().groupby(d.country)
+        d[f"dl1_{s}"], d[f"dl2_{s}"] = gd.shift(1), gd.shift(2)
         if FGLS:  # 2단계 가중최소제곱: 시작 연도 자기 부문 저축 식(무가중)의 잔차 → 국가별 분산의 역수, 부문 내 모든 식에 공통
             y0 = f"{NORM}_{s}_h0"
-            q = d[[y0, f"z_{s}", "country", "year"]].dropna()
-            X = np.hstack([q[[f"z_{s}"]].to_numpy(float), lt._fe_matrix(q, ("country", "year"))])
+            q = d[[y0, f"z_{s}", *ctrl(s), "country", "year"]].dropna()
+            X = np.hstack([q[[f"z_{s}", *ctrl(s)]].to_numpy(float), lt._fe_matrix(q, ("country", "year"))])
             b = np.linalg.lstsq(X, q[y0].to_numpy(float), rcond=None)[0]
             e = pd.Series(q[y0].to_numpy(float) - X @ b, index=q.index)
             d[f"w_{s}"] = 1 / d.country.map(e.groupby(q.country).var())
@@ -113,6 +120,8 @@ svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg
 svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg .dot.s3{fill:#3b8a4f}
 .sw.s1{border-color:#2459a8} .sw.s2{border-color:#d1701f;border-top-style:dashed} .sw.s3{border-color:#3b8a4f;border-top-style:dotted}</style>"""
     base_lab = "저축−투자 차(S−I, 국민계정상 순대출)" if NORM == "nl" else "저축"
+    if LAGS:
+        base_lab += ", 사건 전 자기 부문 S−I 변화 2개 시차 통제"
     note = (f"주: 시작 연도 자기 부문 {base_lab} 반응을 1로 정규화한 누적 반응(GDP 대비). 가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 "
             "가처분소득 비중 변화보다 큰 해, 기업 = 교역조건(수출·수입 디플레이터 비율) 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. "
             "시작 연도 자기 부문 자금잉여가 충격과 같은 방향인 사례, 증가·감소는 부호를 맞춰 통합. 국가·연도 고정효과 국소투영")
@@ -149,6 +158,8 @@ if __name__ == "__main__":
         NORM, TAG = "nl", TAG + "_nl"
     if "--h5" in sys.argv:
         HMAX = 5
+    if "--lags" in sys.argv:
+        LAGS, TAG = True, TAG + "_lags"
     r = pd.read_csv(OUT / f"ep_report{TAG}.csv") if "--render" in sys.argv else \
         estimate(reps=0 if "--point" in sys.argv else 499)
     render(r)

@@ -15,8 +15,13 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+import sys
+
 OUT = Path(__file__).resolve().parent / "output"
 DST = OUT / "paper"
+LAGS = "--lags" in sys.argv          # 사건 전 자기 부문 S−I 변화 2개 시차를 통제한 사양(본문 추천)
+SFX = "_lags" if LAGS else ""
+H0 = 0 if LAGS else -1               # 시차 통제판은 h = 0부터
 HMAX = 6
 HH, CO = "#1f3b73", "#b5541c"
 plt.rcParams.update({
@@ -31,7 +36,8 @@ LAB_CO = "Corporations: terms-of-trade-driven profit shifts"
 SPEC = ("Episodes: country-specific top/bottom decile changes in the household saving rate with the consumption-share change exceeding "
         "the disposable-income-share change (households), or in the terms of trade with operating surplus moving in the same direction "
         "(corporations); increases and decreases pooled with signs aligned. Local projections with country and year fixed effects, "
-        "estimated by two-step weighted least squares; 42 economies, 1970–2025.")
+        "estimated by two-step weighted least squares; 42 economies, 1970–2025."
+        + (" All regressions control for two lags of the change in the own-sector saving–investment balance." if "--lags" in sys.argv else ""))
 
 
 def with_ref(q, cols=("ratio", "lo68", "hi68")):
@@ -41,14 +47,16 @@ def with_ref(q, cols=("ratio", "lo68", "hi68")):
     return pd.concat([ref, q[["h", *cols]]], ignore_index=True)
 
 
-def line(ax, q, color, label, ls="-", band=True, ref=True):
+def line(ax, q, color, label, ls="-", band=True, ref=None):
+    ref = H0 < 0 if ref is None else ref
     q = with_ref(q) if ref else q[q.h <= HMAX].sort_values("h")
     if band:
         ax.fill_between(q.h, q.lo68, q.hi68, color=color, alpha=0.14, lw=0)
     ax.plot(q.h, q.ratio, color=color, ls=ls, lw=1.6, marker="o", ms=3, label=label)
 
 
-def finish(ax, ylab, h0=-1):
+def finish(ax, ylab, h0=None):
+    h0 = H0 if h0 is None else h0
     ax.axhline(0, color="0.3", lw=0.6)
     if h0 < 0:
         ax.axvline(-1, color="0.75", lw=0.5, ls=":")
@@ -60,12 +68,12 @@ def finish(ax, ylab, h0=-1):
 def save(fig, name):
     DST.mkdir(exist_ok=True)
     for ext in ("png", "pdf"):
-        fig.savefig(DST / f"{name}.{ext}", bbox_inches="tight")
+        fig.savefig(DST / f"{name}{SFX}.{ext}", bbox_inches="tight")
     plt.close(fig)
 
 
 def fig1():
-    r = pd.read_csv(OUT / "ep_report_fgls_nl.csv")
+    r = pd.read_csv(OUT / "ep_report_fgls_nl.csv".replace(".csv", SFX + ".csv"))
     r = r[r.kind == "resp"]
     n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
     fig, ax = plt.subplots(figsize=(5.2, 3.4))
@@ -76,13 +84,13 @@ def fig1():
     ax.set_title("Figure 1. Persistence of sectoral saving–investment balances", loc="left", fontweight="bold")
     fig.text(0.0, -0.2, "Notes: Cumulative responses of the own-sector saving–investment balance (national-accounts net lending, "
              "percent of GDP), normalized by the impact response. Shaded areas are 68 percent confidence bands from a country-cluster "
-             "bootstrap (499 replications). Year $-1$ is the reference year. " + SPEC, fontsize=7, wrap=True, va="top",
+             "bootstrap (499 replications). Responses are measured relative to year $-1$. " + SPEC, fontsize=7, wrap=True, va="top",
              transform=ax.transAxes)
     save(fig, "fig1_si_persistence")
 
 
 def fig2():
-    r = pd.read_csv(OUT / "ep_report_bars.csv")
+    r = pd.read_csv(OUT / "ep_report_bars.csv".replace(".csv", SFX + ".csv"))
     c = r[(r.sector == "corp") & (r.h <= HMAX)]
     g = lambda v: c[c["var"] == v].sort_values("h").ratio.values
     nl = g("nl_corp")
@@ -96,9 +104,10 @@ def fig2():
         base = np.where(v >= 0, up, dn)
         ax.bar(hs, v, bottom=base, width=0.6, color=col, alpha=0.85, label=lab, edgecolor="white", linewidth=0.4)
         up, dn = up + np.clip(v, 0, None), dn + np.clip(v, None, 0)
-    ax.plot(np.r_[-1, hs], np.r_[0, nl], color="black", lw=1.5, marker="o", ms=3.5, mfc="white", label="Saving–investment balance")
+    xs, ys = (np.r_[-1, hs], np.r_[0, nl]) if H0 < 0 else (hs, nl)
+    ax.plot(xs, ys, color="black", lw=1.5, marker="o", ms=3.5, mfc="white", label="Saving–investment balance")
     finish(ax, "Contribution\n(impact saving–investment balance = 1)")
-    ax.set_xlim(-1.5, HMAX + 0.5)
+    ax.set_xlim(H0 - 0.5, HMAX + 0.5)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, columnspacing=1.2)
     ax.set_title("Figure 2. Decomposition of the corporate saving–investment balance", loc="left", fontweight="bold")
     fig.text(0.0, -0.36, "Notes: Point estimates for terms-of-trade episodes. Bars sum to the corporate saving–investment balance: "
@@ -109,7 +118,7 @@ def fig2():
 
 
 def fig3():
-    p = OUT / "ep_report_extra.csv"
+    p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
     if not p.exists():
         return
     r = pd.read_csv(p)
@@ -160,7 +169,7 @@ def fig1_variants():
 
 
 def fig4():
-    p = OUT / "ep_report_extra.csv"
+    p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
     if not p.exists():
         return
     r = pd.read_csv(p)
@@ -172,7 +181,7 @@ def fig4():
     ax.legend(loc="center", bbox_to_anchor=(0.55, 0.5))
     ax.set_title("Figure 4. Household saving rate after saving episodes", loc="left", fontweight="bold")
     fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
-             "percentage points) per episode, not normalized. Year $-1$ is the reference year and equals zero by construction. "
+             "percentage points) per episode relative to year $-1$, not normalized. "
              "Shaded areas are 68 percent confidence bands from a country-cluster bootstrap (499 replications). " + SPEC,
              fontsize=7, wrap=True, va="top", transform=ax.transAxes)
     save(fig, "fig4_household_saving_rate")
@@ -183,4 +192,5 @@ if __name__ == "__main__":
     fig2()
     fig3()
     fig4()
-    fig1_variants()
+    if not LAGS:  # 시차 통제판에서는 사전 시점 반응이 정의상 0이라 그리지 않음
+        fig1_variants()

@@ -17,15 +17,17 @@ KEYS = [(s, v, h) for s in ("hh", "corp") for v in ("ca", "src_hh") for h in ran
 
 
 def stats(d):
-    g0 = {s: lt.ols(d, f"nl_{s}_h0", [f"z_{s}"], [], se=False, w=f"w_{s}")[0][0] for s in ("hh", "corp")}
+    g0 = {s: lt.ols(d, f"nl_{s}_h0", [f"z_{s}"], rp.ctrl(s), se=False, w=f"w_{s}")[0][0] for s in ("hh", "corp")}
     out = []
     for s, v, h in KEYS:
-        g = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], [], se=False, w=f"w_{s}")[0][0]
+        g = lt.ols(d, f"{v}_h{h}", [f"z_{s}"], rp.ctrl(s), se=False, w=f"w_{s}")[0][0]
         out.append(g if v == "src_hh" else g / g0[s])
     return np.array(out)
 
 
 def main():
+    import sys
+    rp.LAGS = "--lags" in sys.argv
     rp.FGLS = rp.WSV = True
     rp.NORM = "nl"
     rp.HHV, rp.COV = ["nl_hh", "ca", "src_hh"], ["nl_corp", "ca", "src_hh"]
@@ -35,7 +37,7 @@ def main():
     r = pd.DataFrame(KEYS, columns=["sector", "var", "h"]).assign(
         ratio=pt, lo68=np.nanpercentile(bs, 16, axis=0), hi68=np.nanpercentile(bs, 84, axis=0),
         lo90=np.nanpercentile(bs, 5, axis=0), hi90=np.nanpercentile(bs, 95, axis=0), n_hh=len(P["hh"]), n_corp=len(P["corp"]))
-    r.to_csv(OUT / "ep_report_extra.csv", index=False)
+    r.to_csv(OUT / f"ep_report_extra{'_lags' if rp.LAGS else ''}.csv", index=False)
     print(r.pivot_table(index=["sector", "var"], columns="h", values="ratio").round(2).to_string())
 
 
