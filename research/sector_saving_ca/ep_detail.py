@@ -13,6 +13,8 @@
   tot_prof      : 교역조건 사례는 영업잉여 비중이 같은 방향
   balanced      : t+K까지 모두 관측되는 사례만 (시점별 구성 고정)
   drop_eps      : 제외할 교역조건 사례 [(국가, 연도), ...]
+  hh_def        : 가계 사례 재정의. None(기본) / "cons" = 소비 주도(부호 맞춘 −Δ소비 ≥ Δ가처분소득, GDP 대비)
+                  / "nocorp" = 같은 해 기업 저축이 반대로 움직이지 않음(부호 맞춘 Δ기업저축 ≥ 0) / "both" = 둘 다
   dir           : "both"(기본) = 증가·감소 모두 / "up" = 가계저축률 상승·교역조건 개선만 / "down" = 반대만
   tot           : 교역조건 변화율 변수. "tot_na_g" = 국민계정 수출/수입 디플레이터(상품·서비스, 1970년대~, 기본)
                   "tot_g" = WDI 상품 순교역조건 지수(2006~, 이전 기본)
@@ -106,6 +108,12 @@ def paths(x, o):
             if o["align"] == "same" and np.sign(den) != ssh:
                 continue
             sg = np.sign(den) if o["align"] == "nl" else ssh
+            if s == "hh" and o.get("hh_def"):
+                dd = lambda v: sg * (xp[v].get((c, y), np.nan) - xp[v].get((c, y - 1), np.nan))
+                cons_led = -dd("cons_hh") >= dd("yd_hh")
+                no_corp = dd("sv_corp") >= 0
+                if not {"cons": cons_led, "nocorp": no_corp, "both": cons_led and no_corp}[o["hh_def"]]:
+                    continue
             if o["balanced"] and np.isnan(nl.get((c, y + K), np.nan)):
                 continue
             r = dict(country=c, year=y, sign=sg, shock_sign=ssh, den=sg * den)
