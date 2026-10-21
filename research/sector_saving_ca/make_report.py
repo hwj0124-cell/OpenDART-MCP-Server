@@ -26,7 +26,7 @@ def svg_lines(series, xlabel, ylabel, w=640, h=280, xs=None):
     for t in np.arange(lo, hi + step / 2, step):
         cls = "zero" if abs(t) < 1e-9 else "grid"
         o.append(f'<line class="{cls}" x1="{ml}" x2="{w-mr}" y1="{Y(t):.1f}" y2="{Y(t):.1f}"/>')
-        o.append(f'<text class="tick" x="{ml-6}" y="{Y(t)+4:.1f}" text-anchor="end">{t:.2g}</text>')
+        o.append(f'<text class="tick" x="{ml-6}" y="{Y(t)+4:.1f}" text-anchor="end">{0 if abs(t) < 1e-9 else round(t, 6):.2g}</text>')
     for t in (xs if xs is not None else np.unique(allx)):
         o.append(f'<text class="tick" x="{X(t):.1f}" y="{h-mb+18}" text-anchor="middle">{int(t)}</text>')
     o.append(f'<text class="axis" x="{(ml+w-mr)/2}" y="{h-6}" text-anchor="middle">{xlabel}</text>')
