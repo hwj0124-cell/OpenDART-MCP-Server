@@ -13,6 +13,8 @@
   tot_prof      : 교역조건 사례는 영업잉여 비중이 같은 방향
   balanced      : t+K까지 모두 관측되는 사례만 (시점별 구성 고정)
   drop_eps      : 제외할 교역조건 사례 [(국가, 연도), ...]
+  sd            : 지정하면 분위 대신 국가별 평균 ± sd × 표준편차 밖의 해를 사례로 (예: 1.0)
+  base          : "nl"(기본) / "sv" — "같은 방향" 조건과 부호·정규화 기준이 되는 시작 반응 변수
   hh_def        : 가계 사례 재정의. None(기본) / "cons" = 소비 주도(부호 맞춘 −Δ소비 ≥ Δ가처분소득, GDP 대비)
                   / "nocorp" = 같은 해 기업 저축이 반대로 움직이지 않음(부호 맞춘 Δ기업저축 ≥ 0) / "both" = 둘 다
   dir           : "both"(기본) = 증가·감소 모두 / "up" = 가계저축률 상승·교역조건 개선만 / "down" = 반대만
@@ -57,6 +59,10 @@ def episodes(x, o):
     x = x.assign(d_hh=x.hh_rate - g.hh_rate.shift(1), d_prof=x.prof - g.prof.shift(1), tot_x=x[o["tot"]])
 
     def cut(col):
+        if o.get("sd"):  # 국가별 평균 ± sd·표준편차
+            gg = x.groupby("country")[col]
+            m, v = gg.transform("mean"), gg.transform("std")
+            return m - o["sd"] * v, m + o["sd"] * v
         if o["by_country"]:
             gg = x.groupby("country")[col]
             return gg.transform(lambda s: s.quantile(o["q"])), gg.transform(lambda s: s.quantile(1 - o["q"]))
@@ -97,7 +103,7 @@ def paths(x, o):
     eps = episodes(x, o)
     res = {}
     for s, el in eps.items():
-        nl = xp[f"nl_{s}"]
+        nl = xp[f"{o.get('base', 'nl')}_{s}"]  # 시작 반응 기준 변수: 순자금운용(기본) 또는 저축(base="sv")
         rows = []
         for c, y, ssh in el:
             if s == "corp" and (c, y) in o.get("drop_eps", ()):
