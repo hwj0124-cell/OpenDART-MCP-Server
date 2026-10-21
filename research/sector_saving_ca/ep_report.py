@@ -24,7 +24,8 @@ COV = ["sv_corp", "nl_corp", "prof", "div_paid", "div_net", "inv_corp"]
 KEYS = [("hh", v, h) for v in HHV for h in range(K + 1)] + [("corp", v, h) for v in COV for h in range(K + 1)]
 DIFFS = [("sv", "sv_hh", "sv_corp"), ("nl", "nl_hh", "nl_corp")]
 XL = "h년 후 (t−1 = 0, t = 시작)"
-WSV = False  # True: 국가별 자기 부문 Δ저축 분산의 역수로 가중(--wsv)
+WSV = False  # True: 가중 추정(--wsv: 국가별 자기 부문 Δ저축 분산의 역수, --fgls: 1단계 잔차 분산의 역수)
+FGLS = False
 TAG = ""
 
 
@@ -41,7 +42,14 @@ def prepare():
     P = ed.paths(x, {**el.SPEC, **CH})
     d = fc.design(x, P)
     for s in ("hh", "corp"):
-        d[f"w_{s}"] = 1 / d.groupby("country")[f"sv_{s}"].transform(lambda v: v.diff().var())
+        if FGLS:  # 2단계 가중최소제곱: 시작 연도 자기 부문 저축 식(무가중)의 잔차 → 국가별 분산의 역수, 부문 내 모든 식에 공통
+            q = d[[f"sv_{s}_h0", f"z_{s}", "country", "year"]].dropna()
+            X = np.hstack([q[[f"z_{s}"]].to_numpy(float), lt._fe_matrix(q, ("country", "year"))])
+            b = np.linalg.lstsq(X, q[f"sv_{s}_h0"].to_numpy(float), rcond=None)[0]
+            e = pd.Series(q[f"sv_{s}_h0"].to_numpy(float) - X @ b, index=q.index)
+            d[f"w_{s}"] = 1 / d.country.map(e.groupby(q.country).var())
+        else:
+            d[f"w_{s}"] = 1 / d.groupby("country")[f"sv_{s}"].transform(lambda v: v.diff().var())
     return P, d
 
 
@@ -96,7 +104,9 @@ svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg
     note = ("주: 시작 연도 자기 부문 저축 반응을 1로 정규화한 누적 반응(GDP 대비). 가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 "
             "가처분소득 비중 변화보다 큰 해, 기업 = 교역조건(수출·수입 디플레이터 비율) 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. "
             "시작 연도 자기 부문 자금잉여가 충격과 같은 방향인 사례, 증가·감소는 부호를 맞춰 통합. 국가·연도 고정효과 국소투영")
-    if WSV:
+    if FGLS:
+        note += "(2단계 가중최소제곱: 1단계 저축 식 잔차의 국가별 분산 역수로 가중)"
+    elif WSV:
         note += "(국가별 자기 부문 저축 변화 분산의 역수로 가중)"
     n1 = note + (", 음영은 68% 구간(국가 단위 부트스트랩 499회)." if r.lo68.ne(r.ratio).any() else ", 점추정치(구간 미산출).")
     n2 = note + ", 점추정치."
@@ -121,6 +131,8 @@ if __name__ == "__main__":
     import sys
     if "--wsv" in sys.argv:
         WSV, TAG = True, "_wsv"
+    if "--fgls" in sys.argv:
+        WSV, FGLS, TAG = True, True, "_fgls"
     r = pd.read_csv(OUT / f"ep_report{TAG}.csv") if "--render" in sys.argv else \
         estimate(reps=0 if "--point" in sys.argv else 499)
     render(r)
