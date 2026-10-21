@@ -144,6 +144,62 @@ def fig3():
     save(fig, "fig3_household_saving_consumption")
 
 
+def fig4_diagnostics():
+    """Figure 4 (diagnostics, 2×2, point estimates): components behind Figures 1–2, main specification."""
+    p = OUT / f"ep_report_diag{SFX}.csv"
+    if not p.exists():
+        return
+    r = pd.read_csv(p)
+    panels = [("(a) Corporations: saving and operating surplus", "corp",
+               [("sv_corp", "Gross saving", "-"), ("prof", "Gross operating surplus", "--")]),
+              ("(b) Corporations: dividends and investment", "corp",
+               [("div_net", "Net dividends paid", "-"), ("gcf_corp", "Gross capital formation", "--"), ("inv_corp", "Fixed capital formation", ":")]),
+              ("(c) Households: saving, income and consumption", "hh",
+               [("sv_hh", "Gross saving", "-"), ("yd_hh", "Disposable income", "--"), ("cons_hh", "Final consumption", ":")]),
+              ("(d) Households: investment", "hh", [("gcf_hh", "Gross capital formation", "-")])]
+    fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.6))
+    cols = ["#1f3b73", "#b5541c", "#5f8f3e"]
+    for ax, (title, s, series) in zip(axes.ravel(), panels):
+        for (v, lab, ls), col in zip(series, cols):
+            q = r[(r.sector == s) & (r["var"] == v) & (r.h <= HMAX)].sort_values("h")
+            ax.plot(q.h, q.ratio, color=col, ls=ls, lw=1.5, marker="o", ms=2.8, label=lab)
+        finish(ax, "Response (impact own-sector\nsaving–investment balance = 1)", h0=0)
+        ax.set_title(title, loc="left")
+        ax.legend(loc="best", fontsize=7)
+    fig.suptitle("Figure 4. Diagnostics: components of sectoral saving–investment balances", x=0.0, ha="left",
+                 fontweight="bold", y=1.01)
+    fig.tight_layout()
+    fig.text(0.0, -0.03, "Notes: Point estimates, percent of GDP, normalized by the impact response of the own-sector saving–investment "
+             "balance. Panels (a)–(b): terms-of-trade episodes; (c)–(d): household episodes. Same episodes and estimator as Figure 1.",
+             fontsize=7, wrap=True, va="top")
+    save(fig, "fig4_diagnostics")
+
+
+def fig5_consumption():
+    """Figure 5: nominal growth of household consumption, disposable income and GDP in the two episode types."""
+    p = OUT / f"ep_report_growth{SFX}.csv"
+    if not p.exists():
+        return
+    r = pd.read_csv(p)
+    n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2), sharey=True)
+    series = [("lcons_hh", "Household consumption", "#1f3b73", "-"), ("lyd_hh", "Household disposable income", "#5f8f3e", ":"),
+              ("lgdp", "Nominal GDP", "#b5541c", "--")]
+    for ax, s, title in ((axes[0], "hh", f"(a) Household episodes (N = {n_hh})"), (axes[1], "corp", f"(b) Terms-of-trade episodes (N = {n_co})")):
+        for v, lab, col, ls in series:
+            line(ax, r[(r.sector == s) & (r["var"] == v)], col, lab, ls=ls)
+        finish(ax, "Cumulative nominal growth\n(percent, relative to year $-1$)" if s == "hh" else "")
+        ax.set_title(title, loc="left")
+    axes[0].legend(loc="lower left", fontsize=7)
+    fig.suptitle("Figure 5. Household consumption, income and GDP in the two episode types", x=0.0, ha="left", fontweight="bold", y=1.03)
+    fig.tight_layout()
+    fig.text(0.0, -0.06, "Notes: Cumulative change in the log of nominal household final consumption, household gross disposable income and "
+             "nominal GDP (×100) per episode, not normalized; common nominal growth is absorbed by year fixed effects. "
+             "Shaded areas are 68 percent confidence bands (country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1.",
+             fontsize=7, wrap=True, va="top")
+    save(fig, "fig5_consumption_growth")
+
+
 def fig1_variants():
     """그림 1 두 가지: 사전 시점 포함(h = −3…6, h = −1 기준 0) / h = 0부터."""
     p = OUT / f"ep_report_leads{SFX}.csv"
@@ -222,6 +278,8 @@ if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
+    fig4_diagnostics()
+    fig5_consumption()
     fig1_variants()
     if LAGS:
         fig_clean()

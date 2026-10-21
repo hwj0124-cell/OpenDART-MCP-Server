@@ -170,6 +170,10 @@ def build(nonfin=NONFIN, wdi=RAW / "wdi.csv", denom="gdp"):
     # 금융법인 순대출은 대부분 국가에서 미제공 → 항등식 잔차로 보완
     out["nl_fin"] = out["nl_fin"].fillna(out["ca"] - out["nl_corp"] - out["nl_gov"] - out["nl_hh"])
     out["hh_rate"] = 100 * p["sv_hh"] / p["yd_hh"]
+    # 명목 수준의 로그(×100): 시점 차이가 누적 명목 증가율(%)이 됨 — GDP 비율의 분모 효과 없이 비교하는 용도
+    for c in ("yd_hh", "cons_hh"):
+        out[f"l{c}"] = 100 * np.log(p[c].where(p[c] > 0))
+    out["lgdp"] = 100 * np.log(den.where(den > 0))
     out["gdp_g"] = 100 * p.groupby("country")["gdp"].pct_change(fill_method=None)
     if Path(wdi).exists():
         w = pd.read_csv(wdi).rename(columns={"REF_AREA": "country", "TIME_PERIOD": "year"})
