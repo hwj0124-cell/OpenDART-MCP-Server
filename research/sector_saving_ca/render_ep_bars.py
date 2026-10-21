@@ -3,7 +3,7 @@
 기업 S−I = 영업잉여 − 순배당(지급 − 수취) − 투자(총자본형성: 고정투자·재고·귀중품) + 기타
   기타 = 이자·세금·기타 재산소득·경상이전 − 토지 등 비생산자산 취득 + 순자본이전 수취
 사양: ep_report와 같음(S−I 정규화, 2단계 가중최소제곱, 국가·연도FE). 사용: python render_ep_bars.py [HMAX]
-→ output/ep_report_bars.csv, output/ep_report_bars.png
+→ output/ep_report_bars.csv, output/ep_report_bars_a.png(그림 1), output/ep_report_bars_b.png(그림 2)
 """
 import sys
 
@@ -39,7 +39,7 @@ def estimate():
     return r
 
 
-def bars(r, title, w=430, h=320):
+def bars(r, title, w=640, h=360):
     g = lambda v: r[(r["var"] == v) & (r.h <= HMAX)].sort_values("h").ratio.values
     nl = g("nl_corp")
     comps = [("prof", "영업잉여", g("prof")), ("div", "−순배당", -g("div_net")), ("inv", "−투자", -g("gcf_corp"))]
@@ -90,7 +90,7 @@ def render(r):
     vals = np.r_[ser[0][3], ser[0][4], ser[0][5], ser[1][3], ser[1][4], ser[1][5]]
     ylim = (np.floor(min(vals.min(), 0) / 0.25) * 0.25, np.ceil(max(vals.max(), 0) / 0.25) * 0.25)
     t1 = "(a) 저축−투자 차(S−I): 가계 vs 기업"
-    left = (f'<figure><div class="panel-title">{t1}</div>{svg_lines(ser, XL, t1, w=430, h=320, ylim=ylim)}'
+    left = (f'<figure><div class="panel-title">{t1}</div>{svg_lines(ser, XL, t1, w=640, h=360, ylim=ylim)}'
             f'<div class="legend"><span><i class="sw s1"></i>가계(소비행태 변화, {n_hh}건)</span>'
             f'<span><i class="sw s2"></i>기업(교역조건, {n_corp}건)</span></div></figure>')
     right = bars(r[r.sector == "corp"], "(b) 기업 S−I 분해")
@@ -105,17 +105,29 @@ svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg
             "(이자·세금·기타 재산소득, 토지 등 비생산자산, 자본이전 등). "
             "가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 가처분소득 비중 변화보다 큰 해, "
             "기업 = 교역조건 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. 2단계 가중최소제곱 국소투영(국가·연도 고정효과).")
-    html = (f'<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:900px">'
-            f'<section id="F"><h2 style="font-size:18px">그림. 원천별 저축−투자 차의 지속성과 기업 흑자의 해소 경로</h2>'
-            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{left}{right}</div>'
-            f'<p class="ci" style="font-size:12px">{note}</p></section></main></body></html>')
+    common = ("주: 시작 연도 자기 부문 저축−투자 차(S−I, 국민계정상 순대출) 반응을 1로 정규화한 누적 반응(GDP 대비). "
+              "가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 가처분소득 비중 변화보다 큰 해(소비행태 변화), "
+              "기업 = 교역조건 변화가 국가별 상·하위 10%이고 영업잉여가 같은 방향인 해. OECD 42개국 1970~2025년, "
+              "2단계 가중최소제곱 국소투영(국가·연도 고정효과).")
+    note_a = common + " 음영은 68% 구간(국가 단위 부트스트랩 499회)."
+    note_b = (common + " 막대 합 = 기업 S−I: 영업잉여 − 순배당(지급 − 수취) − 투자(총자본형성) + 기타"
+              "(이자·세금·기타 재산소득, 토지 등, 자본이전). 점추정치.")
+    left = left.replace(t1, "")
+    right = right.replace("(b) 기업 S−I 분해", "")
+    sec = lambda i, title, body, note: (f'<section id="{i}"><h2 style="font-size:19px">{title}</h2>{body}'
+                                        f'<p class="ci" style="font-size:12px">{note}</p></section>')
+    html = (f'<!doctype html><html><head><meta charset="utf-8">{style}</head><body><main style="max-width:700px">'
+            + sec("A", "그림 1. 원천별 저축−투자 차(S−I)의 지속성", left, note_a)
+            + sec("B", "그림 2. 기업 저축−투자 차의 해소 경로", right, note_b)
+            + '</main></body></html>')
     (OUT / "ep_report_bars.html").write_text(html)
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
-        pg = b.new_page(viewport={"width": 900, "height": 800}, device_scale_factor=2)
+        pg = b.new_page(viewport={"width": 700, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1200)
-        pg.locator("#F").screenshot(path=str(OUT / "ep_report_bars.png"))
+        pg.locator("#A").screenshot(path=str(OUT / "ep_report_bars_a.png"))
+        pg.locator("#B").screenshot(path=str(OUT / "ep_report_bars_b.png"))
         b.close()
 
 
