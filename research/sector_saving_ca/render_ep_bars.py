@@ -1,4 +1,4 @@
-"""보고서 그림(점추정치, 구간 없음): 왼쪽 가계·기업 저축−투자 차(S−I) 선, 오른쪽 기업 S−I 분해 누적 막대.
+"""보고서 그림: 왼쪽 가계·기업 저축−투자 차(S−I) 선(68% 구간), 오른쪽 기업 S−I 분해 누적 막대(점추정치).
 
 기업 S−I = 영업잉여 − 순배당(지급 − 수취) − 투자(총자본형성: 고정투자·재고·귀중품) + 기타
   기타 = 이자·세금·기타 재산소득·경상이전 − 토지 등 비생산자산 취득 + 순자본이전 수취
@@ -78,10 +78,16 @@ def bars(r, title, w=430, h=320):
 
 def render(r):
     n_hh, n_corp = int(r[r.sector == "hh"].n.iloc[0]), int(r[r.sector == "corp"].n.iloc[0])
-    q = lambda s, v: r[(r.sector == s) & (r["var"] == v) & (r.h <= HMAX)].sort_values("h")
-    ser = [("s1", "", q("hh", "nl_hh").h.values, q("hh", "nl_hh").ratio.values, None, None),
-           ("s2", "", q("corp", "nl_corp").h.values, q("corp", "nl_corp").ratio.values, None, None)]
-    vals = np.r_[ser[0][3], ser[1][3]]
+    # 왼쪽 패널 68% 구간: 같은 사양의 부트스트랩 결과(ep_report.py --fgls --nl)
+    ci = pd.read_csv(OUT / "ep_report_fgls_nl.csv")
+    ci = ci[ci.kind == "resp"]
+    q = lambda s, v: ci[(ci.sector == s) & (ci["var"] == v) & (ci.h <= HMAX)].sort_values("h")
+    for s, v in (("hh", "nl_hh"), ("corp", "nl_corp")):  # 점추정치가 그림 오른쪽과 같은 사양인지 확인
+        a = r[(r.sector == s) & (r["var"] == v) & (r.h <= HMAX)].sort_values("h").ratio.values
+        assert np.allclose(a, q(s, v).ratio.values, atol=1e-6), f"{v}: 구간 파일과 점추정치가 다름"
+    ser = [("s1", "", q("hh", "nl_hh").h.values, q("hh", "nl_hh").ratio.values, q("hh", "nl_hh").lo68.values, q("hh", "nl_hh").hi68.values),
+           ("s2", "", q("corp", "nl_corp").h.values, q("corp", "nl_corp").ratio.values, q("corp", "nl_corp").lo68.values, q("corp", "nl_corp").hi68.values)]
+    vals = np.r_[ser[0][3], ser[0][4], ser[0][5], ser[1][3], ser[1][4], ser[1][5]]
     ylim = (np.floor(min(vals.min(), 0) / 0.25) * 0.25, np.ceil(max(vals.max(), 0) / 0.25) * 0.25)
     t1 = "(a) 저축−투자 차(S−I): 가계 vs 기업"
     left = (f'<figure><div class="panel-title">{t1}</div>{svg_lines(ser, XL, t1, w=430, h=320, ylim=ylim)}'
@@ -90,10 +96,11 @@ def render(r):
     right = bars(r[r.sector == "corp"], "(b) 기업 S−I 분해")
     style = (HERE / "report_template.html").read_text()
     style = style[:style.index("<main>")] + """<style>
-svg .line.s1{stroke:#2459a8;fill:none;stroke-width:2.2} svg .dot.s1{fill:#2459a8}
-svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg .dot.s2{fill:#d1701f}
+svg .line.s1{stroke:#2459a8;fill:none;stroke-width:2.2} svg .dot.s1{fill:#2459a8} svg .band.s1{fill:#2459a8;opacity:.14}
+svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg .dot.s2{fill:#d1701f} svg .band.s2{fill:#d1701f;opacity:.14}
 .sw.s1{border-color:#2459a8} .sw.s2{border-color:#d1701f;border-top-style:dashed}</style>"""
-    note = ("주: 시작 연도 자기 부문 저축−투자 차(S−I, 국민계정상 순대출) 반응을 1로 정규화한 누적 반응(GDP 대비), 점추정치. "
+    note = ("주: 시작 연도 자기 부문 저축−투자 차(S−I, 국민계정상 순대출) 반응을 1로 정규화한 누적 반응(GDP 대비). "
+            "(a) 음영은 68% 구간(국가 단위 부트스트랩 499회), (b)는 점추정치. "
             "(b) 막대 합 = 기업 S−I: 영업잉여 − 순배당(지급 − 수취) − 투자(총자본형성: 고정투자·재고) + 기타"
             "(이자·세금·기타 재산소득, 토지 등 비생산자산, 자본이전 등). "
             "가계 = 가계저축률 변화가 국가별 상·하위 10%이고 소비 비중 변화가 가처분소득 비중 변화보다 큰 해, "
