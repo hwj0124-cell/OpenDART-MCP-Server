@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8"><title>기업저축·가계저축 경상수지 반응</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 단일 칼럼 연구 메모, 그림은 칼럼 폭 전체. 부문 색은 기업=적갈, 가계=청 */
+:root {
+  --bg: #f5f6f4; --surface: #ffffff; --ink: #1d2327; --muted: #5b6669; --rule: #d9dedb;
+  --corp: #b4472e; --hh: #2a5c9a; --accent: #3d6b5c; --warn-bg: #fbf1e6; --warn: #8a4b12;
+  --prof: #7d6a2c; --ca: #1d2327; --gov: #3d6b5c;
+  --display: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.75 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 34px; }
+main > *, .pair > * { min-width: 0; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+h1 { font: 700 clamp(24px, 5vw, 32px)/1.3 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 600 21px/1.4 var(--display); margin: 0 0 10px; text-wrap: balance; }
+h3 { font: 600 15.5px/1.5 var(--body); margin: 18px 0 6px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+blockquote { margin: 0; padding: 12px 16px; border-left: 3px solid var(--rule); color: var(--muted); background: var(--surface); }
+.verdict { background: var(--warn-bg); color: var(--ink); padding: 16px 18px; border-radius: 4px; display: grid; gap: 8px; }
+.verdict strong { color: var(--warn); }
+ul.key { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .94em; }
+figure { margin: 6px 0 4px; background: var(--surface); border: 1px solid var(--rule); padding: 14px 12px 10px; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+svg { width: 100%; height: auto; display: block; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .zero { stroke: var(--muted); stroke-width: 1; }
+svg .tick, svg .axis { fill: var(--muted); font: 11px var(--mono); }
+svg .axis { font-family: var(--body); font-size: 12px; }
+svg .line { fill: none; stroke-width: 2.4; stroke-linejoin: round; }
+svg .band { stroke: none; opacity: .14; }
+.corp { stroke: var(--corp); fill: var(--corp); } .hh { stroke: var(--hh); fill: var(--hh); }
+svg .line.corpalt { stroke: var(--corp); stroke-dasharray: 5 4; } svg .band.corpalt { fill: var(--corp); opacity: .07; } svg .dot.corpalt { fill: var(--corp); }
+svg .line.hhalt { stroke: var(--hh); stroke-dasharray: 5 4; } svg .band.hhalt { fill: var(--hh); opacity: .07; } svg .dot.hhalt { fill: var(--hh); }
+.prof { stroke: var(--prof); fill: var(--prof); } .ca { stroke: var(--ca); fill: var(--ca); }
+.div { stroke: var(--corp); fill: var(--corp); } .tax { stroke: var(--prof); fill: var(--prof); } .gov { stroke: var(--gov); fill: var(--gov); }
+svg .line.prof, svg .line.ca, svg .line.div, svg .line.tax, svg .line.gov, svg .line.corp, svg .line.hh { fill: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2.5px solid; display: inline-block; }
+.sw.corp { border-color: var(--corp); } .sw.hh { border-color: var(--hh); } .sw.prof { border-color: var(--prof); }
+.sw.ca { border-color: var(--ca); } .sw.div { border-color: var(--corp); } .sw.tax { border-color: var(--prof); } .sw.gov { border-color: var(--gov); }
+.sw.corpalt { border-color: var(--corp); border-top-style: dashed; } .sw.hhalt { border-color: var(--hh); border-top-style: dashed; }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+thead th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+tbody th { font-weight: 500; }
+td { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.em { color: var(--ink); font-weight: 500; }
+tr.weak td, tr.weak th { opacity: .55; }
+.ci { color: var(--muted); font-size: .9em; }
+.rewrite { background: var(--surface); border: 1px solid var(--rule); padding: 14px 16px; display: grid; gap: 10px; }
+.rewrite .lab { font: 500 11.5px var(--mono); letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+.rewrite .new { border-left: 3px solid var(--accent); padding-left: 12px; }
+dl.spec { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+dl.spec dt { color: var(--muted); } dl.spec dd { margin: 0; min-width: 0; }
+@media (max-width: 520px) { dl.spec { grid-template-columns: 1fr; } dl.spec dd { margin-bottom: 6px; } }
+code { font-family: var(--mono); font-size: .9em; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+</style>
+
+</head><body><main style="max-width:900px"><section id="F"><h2 style="font-size:18px">그림. 저축−투자 차의 분해: 저축과 투자</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><figure><div class="panel-title">(a) 가계(소비행태 변화, 36건)</div><svg viewBox="0 0 430 300" role="img" aria-label="(a) 가계(소비행태 변화, 36건)"><line class="grid" x1="48" x2="418" y1="260.0" y2="260.0"/><text class="tick" x="42" y="264.0" text-anchor="end">-0.25</text><line class="zero" x1="48" x2="418" y1="219.0" y2="219.0"/><text class="tick" x="42" y="223.0" text-anchor="end">0</text><line class="grid" x1="48" x2="418" y1="178.0" y2="178.0"/><text class="tick" x="42" y="182.0" text-anchor="end">0.25</text><line class="grid" x1="48" x2="418" y1="137.0" y2="137.0"/><text class="tick" x="42" y="141.0" text-anchor="end">0.5</text><line class="grid" x1="48" x2="418" y1="96.0" y2="96.0"/><text class="tick" x="42" y="100.0" text-anchor="end">0.75</text><line class="grid" x1="48" x2="418" y1="55.0" y2="55.0"/><text class="tick" x="42" y="59.0" text-anchor="end">1</text><line class="grid" x1="48" x2="418" y1="14.0" y2="14.0"/><text class="tick" x="42" y="18.0" text-anchor="end">1.25</text><rect x="61.9" y="55.5" width="33.9" height="163.5" fill="#2459a8" opacity=".78"/><rect x="61.9" y="55.0" width="33.9" height="0.5" fill="#d1701f" opacity=".78"/><text class="tick" x="78.8" y="276" text-anchor="middle">0</text><rect x="123.5" y="69.6" width="33.9" height="149.4" fill="#2459a8" opacity=".78"/><rect x="123.5" y="60.4" width="33.9" height="9.1" fill="#d1701f" opacity=".78"/><text class="tick" x="140.5" y="276" text-anchor="middle">1</text><rect x="185.2" y="94.4" width="33.9" height="124.6" fill="#2459a8" opacity=".78"/><rect x="185.2" y="91.9" width="33.9" height="2.5" fill="#d1701f" opacity=".78"/><text class="tick" x="202.2" y="276" text-anchor="middle">2</text><rect x="246.9" y="92.0" width="33.9" height="127.0" fill="#2459a8" opacity=".78"/><rect x="246.9" y="91.2" width="33.9" height="0.8" fill="#d1701f" opacity=".78"/><text class="tick" x="263.8" y="276" text-anchor="middle">3</text><rect x="308.5" y="65.7" width="33.9" height="153.3" fill="#2459a8" opacity=".78"/><rect x="308.5" y="219.0" width="33.9" height="9.7" fill="#d1701f" opacity=".78"/><text class="tick" x="325.5" y="276" text-anchor="middle">4</text><rect x="370.2" y="85.5" width="33.9" height="133.5" fill="#2459a8" opacity=".78"/><rect x="370.2" y="61.0" width="33.9" height="24.4" fill="#d1701f" opacity=".78"/><text class="tick" x="387.2" y="276" text-anchor="middle">5</text><text class="axis" x="233.0" y="296" text-anchor="middle">h년 후 (t−1 = 0, t = 시작)</text><line x1="78.8" x2="78.8" y1="55.0" y2="55.0" stroke="#222" stroke-width="1.4"/><line x1="140.5" x2="140.5" y1="90.9" y2="33.1" stroke="#222" stroke-width="1.4"/><line x1="202.2" x2="202.2" y1="127.9" y2="62.6" stroke="#222" stroke-width="1.4"/><line x1="263.8" x2="263.8" y1="131.5" y2="58.7" stroke="#222" stroke-width="1.4"/><line x1="325.5" x2="325.5" y1="126.5" y2="30.9" stroke="#222" stroke-width="1.4"/><line x1="387.2" x2="387.2" y1="102.1" y2="20.8" stroke="#222" stroke-width="1.4"/><polyline points="78.8,55.0 140.5,60.4 202.2,91.9 263.8,91.2 325.5,75.4 387.2,61.0" fill="none" stroke="#222" stroke-width="2"/><circle cx="78.8" cy="55.0" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="140.5" cy="60.4" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="202.2" cy="91.9" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="263.8" cy="91.2" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="325.5" cy="75.4" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="387.2" cy="61.0" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/></svg><div class="legend"><span><i style="display:inline-block;width:12px;height:12px;background:#2459a8;opacity:.78"></i>저축</span><span><i style="display:inline-block;width:12px;height:12px;background:#d1701f;opacity:.78"></i>−투자 등</span><span><i style="display:inline-block;width:14px;border-top:2px solid #222"></i>저축−투자 차(S−I)·68% 구간</span></div></figure><figure><div class="panel-title">(b) 기업(교역조건, 52건)</div><svg viewBox="0 0 430 300" role="img" aria-label="(b) 기업(교역조건, 52건)"><line class="grid" x1="48" x2="418" y1="260.0" y2="260.0"/><text class="tick" x="42" y="264.0" text-anchor="end">-0.5</text><line class="grid" x1="48" x2="418" y1="224.9" y2="224.9"/><text class="tick" x="42" y="228.9" text-anchor="end">-0.25</text><line class="zero" x1="48" x2="418" y1="189.7" y2="189.7"/><text class="tick" x="42" y="193.7" text-anchor="end">0</text><line class="grid" x1="48" x2="418" y1="154.6" y2="154.6"/><text class="tick" x="42" y="158.6" text-anchor="end">0.25</text><line class="grid" x1="48" x2="418" y1="119.4" y2="119.4"/><text class="tick" x="42" y="123.4" text-anchor="end">0.5</text><line class="grid" x1="48" x2="418" y1="84.3" y2="84.3"/><text class="tick" x="42" y="88.3" text-anchor="end">0.75</text><line class="grid" x1="48" x2="418" y1="49.1" y2="49.1"/><text class="tick" x="42" y="53.1" text-anchor="end">1</text><line class="grid" x1="48" x2="418" y1="14.0" y2="14.0"/><text class="tick" x="42" y="18.0" text-anchor="end">1.25</text><rect x="61.9" y="84.2" width="33.9" height="105.5" fill="#2459a8" opacity=".78"/><rect x="61.9" y="49.1" width="33.9" height="35.0" fill="#d1701f" opacity=".78"/><text class="tick" x="78.8" y="276" text-anchor="middle">0</text><rect x="123.5" y="106.2" width="33.9" height="83.5" fill="#2459a8" opacity=".78"/><rect x="123.5" y="189.7" width="33.9" height="25.6" fill="#d1701f" opacity=".78"/><text class="tick" x="140.5" y="276" text-anchor="middle">1</text><rect x="185.2" y="118.1" width="33.9" height="71.6" fill="#2459a8" opacity=".78"/><rect x="185.2" y="189.7" width="33.9" height="37.4" fill="#d1701f" opacity=".78"/><text class="tick" x="202.2" y="276" text-anchor="middle">2</text><rect x="246.9" y="127.5" width="33.9" height="62.2" fill="#2459a8" opacity=".78"/><rect x="246.9" y="189.7" width="33.9" height="31.1" fill="#d1701f" opacity=".78"/><text class="tick" x="263.8" y="276" text-anchor="middle">3</text><rect x="308.5" y="117.2" width="33.9" height="72.5" fill="#2459a8" opacity=".78"/><rect x="308.5" y="189.7" width="33.9" height="36.0" fill="#d1701f" opacity=".78"/><text class="tick" x="325.5" y="276" text-anchor="middle">4</text><rect x="370.2" y="111.9" width="33.9" height="77.8" fill="#2459a8" opacity=".78"/><rect x="370.2" y="189.7" width="33.9" height="55.4" fill="#d1701f" opacity=".78"/><text class="tick" x="387.2" y="276" text-anchor="middle">5</text><text class="axis" x="233.0" y="296" text-anchor="middle">h년 후 (t−1 = 0, t = 시작)</text><line x1="78.8" x2="78.8" y1="49.1" y2="49.1" stroke="#222" stroke-width="1.4"/><line x1="140.5" x2="140.5" y1="156.2" y2="110.1" stroke="#222" stroke-width="1.4"/><line x1="202.2" x2="202.2" y1="184.5" y2="125.3" stroke="#222" stroke-width="1.4"/><line x1="263.8" x2="263.8" y1="196.9" y2="120.2" stroke="#222" stroke-width="1.4"/><line x1="325.5" x2="325.5" y1="200.1" y2="109.3" stroke="#222" stroke-width="1.4"/><line x1="387.2" x2="387.2" y1="215.1" y2="119.7" stroke="#222" stroke-width="1.4"/><polyline points="78.8,49.1 140.5,131.9 202.2,155.5 263.8,158.6 325.5,153.2 387.2,167.3" fill="none" stroke="#222" stroke-width="2"/><circle cx="78.8" cy="49.1" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="140.5" cy="131.9" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="202.2" cy="155.5" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="263.8" cy="158.6" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="325.5" cy="153.2" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/><circle cx="387.2" cy="167.3" r="3.2" fill="#fff" stroke="#222" stroke-width="1.8"/></svg><div class="legend"><span><i style="display:inline-block;width:12px;height:12px;background:#2459a8;opacity:.78"></i>저축</span><span><i style="display:inline-block;width:12px;height:12px;background:#d1701f;opacity:.78"></i>−투자 등</span><span><i style="display:inline-block;width:14px;border-top:2px solid #222"></i>저축−투자 차(S−I)·68% 구간</span></div></figure></div><p class="ci" style="font-size:12px">주: 시작 연도 자기 부문 저축−투자 차(S−I, 국민계정상 순대출) 반응을 1로 정규화한 누적 반응(GDP 대비). 막대는 저축과 −투자 등(고정투자·재고·토지 등 − 순자본이전)으로, 합이 S−I. 선은 S−I 추정치와 68% 구간(국가 단위 부트스트랩 499회). 2단계 가중최소제곱 국소투영(국가·연도 고정효과). 사례 정의는 그림 1과 같음.</p></section></main></body></html>
