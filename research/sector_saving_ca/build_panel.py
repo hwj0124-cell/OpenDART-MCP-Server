@@ -124,7 +124,7 @@ def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv"):
     if Path(wdi).exists():
         w = pd.read_csv(wdi).rename(columns={"REF_AREA": "country", "TIME_PERIOD": "year"})
         w["tot_g"] = 100 * w.groupby("country")["terms_of_trade_index"].pct_change(fill_method=None)
-        out = out.merge(w[["country", "year", "real_gdp_growth", "tot_g", "old_age_dependency"]],
+        out = out.merge(w[["country", "year", "real_gdp_growth", "tot_g", "old_age_dependency", "real_interest_rate"]],
                         on=["country", "year"], how="left")
         out["gdp_g"] = out["real_gdp_growth"].fillna(out["gdp_g"])
         out = out.drop(columns="real_gdp_growth")

@@ -148,6 +148,36 @@ def main():
     for k, v in figs.items():
         tpl = tpl.replace(k, v)
     tpl = tpl.replace("{{SOURCE_TABLE}}", "\n".join(s2))
+    # 경상수지 1단위 정규화 지속성
+    pp = pd.read_csv(OUT / "persistence_paths.csv")
+    def pth(pref, variant, shock, y, cls):
+        r = pp[pp["sample"].str.startswith(pref) & (pp.variant == variant) & (pp.shock == shock) & (pp.outcome == y)]
+        return (cls, "", r.h, r.b, r.b - Z * r.se, r.b + Z * r.se)
+    for key, pref in (("ALL", "전체"), ("MNE", "MNE"), ("CORE", "선진")):
+        tpl = tpl.replace(f"{{{{PER_CA_{key}}}}}", svg_lines(
+            [pth(pref, "base", "P", "ca", "corp"), pth(pref, "base", "H", "ca", "hh")], "충격 후 연수", "ca"))
+        tpl = tpl.replace(f"{{{{PER_P_{key}}}}}", svg_lines(
+            [pth(pref, "base", "P", "prof", "prof"), pth(pref, "base", "P", "sv_nat", "gov"),
+             pth(pref, "base", "P", "ca", "corp")], "충격 후 연수", ""))
+        tpl = tpl.replace(f"{{{{PER_H_{key}}}}}", svg_lines(
+            [pth(pref, "base", "H", "hh_rate", "prof"), pth(pref, "base", "H", "sv_nat", "gov"),
+             pth(pref, "base", "H", "ca", "hh")], "충격 후 연수", ""))
+    ps = pd.read_csv(OUT / "persistence.csv")
+    vlab = {"base": "기본", "growth": "+ 당해 성장률", "tot": "+ 교역조건", "macro": "+ 실질금리·고령화·재정",
+            "lags4": "시차 4년", "big": "대형충격만"}
+    s4 = []
+    for (smp, var), grp in ps.groupby(["sample", "variant"], sort=False):
+        gg = grp.set_index("key")
+        pt_ = lambda k: f'{gg.loc[k, "point"]:.2f}'
+        cell = lambda k: f'{gg.loc[k, "point"]:.2f} <span class="ci">[{gg.loc[k, "lo90"]:.2f}, {gg.loc[k, "hi90"]:.2f}]</span>'
+        f_ = gg.iloc[0]
+        weak = " weak" if min(f_.F_P, f_.F_H) < 10 else ""
+        s4.append(f"<tr class='{weak.strip()}'><th>{smp.split(' (')[0]}<div class='ci'>{vlab[var]}</div></th>"
+                  f"<td>{int(f_.n)}</td><td>{f_.F_P:.0f} / {f_.F_H:.0f}</td>"
+                  f"<td>{pt_('P_ca_13')} / {pt_('H_ca_13')}</td><td class='em'>{cell('diff_ca_13')}</td>"
+                  f"<td>{pt_('P_ca_46')} / {pt_('H_ca_46')}</td><td>{cell('diff_ca_46')}</td>"
+                  f"<td>{pt_('P_prof_46')}</td></tr>")
+    tpl = tpl.replace("{{PERSIST_TABLE}}", "\n".join(s4))
     ip = pd.read_csv(OUT / "lp_ipw.csv")
     s3 = []
     for name, grp in ip.groupby("sample", sort=False):
