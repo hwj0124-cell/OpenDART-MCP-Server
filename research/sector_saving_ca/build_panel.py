@@ -28,7 +28,6 @@ RAW = HERE / "data" / "raw"
 HH = ["S1M", "S14_S15"]  # OECD 코드 표기가 데이터셋마다 다름
 BAL = ["B", "_Z", "C", "D"]  # 균형항목: 추출본에 따라 C·D 양쪽에 같은 값
 AGGREGATES = {"EU", "EA20", "EA19", "EU27_2020", "OECD"}
-INV_MIN_SHARE = 0.4  # 고정투자가 '투자 등'의 이 비율 미만이면 끊긴 계열로 간주
 
 # (변수명, 부문 후보, 거래 후보, 계정기입 후보)
 SPEC = [
@@ -61,7 +60,7 @@ PREF = {  # 중복 행이 있을 때 우선순위
     "TRANSFORMATION": ["N", "_Z"],
     "COUNTERPART_SECTOR": ["S1", "_Z", "_T", "S2"],
     "CONSOLIDATION": ["N", "S", "C", "_Z"],
-    "INSTR_ASSET": ["_Z", "_T"],
+    "INSTR_ASSET": ["_Z", "N11G", "_T"],  # P51G는 고정자산 총계 N11G (세부 자산 N111G 등 제외)
     "ACTIVITY": ["_Z", "_T"],
     "EXPENDITURE": ["_Z", "_T"],
 }
@@ -136,7 +135,12 @@ def gdp_oecd(path=RAW / "oecd" / "gdp.csv"):
     return d.rename(columns={"REF_AREA": "country", "TIME_PERIOD": "year", "OBS_VALUE": "b1gq"})[["country", "year", "b1gq"]]
 
 
-def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv", denom="gdp"):
+NONFIN = RAW / "oecd" / "table14_raw.csv"  # OECD API 응답 원본(모든 차원 열 유지). 없으면 예전 추출본
+if not NONFIN.exists():
+    NONFIN = RAW / "nonfin.csv"
+
+
+def build(nonfin=NONFIN, wdi=RAW / "wdi.csv", denom="gdp"):
     raw = load_raw(nonfin)
     cols = {name: pick(raw, s, t, e) for name, s, t, e in SPEC}
     cols = {k: v for k, v in cols.items() if not v.empty}
@@ -162,13 +166,6 @@ def build(nonfin=RAW / "nonfin.csv", wdi=RAW / "wdi.csv", denom="gdp"):
     out = out.rename(columns={"nl_nat": "ca"})
     # 금융법인 순대출은 대부분 국가에서 미제공 → 항등식 잔차로 보완
     out["nl_fin"] = out["nl_fin"].fillna(out["ca"] - out["nl_corp"] - out["nl_gov"] - out["nl_hh"])
-    # 고정투자(P51G) 품질 점검: 일부 국가(ITA·FRA·CZE·CRI·HRV·MEX·SVN 등) 추출본은 0 근처와 정상 수준을 오간다.
-    # 균형항목으로 만든 '투자 등'(= 저축 − 순자금운용, 고정투자+재고+비생산자산−순자본이전)이 2%p 넘는데
-    # 고정투자가 그 40%에도 못 미치는 관측치는 끊긴 계열로 보고 결측 처리한다. 재고·토지·지식재산 때문에
-    # 실제로 차이가 큰 나라(KOR·CHN·IRL 등)는 비율 기준이라 남는다. (정부는 대규모 자본이전이 흔해 점검하지 않음)
-    for s in ("corp", "hh"):
-        tot = out[f"sv_{s}"] - out[f"nl_{s}"]
-        out.loc[(tot > 2) & (out[f"inv_{s}"] < INV_MIN_SHARE * tot), f"inv_{s}"] = np.nan
     out["hh_rate"] = 100 * p["sv_hh"] / p["yd_hh"]
     out["gdp_g"] = 100 * p.groupby("country")["gdp"].pct_change(fill_method=None)
     if Path(wdi).exists():
