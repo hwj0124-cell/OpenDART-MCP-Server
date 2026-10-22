@@ -118,30 +118,24 @@ def fig2():
 
 
 def fig3():
-    """Figure 3: (a) household saving rate, (b) household consumption — both episode types, raw units."""
+    """Figure 3: household saving rate in the two episode types (raw percentage points)."""
     p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
     if not p.exists():
         return
     r = pd.read_csv(p)
-    if "cons_hh" not in set(r["var"]):
-        return
     n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.1))
-    for ax, v, ylab, title in ((axes[0], "src_hh", "Percentage points of\ndisposable income", "(a) Household saving rate"),
-                               (axes[1], "cons_hh", "Percentage points of GDP", "(b) Household consumption")):
-        line(ax, r[(r.sector == "hh") & (r["var"] == v)], HH, f"Household episodes (N = {n_hh})")
-        line(ax, r[(r.sector == "corp") & (r["var"] == v)], CO, f"Terms-of-trade episodes (N = {n_co})", ls="--")
-        finish(ax, ylab)
-        ax.set_title(title, loc="left")
-    axes[0].legend(loc="center", bbox_to_anchor=(0.55, 0.47))
-    fig.suptitle("Figure 3. Household saving rate and consumption", x=0.0, ha="left", fontweight="bold", y=1.03)
-    fig.tight_layout()
-    fig.text(0.0, -0.06, "Notes: Cumulative change per episode relative to year $-1$, not normalized. (a) Household gross saving over "
-             "gross disposable income. (b) Household final consumption expenditure, percent of nominal GDP. Shaded areas are 68 percent "
-             "confidence bands (country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1"
-             + (", including two lags of the change in the own-sector saving–investment balance." if LAGS else "."),
-             fontsize=7, wrap=True, va="top")
-    save(fig, "fig3_household_saving_consumption")
+    fig, ax = plt.subplots(figsize=(5.2, 3.3))
+    line(ax, r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, f"{LAB_HH} (N = {n_hh})")
+    line(ax, r[(r.sector == "corp") & (r["var"] == "src_hh")], CO, f"{LAB_CO} (N = {n_co})", ls="--")
+    finish(ax, "Household saving rate\n(percentage points of disposable income)")
+    lo, hi = ax.get_ylim()
+    ax.set_ylim(lo, hi + 0.25 * (hi - lo))
+    ax.legend(loc="upper right", fontsize=7.5)
+    ax.set_title("Figure 3. Household saving rate after saving episodes", loc="left", fontweight="bold")
+    fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
+             "percentage points) per episode relative to year $-1$, not normalized. Shaded areas are 68 percent confidence bands "
+             "from a country-cluster bootstrap (499 replications). " + SPEC, fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+    save(fig, "fig3_household_saving_rate")
 
 
 def fig4_diagnostics():
