@@ -3,7 +3,7 @@
 Inputs (from ep_report.py --fgls --nl, render_ep_bars.py, ep_report_extra.py):
   output/ep_report_fgls_nl.csv, output/ep_report_bars.csv, output/ep_report_extra.csv
 Outputs: output/paper/fig1_si_persistence*.(png|pdf), fig2_corporate_decomposition.(png|pdf),
-         fig3_household_decomposition, fig4_household_saving_rate, fig5_diagnostics, fig6_consumption_growth   (suffix _lags for the lag-controlled specification)
+         fig3_household_decomposition, fig4_saving_propensities, fig5_diagnostics, fig6_consumption_growth   (suffix _lags for the lag-controlled specification)
 All responses are y_{t+h} − y_{t−1}; h = −1 is the reference year and equals zero by construction.
 """
 from pathlib import Path
@@ -165,24 +165,36 @@ def fig3():
 
 
 def fig4():
-    """Figure 4: household saving rate in the two episode types (raw percentage points)."""
-    p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
-    if not p.exists():
+    """Figure 4: behavioural ratios — household saving rate (household episodes) vs corporate reinvestment and payout
+    ratios (terms-of-trade episodes), raw percentage points."""
+    p, pc = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv"), OUT / f"ep_corp_ratios{SFX}.csv"
+    if not (p.exists() and pc.exists()):
         return
-    r = pd.read_csv(p)
-    n_hh, n_co = int(r.n_hh.iloc[0]), int(r.n_corp.iloc[0])
-    fig, ax = plt.subplots(figsize=(5.2, 3.3))
-    line(ax, r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, f"{LAB_HH} (N = {n_hh})")
-    line(ax, r[(r.sector == "corp") & (r["var"] == "src_hh")], CO, f"{LAB_CO} (N = {n_co})", ls="--")
-    finish(ax, "Household saving rate\n(percentage points of disposable income)")
-    lo, hi = ax.get_ylim()
-    ax.set_ylim(lo, hi + 0.25 * (hi - lo))
-    ax.legend(loc="upper right", fontsize=7.5)
-    ax.set_title("Figure 4. Household saving rate after saving episodes", loc="left", fontweight="bold")
-    fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
-             "percentage points) per episode relative to year $-1$, not normalized. Shaded areas are 68 percent confidence bands "
-             "from a country-cluster bootstrap (499 replications). " + SPEC, fontsize=7, wrap=True, va="top", transform=ax.transAxes)
-    save(fig, "fig4_household_saving_rate")
+    r, c = pd.read_csv(p), pd.read_csv(pc)
+    n_hh, n_co = int(r.n_hh.iloc[0]), int(c.n_corp.iloc[0])
+    tot_hh = r[(r.sector == "corp") & (r["var"] == "src_hh") & (r.h <= HMAX)].ratio
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2))
+    line(axes[0], r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, "Household saving rate")
+    finish(axes[0], "Percentage points of\ngross disposable income")
+    axes[0].set_title(f"(a) Households: household episodes (N = {n_hh})", loc="left")
+    line(axes[1], c[c["var"] == "reinv_corp"], CO, "Reinvestment ratio (capital formation / surplus)")
+    line(axes[1], c[c["var"] == "pay_corp"], "#7a6aa8", "Net payout ratio (net dividends / surplus)", ls="--")
+    finish(axes[1], "Percentage points of\ngross operating surplus")
+    axes[1].set_title(f"(b) Corporations: terms-of-trade episodes (N = {n_co})", loc="left")
+    for ax in axes:
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, hi + 0.3 * (hi - lo))
+        ax.legend(loc="upper right", fontsize=7)
+    fig.suptitle("Figure 4. Household saving propensity and corporate spending propensities", x=0.0, ha="left",
+                 fontweight="bold", y=0.99)
+    fig.tight_layout()
+    fig.text(0.0, -0.06, "Notes: Cumulative change per episode relative to year $-1$, not normalized. Panel (a): household gross saving over "
+             "gross disposable income. Panel (b): non-financial corporations' gross capital formation and net dividends paid (paid minus "
+             "received), each over gross operating surplus. In terms-of-trade episodes the household saving rate changes by "
+             f"between −{abs(tot_hh.min()):.1f} and {max(tot_hh.max(), 0):.1f} percentage points (not shown). Shaded areas are 68 percent confidence bands "
+             "(country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1.",
+             fontsize=7, wrap=True, va="top")
+    save(fig, "fig4_saving_propensities")
 
 
 def fig5_diagnostics():
