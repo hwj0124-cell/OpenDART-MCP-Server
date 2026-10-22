@@ -172,7 +172,6 @@ def fig4():
         return
     r, c = pd.read_csv(p), pd.read_csv(pc)
     n_hh, n_co = int(r.n_hh.iloc[0]), int(c.n_corp.iloc[0])
-    tot_hh = r[(r.sector == "corp") & (r["var"] == "src_hh") & (r.h <= HMAX)].ratio
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2))
     line(axes[0], r[(r.sector == "hh") & (r["var"] == "src_hh")], HH, "Household saving rate")
     finish(axes[0], "Percentage points of\ngross disposable income")
@@ -190,8 +189,7 @@ def fig4():
     fig.tight_layout()
     fig.text(0.0, -0.06, "Notes: Cumulative change per episode relative to year $-1$, not normalized. Panel (a): household gross saving over "
              "gross disposable income. Panel (b): non-financial corporations' gross capital formation and net dividends paid (paid minus "
-             "received), each over gross operating surplus. In terms-of-trade episodes the household saving rate changes by "
-             f"between −{abs(tot_hh.min()):.1f} and {max(tot_hh.max(), 0):.1f} percentage points (not shown). Shaded areas are 68 percent confidence bands "
+             "received), each over gross operating surplus. Shaded areas are 68 percent confidence bands "
              "(country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1.",
              fontsize=7, wrap=True, va="top")
     save(fig, "fig4_saving_propensities")
