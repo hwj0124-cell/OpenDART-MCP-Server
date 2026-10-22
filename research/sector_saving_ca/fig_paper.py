@@ -3,7 +3,7 @@
 Inputs (from ep_report.py --fgls --nl, render_ep_bars.py, ep_report_extra.py):
   output/ep_report_fgls_nl.csv, output/ep_report_bars.csv, output/ep_report_extra.csv
 Outputs: output/paper/fig1_si_persistence*.(png|pdf), fig2_corporate_decomposition.(png|pdf),
-         fig3_household_saving_consumption.(png|pdf)   (suffix _lags for the lag-controlled specification)
+         fig3_household_decomposition, fig4_household_saving_rate, fig5_diagnostics, fig6_consumption_growth   (suffix _lags for the lag-controlled specification)
 All responses are y_{t+h} − y_{t−1}; h = −1 is the reference year and equals zero by construction.
 """
 from pathlib import Path
@@ -89,16 +89,9 @@ def fig1():
     save(fig, "fig1_si_persistence")
 
 
-def fig2():
-    r = pd.read_csv(OUT / "ep_report_bars.csv".replace(".csv", SFX + ".csv"))
-    c = r[(r.sector == "corp") & (r.h <= HMAX)]
-    g = lambda v: c[c["var"] == v].sort_values("h").ratio.values
-    nl = g("nl_corp")
-    comps = [("Gross operating surplus", g("prof"), "#1f3b73"), ("Net dividends paid (−)", -g("div_net"), "#7a6aa8"),
-             ("Gross capital formation (−)", -g("gcf_corp"), "#b5541c")]
-    comps.append(("Other", nl - sum(v for _, v, _ in comps), "#a6a6a6"))
+def stack(ax, comps, nl, ylim=None):
+    """Stacked contributions (bars) and the saving–investment balance (line)."""
     hs = np.arange(len(nl))
-    fig, ax = plt.subplots(figsize=(5.2, 3.4))
     up, dn = np.zeros(len(hs)), np.zeros(len(hs))
     for lab, v, col in comps:
         base = np.where(v >= 0, up, dn)
@@ -108,17 +101,71 @@ def fig2():
     ax.plot(xs, ys, color="black", lw=1.5, marker="o", ms=3.5, mfc="white", label="Saving–investment balance")
     finish(ax, "Contribution\n(impact saving–investment balance = 1)")
     ax.set_xlim(H0 - 0.5, HMAX + 0.5)
+    if ylim:
+        ax.set_ylim(*ylim)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, columnspacing=1.2)
+    return up, dn
+
+
+def comps_corp():
+    r = pd.read_csv(OUT / "ep_report_bars.csv".replace(".csv", SFX + ".csv"))
+    c = r[(r.sector == "corp") & (r.h <= HMAX)]
+    g = lambda v: c[c["var"] == v].sort_values("h").ratio.values
+    nl = g("nl_corp")
+    comps = [("Gross operating surplus", g("prof"), "#1f3b73"), ("Net dividends paid (−)", -g("div_net"), "#7a6aa8"),
+             ("Gross capital formation (−)", -g("gcf_corp"), "#b5541c")]
+    comps.append(("Other", nl - sum(v for _, v, _ in comps), "#a6a6a6"))
+    return comps, nl
+
+
+def comps_hh():
+    r = pd.read_csv(OUT / f"ep_report_diag{SFX}.csv")
+    c = r[(r.sector == "hh") & (r.h <= HMAX)]
+    g = lambda v: c[c["var"] == v].sort_values("h").ratio.values
+    nl = g("nl_hh")
+    comps = [("Gross disposable income", g("yd_hh"), "#1f3b73"), ("Final consumption (−)", -g("cons_hh"), "#7a6aa8"),
+             ("Gross capital formation (−)", -g("gcf_hh"), "#b5541c")]
+    comps.append(("Other", nl - sum(v for _, v, _ in comps), "#a6a6a6"))
+    return comps, nl
+
+
+def common_ylim():
+    """Same vertical scale for Figures 2 and 3 so the two decompositions can be compared directly."""
+    lo, hi = 0.0, 1.0
+    for comps, nl in (comps_corp(), comps_hh()):
+        vs = np.array([v for _, v, _ in comps])
+        lo, hi = min(lo, np.clip(vs, None, 0).sum(0).min(), nl.min()), max(hi, np.clip(vs, 0, None).sum(0).max(), nl.max())
+    pad = 0.06 * (hi - lo)
+    return lo - pad, hi + pad
+
+
+def fig2():
+    comps, nl = comps_corp()
+    fig, ax = plt.subplots(figsize=(5.2, 3.4))
+    stack(ax, comps, nl, common_ylim())
     ax.set_title("Figure 2. Decomposition of the corporate saving–investment balance", loc="left", fontweight="bold")
     fig.text(0.0, -0.36, "Notes: Point estimates for terms-of-trade episodes. Bars sum to the corporate saving–investment balance: "
              "gross operating surplus minus net dividends paid (paid minus received) minus gross capital formation (fixed capital and "
-             "inventories) plus other items (interest, taxes, other property income, non-produced assets and capital transfers). " + SPEC,
-             fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+             "inventories) plus other items (interest, taxes, other property income, non-produced assets and capital transfers). "
+             "Vertical scale as in Figure 3. " + SPEC, fontsize=7, wrap=True, va="top", transform=ax.transAxes)
     save(fig, "fig2_corporate_decomposition")
 
 
 def fig3():
-    """Figure 3: household saving rate in the two episode types (raw percentage points)."""
+    """Figure 3: household counterpart of Figure 2."""
+    comps, nl = comps_hh()
+    fig, ax = plt.subplots(figsize=(5.2, 3.4))
+    stack(ax, comps, nl, common_ylim())
+    ax.set_title("Figure 3. Decomposition of the household saving–investment balance", loc="left", fontweight="bold")
+    fig.text(0.0, -0.36, "Notes: Point estimates for household episodes. Bars sum to the household saving–investment balance: "
+             "gross disposable income minus final consumption minus gross capital formation (mainly dwellings) plus other items "
+             "(pension-entitlement adjustment, non-produced assets and capital transfers). Vertical scale as in Figure 2. " + SPEC,
+             fontsize=7, wrap=True, va="top", transform=ax.transAxes)
+    save(fig, "fig3_household_decomposition")
+
+
+def fig4():
+    """Figure 4: household saving rate in the two episode types (raw percentage points)."""
     p = OUT / "ep_report_extra.csv".replace(".csv", SFX + ".csv")
     if not p.exists():
         return
@@ -131,15 +178,15 @@ def fig3():
     lo, hi = ax.get_ylim()
     ax.set_ylim(lo, hi + 0.25 * (hi - lo))
     ax.legend(loc="upper right", fontsize=7.5)
-    ax.set_title("Figure 3. Household saving rate after saving episodes", loc="left", fontweight="bold")
+    ax.set_title("Figure 4. Household saving rate after saving episodes", loc="left", fontweight="bold")
     fig.text(0.0, -0.2, "Notes: Cumulative change in the household gross saving rate (gross saving over gross disposable income, "
              "percentage points) per episode relative to year $-1$, not normalized. Shaded areas are 68 percent confidence bands "
              "from a country-cluster bootstrap (499 replications). " + SPEC, fontsize=7, wrap=True, va="top", transform=ax.transAxes)
-    save(fig, "fig3_household_saving_rate")
+    save(fig, "fig4_household_saving_rate")
 
 
-def fig4_diagnostics():
-    """Figure 4 (diagnostics, 2×2, point estimates): components behind Figures 1–2, main specification."""
+def fig5_diagnostics():
+    """Figure 5 (diagnostics, 2×2, point estimates): components behind Figures 1–2, main specification."""
     p = OUT / f"ep_report_diag{SFX}.csv"
     if not p.exists():
         return
@@ -162,17 +209,17 @@ def fig4_diagnostics():
         lo, hi = ax.get_ylim()
         ax.set_ylim(lo, hi + 0.45 * (hi - lo))  # 범례 자리 확보
         ax.legend(loc="upper left", fontsize=7, ncol=1)
-    fig.suptitle("Figure 4. Diagnostics: components of sectoral saving–investment balances", x=0.0, ha="left",
+    fig.suptitle("Figure 5. Diagnostics: components of sectoral saving–investment balances", x=0.0, ha="left",
                  fontweight="bold", y=1.01)
     fig.tight_layout()
     fig.text(0.0, -0.03, "Notes: Point estimates, percent of GDP, normalized by the impact response of the own-sector saving–investment "
              "balance. Panels (a)–(b): terms-of-trade episodes; (c)–(d): household episodes. Same episodes and estimator as Figure 1.",
              fontsize=7, wrap=True, va="top")
-    save(fig, "fig4_diagnostics")
+    save(fig, "fig5_diagnostics")
 
 
-def fig5_consumption():
-    """Figure 5: nominal growth of household consumption, disposable income and GDP in the two episode types."""
+def fig6_consumption():
+    """Figure 6: nominal growth of household consumption, disposable income and GDP in the two episode types."""
     p = OUT / f"ep_report_growth{SFX}.csv"
     if not p.exists():
         return
@@ -187,13 +234,13 @@ def fig5_consumption():
         finish(ax, "Cumulative nominal growth\n(percent, relative to year $-1$)" if s == "hh" else "")
         ax.set_title(title, loc="left")
     axes[0].legend(loc="lower left", fontsize=7)
-    fig.suptitle("Figure 5. Household consumption, income and GDP in the two episode types", x=0.0, ha="left", fontweight="bold", y=1.03)
+    fig.suptitle("Figure 6. Household consumption, income and GDP in the two episode types", x=0.0, ha="left", fontweight="bold", y=1.03)
     fig.tight_layout()
     fig.text(0.0, -0.06, "Notes: Cumulative change in the log of nominal household final consumption, household gross disposable income and "
              "nominal GDP (×100) per episode, not normalized; common nominal growth is absorbed by year fixed effects. "
              "Shaded areas are 68 percent confidence bands (country-cluster bootstrap, 499 replications). Same episodes and estimator as Figure 1.",
              fontsize=7, wrap=True, va="top")
-    save(fig, "fig5_consumption_growth")
+    save(fig, "fig6_consumption_growth")
 
 
 def fig1_variants():
@@ -274,8 +321,9 @@ if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
-    fig4_diagnostics()
-    fig5_consumption()
+    fig4()
+    fig5_diagnostics()
+    fig6_consumption()
     fig1_variants()
     if LAGS:
         fig_clean()
