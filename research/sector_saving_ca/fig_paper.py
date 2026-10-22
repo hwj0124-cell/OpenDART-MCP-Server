@@ -123,8 +123,8 @@ def comps_hh():
     c = r[(r.sector == "hh") & (r.h <= HMAX)]
     g = lambda v: c[c["var"] == v].sort_values("h").ratio.values
     nl = g("nl_hh")
-    comps = [("Gross disposable income", g("yd_hh"), "#1f3b73"), ("Final consumption (−)", -g("cons_hh"), "#7a6aa8"),
-             ("Gross capital formation (−)", -g("gcf_hh"), "#b5541c")]
+    comps = [("Final consumption (−)", -g("cons_hh"), "#7a6aa8"), ("Gross disposable income", g("yd_hh"), "#1f3b73"),
+             ("Gross capital formation (−)", -g("gcf_hh"), "#b5541c")]  # 소비를 맨 아래에: 지속되는 소비 감소가 바닥에 보이도록
     comps.append(("Other", nl - sum(v for _, v, _ in comps), "#a6a6a6"))
     return comps, nl
 
