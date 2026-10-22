@@ -7,9 +7,14 @@
 """
 import sys
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # 로컬 PC 등 playwright가 없으면 한글 HTML 미리보기 PNG만 건너뜀(분석 결과·논문 그림과 무관)
+    sync_playwright = None
 
 import ep_report as rp
 import lp_tools as lt
@@ -19,6 +24,9 @@ HMAX = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 6
 K = rp.K
 COL = {"prof": "#2459a8", "div": "#8e6cc0", "inv": "#d1701f", "oth": "#a3a3a3"}
 XL = "h년 후 (t−1 = 0, t = 시작)"
+
+
+CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 
 
 def estimate():
@@ -123,8 +131,10 @@ svg .line.s2{stroke:#d1701f;fill:none;stroke-width:2.2;stroke-dasharray:6 4} svg
             + sec("B", "그림 2. 기업 저축−투자 차의 해소 경로", right, note_b)
             + '</main></body></html>')
     (OUT / f"ep_report_bars{sfx}.html").write_text(html)
+    if sync_playwright is None or not Path(CHROME).exists():
+        return
     with sync_playwright() as p:
-        b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+        b = p.chromium.launch(executable_path=CHROME)
         pg = b.new_page(viewport={"width": 700, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1200)

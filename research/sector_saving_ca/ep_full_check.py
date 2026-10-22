@@ -7,7 +7,10 @@ y_{t+h} − y_{t−1} = γ_h · z_it + 국가FE + 연도FE,  정규화 = γ_h ÷
 """
 import numpy as np
 import pandas as pd
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # 로컬 PC 등 playwright가 없으면 한글 HTML 미리보기 PNG만 건너뜀(분석 결과·논문 그림과 무관)
+    sync_playwright = None
 
 import ep_detail as ed
 import ep_lpiv as el

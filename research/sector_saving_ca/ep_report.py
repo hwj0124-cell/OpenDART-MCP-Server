@@ -7,9 +7,14 @@
 구간: 국가 단위 부트스트랩 499회(비율·차이를 각 표본에서 다시 계산).
 → output/ep_report.csv, output/ep_report_fig1.png, output/ep_report_fig2.png
 """
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # 로컬 PC 등 playwright가 없으면 한글 HTML 미리보기 PNG만 건너뜀(분석 결과·논문 그림과 무관)
+    sync_playwright = None
 
 import ep_detail as ed
 import ep_full_check as fc
@@ -29,6 +34,9 @@ FGLS = False
 NORM = "sv"  # 정규화·가중치 기준 변수: "sv"(저축) 또는 "nl"(저축−투자 차, --nl)
 HMAX = 6     # 그림에 보이는 마지막 시점(--h5 → 5)
 LAGS = False  # True(--lags): 자기 부문 S−I 변화의 사건 전 2개 시차(Δy_{t−1}, Δy_{t−2})를 모든 식에 통제
+
+
+CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 
 
 def ctrl(s):
@@ -138,8 +146,10 @@ svg .line.s3{stroke:#3b8a4f;fill:none;stroke-width:2.2;stroke-dasharray:2 3} svg
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{"".join(f2)}</div><p class="ci" style="font-size:12px">{n2}</p></section>'
             f'</main></body></html>')
     (OUT / f"ep_report{TAG}_figs.html").write_text(html)
+    if sync_playwright is None or not Path(CHROME).exists():
+        return
     with sync_playwright() as p:
-        b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+        b = p.chromium.launch(executable_path=CHROME)
         pg = b.new_page(viewport={"width": 900, "height": 800}, device_scale_factor=2)
         pg.set_content(html)
         pg.wait_for_timeout(1500)
