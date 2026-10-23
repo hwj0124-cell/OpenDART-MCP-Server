@@ -1,0 +1,327 @@
+<title>기업저축·가계저축 경상수지 반응</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 단일 칼럼 연구 메모, 그림은 칼럼 폭 전체. 부문 색은 기업=적갈, 가계=청 */
+:root {
+  --bg: #f5f6f4; --surface: #ffffff; --ink: #1d2327; --muted: #5b6669; --rule: #d9dedb;
+  --corp: #b4472e; --hh: #2a5c9a; --accent: #3d6b5c; --warn-bg: #fbf1e6; --warn: #8a4b12;
+  --prof: #7d6a2c; --ca: #1d2327; --gov: #3d6b5c;
+  --display: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15191b; --surface: #1d2326; --ink: #e6eae8; --muted: #9aa5a6; --rule: #343d40;
+  --corp: #e07a5f; --hh: #6fa2e0; --accent: #7fb8a4; --warn-bg: #2d2418; --warn: #e3a76b;
+  --prof: #cdb76a; --ca: #e6eae8; --gov: #7fb8a4; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.75 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 34px; }
+main > *, .pair > * { min-width: 0; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+h1 { font: 700 clamp(24px, 5vw, 32px)/1.3 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 600 21px/1.4 var(--display); margin: 0 0 10px; text-wrap: balance; }
+h3 { font: 600 15.5px/1.5 var(--body); margin: 18px 0 6px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+blockquote { margin: 0; padding: 12px 16px; border-left: 3px solid var(--rule); color: var(--muted); background: var(--surface); }
+.verdict { background: var(--warn-bg); color: var(--ink); padding: 16px 18px; border-radius: 4px; display: grid; gap: 8px; }
+.verdict strong { color: var(--warn); }
+ul.key { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .94em; }
+figure { margin: 6px 0 4px; background: var(--surface); border: 1px solid var(--rule); padding: 14px 12px 10px; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+svg { width: 100%; height: auto; display: block; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .zero { stroke: var(--muted); stroke-width: 1; }
+svg .tick, svg .axis { fill: var(--muted); font: 11px var(--mono); }
+svg .axis { font-family: var(--body); font-size: 12px; }
+svg .line { fill: none; stroke-width: 2.4; stroke-linejoin: round; }
+svg .band { stroke: none; opacity: .14; }
+.corp { stroke: var(--corp); fill: var(--corp); } .hh { stroke: var(--hh); fill: var(--hh); }
+svg .line.corpalt { stroke: var(--corp); stroke-dasharray: 5 4; } svg .band.corpalt { fill: var(--corp); opacity: .07; } svg .dot.corpalt { fill: var(--corp); }
+svg .line.hhalt { stroke: var(--hh); stroke-dasharray: 5 4; } svg .band.hhalt { fill: var(--hh); opacity: .07; } svg .dot.hhalt { fill: var(--hh); }
+.prof { stroke: var(--prof); fill: var(--prof); } .ca { stroke: var(--ca); fill: var(--ca); }
+.div { stroke: var(--corp); fill: var(--corp); } .tax { stroke: var(--prof); fill: var(--prof); } .gov { stroke: var(--gov); fill: var(--gov); }
+svg .line.prof, svg .line.ca, svg .line.div, svg .line.tax, svg .line.gov, svg .line.corp, svg .line.hh { fill: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2.5px solid; display: inline-block; }
+.sw.corp { border-color: var(--corp); } .sw.hh { border-color: var(--hh); } .sw.prof { border-color: var(--prof); }
+.sw.ca { border-color: var(--ca); } .sw.div { border-color: var(--corp); } .sw.tax { border-color: var(--prof); } .sw.gov { border-color: var(--gov); }
+.sw.corpalt { border-color: var(--corp); border-top-style: dashed; } .sw.hhalt { border-color: var(--hh); border-top-style: dashed; }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+thead th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+tbody th { font-weight: 500; }
+td { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.em { color: var(--ink); font-weight: 500; }
+tr.weak td, tr.weak th { opacity: .55; }
+.ci { color: var(--muted); font-size: .9em; }
+.rewrite { background: var(--surface); border: 1px solid var(--rule); padding: 14px 16px; display: grid; gap: 10px; }
+.rewrite .lab { font: 500 11.5px var(--mono); letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+.rewrite .new { border-left: 3px solid var(--accent); padding-left: 12px; }
+dl.spec { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+dl.spec dt { color: var(--muted); } dl.spec dd { margin: 0; min-width: 0; }
+@media (max-width: 520px) { dl.spec { grid-template-columns: 1fr; } dl.spec dd { margin-bottom: 6px; } }
+code { font-family: var(--mono); font-size: .9em; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">OECD 부문계정 패널 · 41개국 · 1975–2025 · 원천별 분해 추가</div>
+  <h1>기업저축 증가와 가계저축 증가는 경상수지에 다르게 작용하는가</h1>
+  <blockquote>“이번 흑자는 저축 성향의 변화에 따른 가계저축 증가와 달리 별도의 정책 대응 없이도 배분·지출 과정에서 축소될 것이므로…” — 「반도체發 경상수지 흑자 확대와 IMF 대외부문평가 대응 방향」 Ⅲ-2</blockquote>
+</header>
+
+<section class="verdict">
+  <div><strong>결론: 넓은 국가 패널에서는 “이익은 남는데 경상수지는 빨리 사라지는” 그림이 점추정으로 나타납니다. 다만 통계적으로 경계선이고, 통제변수·표본에 따라 약해지거나 뒤집힙니다.</strong></div>
+  <ul class="key">
+    <li><b>출발점을 경상수지 +1%p로 맞춘 비교(1절)</b>: 이익 원천 충격 뒤 경상수지는 1년 뒤 0.41, 2년 뒤 0.16으로 빠르게 줄어듭니다. 그동안 기업이익(1.5~1.9)과 국민저축(1.0~1.3)은 높게 유지됩니다. 성향 원천 충격 뒤 경상수지는 0.87 → 0.50 → 0.35로 더 천천히 줄고, 가계저축도 함께 줄어듭니다(41개국 기준).</li>
+    <li><b>통계적 강도</b>: 1~3년 평균 잔존의 차이(성향−이익)는 0.32~0.35이고, 90% 구간 하단이 −0.07~−0.11로 0을 살짝 포함합니다. 당해 성장률을 통제하면 차이가 절반(0.16)으로 줄어, 일부는 경기 요인입니다. 4~6년 뒤에는 두 원천 모두 0 근처로 차이가 없습니다.</li>
+    <li><b>표본 의존성</b>: 체제전환국을 빼면 차이가 사라집니다. 한국을 포함한 선진 핵심 17개국에서는 반대로 이익 원천 쪽 경상수지가 더 오래 남습니다(차이 −0.84 [−2.54, −0.11]). 이 표본은 도구변수가 약해(F≈7) 해석에 주의가 필요합니다.</li>
+    <li><b>국민저축 대비 전가율(2절)</b>과 <b>부문 전체 비교(3~6절)</b>도 같은 구도입니다. 넓은 패널에서는 문서 쪽, 선진국에서는 반대쪽입니다.</li>
+    <li><b>LP 이외의 방법(9절)</b>: 장기차분, 주기 분해, 패널 오차수정모형 모두 기업과 가계의 차이가 0과 구분되지 않습니다. 장기적으로 경상수지 전가가 줄어드는 현상은 두 부문에 공통입니다.</li>
+    <li><b>외생적 원천(10절)</b>: 교역조건 → 이익, 고령화 → 가계저축률 모두 도구가 약합니다(F≈5). 교역조건 횡재의 축약형 반응은 “일시적 횡재가 2~3년 안에 투자로 흡수된다”는 쪽이지만, 구간이 넓습니다.</li>
+    <li><b>시사점</b>: “국가 패널 평균으로 보면 기업이익 원천 흑자는 이익이 지속되더라도 경상수지 영향이 1~2년 안에 크게 줄어든다”는 정도의 서술은 가능합니다. 단정적 대비나 선진국 일반의 법칙처럼 쓰는 것은 피하는 편이 안전합니다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>설계</h2>
+  <dl class="spec">
+    <dt>자료</dt><dd>OECD Table 14A 부문별 비금융계정(연간, 명목). 비금융법인(S11), 가계·비영리(S1M), 정부(S13), 국민경제(S1). 실질성장률은 WDI</dd>
+    <dt>경상수지</dt><dd>국민경제 순대출(S1 B9) ≈ 경상수지 + 자본수지. 모든 변수는 GNI 대비 %(추출본에 GDP가 없어 GNI 사용)</dd>
+    <dt>충격</dt><dd>① 부문 총저축(B8G)의 전년 대비 변화, ② 대안: 비금융법인 영업잉여(기업이익) 변화 vs 가계 저축률(저축/가처분소득) 변화</dd>
+    <dt>추정</dt><dd>두 충격을 함께 넣은 패널 국소투영(LP). 국가·연도 고정효과, 2년 시차와 직전 수준 통제, 국가 군집 표준오차. 전가율은 LP-IV(부문저축을 충격으로 도구화)</dd>
+    <dt>검정</dt><dd>단기(0–1년)→중기(4–6년) 전가율 하락폭의 기업−가계 차이. 국가 단위 블록 부트스트랩 499회, 90% 구간</dd>
+    <dt>에피소드</dt><dd>한 부문저축 변화가 상위 10%이고 다른 부문은 중위수 이하인 해(같은 부문은 3년 내 중복 제외). 연도평균을 뺀 사건연구와 에피소드 더미 LP</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>1. 경상수지 +1%p에서 출발한 지속성 비교</h2>
+  <p>원천별 충격이 그해 경상수지를 1%p 올리도록 정규화했습니다. 그해 경상수지 변화를 원천 충격(이익 원천 또는 성향 원천)으로 도구화한 LP-IV입니다. 따라서 경상수지 경로는 h=0에서 1이고, 이후 값은 “그 원천에서 생긴 경상수지 1단위 중 남아 있는 몫”입니다. 같은 정규화로 이익·저축률·국민저축 경로도 함께 봅니다. 모든 회귀에 <b>국가·연도 고정효과</b>, 직전 2년 시차(원천별 저축 4성분·경상수지 변화·성장률), 직전 연도 수준(부문저축·경상수지·이익·저축률)이 들어 있습니다.</p>
+  <h3>41개국 전체</h3>
+  <figure><div class="panel-title">경상수지 (충격 시점 = 1)</div>{{PER_CA_ALL}}
+    <div class="legend"><span><i class="sw corp"></i>이익 원천 충격</span><span><i class="sw hh"></i>성향 원천 충격</span></div></figure>
+  <div class="pair">
+    <figure><div class="panel-title">이익 원천 충격: 이익은 남고 경상수지는 사라진다</div>{{PER_P_ALL}}
+      <div class="legend"><span><i class="sw prof"></i>기업이익(영업잉여)</span><span><i class="sw gov"></i>국민총저축</span><span><i class="sw corp"></i>경상수지</span></div></figure>
+    <figure><div class="panel-title">성향 원천 충격: 저축률·경상수지가 함께 줄어든다</div>{{PER_H_ALL}}
+      <div class="legend"><span><i class="sw prof"></i>가계 저축률</span><span><i class="sw gov"></i>국민총저축</span><span><i class="sw hh"></i>경상수지</span></div></figure>
+  </div>
+  <h3>MNE 허브 제외 38개국</h3>
+  <div class="pair">
+    <figure><div class="panel-title">경상수지 (충격 시점 = 1)</div>{{PER_CA_MNE}}<div class="legend"><span><i class="sw corp"></i>이익 원천</span><span><i class="sw hh"></i>성향 원천</span></div></figure>
+    <figure><div class="panel-title">이익 원천 충격: 이익·국민저축·경상수지</div>{{PER_P_MNE}}<div class="legend"><span><i class="sw prof"></i>기업이익</span><span><i class="sw gov"></i>국민총저축</span><span><i class="sw corp"></i>경상수지</span></div></figure>
+  </div>
+  <h3>선진 핵심 17개국 (한국 포함)</h3>
+  <div class="pair">
+    <figure><div class="panel-title">경상수지 (충격 시점 = 1)</div>{{PER_CA_CORE}}<div class="legend"><span><i class="sw corp"></i>이익 원천</span><span><i class="sw hh"></i>성향 원천</span></div></figure>
+    <figure><div class="panel-title">이익 원천 충격: 이익·국민저축·경상수지</div>{{PER_P_CORE}}<div class="legend"><span><i class="sw prof"></i>기업이익</span><span><i class="sw gov"></i>국민총저축</span><span><i class="sw corp"></i>경상수지</span></div></figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)">음영은 90% 신뢰구간(국가 군집). 선진 핵심국은 도구변수가 약해(1단계 F≈7) 구간이 넓습니다.</p>
+  <h3>통제변수·표본별 요약 (부트스트랩 299회, 90% 구간)</h3>
+  <p>값은 충격 시점 경상수지 1%p 중 남아 있는 몫의 평균입니다. 문서 주장이 맞으려면 “차이(성향−이익)”가 양(+)이어야 합니다. 흐린 행은 1단계 F가 10 미만인 경우입니다. “대형충격만”은 충격 × (상위 10% 더미) 교차항으로, 큰 충격만으로 식별하고 작은 충격은 통제한 결과입니다. 교역조건과 실질금리를 넣으면 자료 제약으로 표본이 줄어듭니다(n 참조).</p>
+  <div class="tablewrap"><table class="persist">
+    <thead><tr><th>표본 / 통제</th><th>n</th><th>F (이익/성향)</th><th>1~3년 잔존 이익 / 성향</th><th>차이 1~3년</th><th>4~6년 잔존 이익 / 성향</th><th>차이 4~6년</th><th>이익 원천: 이익 4~6년</th></tr></thead>
+    <tbody>
+{{PERSIST_TABLE}}
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>2. 원천별 비교: 국민저축 대비 전가율</h2>
+  <p>부문저축 변화를 원천별로 정확히 나눕니다(모두 GNI 대비 %p).</p>
+  <dl class="spec">
+    <dt>기업</dt><dd>Δ기업저축 = <b>전년 유보율 × Δ영업잉여</b>(이익 원천) + 당해 영업잉여 × Δ유보율</dd>
+    <dt>가계</dt><dd>Δ가계저축 = <b>전년 가처분소득 비중 × Δ저축률</b>(성향 원천) + 당해 저축률 × Δ가처분소득 비중</dd>
+  </dl>
+  <p style="margin-top:10px">두 원천 충격을 한 회귀식에 넣고, 나머지 두 성분은 같은 시점 통제변수로 둡니다. 계수는 “해당 원천으로 그해 저축이 1%p 늘 때 h년 뒤의 변화”이므로 두 원천을 같은 단위로 비교할 수 있습니다. 누적 전가율은 0~6년 누적 경상수지 증가를 누적 국민저축 증가로 나눈 값으로, 늘어난 국민저축 중 국외로 나간 몫입니다.</p>
+  <h3>넓은 패널 (MNE 허브 제외 38개국): 문서와 같은 방향</h3>
+  <div class="pair">
+    <figure><div class="panel-title">경상수지</div>{{SRC_CA_W}}</figure>
+    <figure><div class="panel-title">국민총저축</div>{{SRC_SN_W}}</figure>
+  </div>
+  <p>이익 원천 저축 1%p는 6년 뒤에도 국민저축을 0.4%p가량 높게 유지하지만, 경상수지 효과는 4년째 0이 됩니다. 그 사이 가계 순자금운용이 −0.35%p 안팎으로 줄고(가계 주택투자 증가), 배당 지급이 늘어 국내에서 흡수됩니다. 성향 원천 저축은 국민저축과 경상수지가 함께 움직입니다.</p>
+  <h3>선진 핵심 17개국 (한국 포함): 반대 방향</h3>
+  <div class="pair">
+    <figure><div class="panel-title">경상수지</div>{{SRC_CA_C}}</figure>
+    <figure><div class="panel-title">국민총저축</div>{{SRC_SN_C}}</figure>
+  </div>
+  <div class="legend"><span><i class="sw corp"></i>이익 원천 저축 1%p</span><span><i class="sw hh"></i>성향 원천 저축 1%p</span></div>
+  <p>이 표본에서는 이익 원천 저축이 국민저축을 6년 뒤 1%p 넘게 높이고, 경상수지도 0.5~0.9%p 높게 유지됩니다. 이익 증가분이 배당·정부수지로 나가도 국내 지출이 늘지 않아 흡수가 일어나지 않습니다. 독일·일본 등의 “기업저축 과잉” 사례와 부합하는 결과입니다.</p>
+  <h3>표본별 요약 (부트스트랩 499회, 90% 구간)</h3>
+  <p>문서 주장이 맞으려면 두 차이 열이 모두 양(+)이어야 합니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>표본</th><th>국가 수</th><th>이익 원천: CA 단기 → 중기</th><th>성향 원천: CA 단기 → 중기</th><th>중기 CA 차이 (성향−이익)</th><th>누적 전가율 이익 / 성향</th><th>전가율 차이 (성향−이익)</th></tr></thead>
+    <tbody>
+{{SOURCE_TABLE}}
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">원천별 에피소드(이익 원천 또는 성향 원천 저축이 상위 10%인 해)도 같은 양상입니다. 넓은 패널에서는 이익 원천 에피소드 뒤 국민저축이 약 1%p 늘어도 경상수지는 0 근처인 반면, 성향 원천 에피소드 뒤에는 경상수지가 1~2%p 오릅니다. 선진 핵심국에서는 이익 원천 에피소드 1년 뒤부터 경상수지가 0.7~1.6%p 높게 유지되고, 성향 원천 에피소드는 4년 뒤에야 오릅니다.</p>
+</section>
+
+<section>
+  <h2>3. 부문 전체 비교: 기업저축의 경상수지 효과가 오히려 오래 남는다</h2>
+  <p>충격 시점에 부문저축이 1%p 늘 때 경상수지는 기업 <span class="num">0.64</span>, 가계 <span class="num">0.56</span>만큼 늘어 차이가 없습니다. 이후 가계저축 충격의 효과는 4~5년 만에 거의 0이 되고 6년째에는 음(−)으로 돌아서지만, 기업저축 충격은 6년 뒤에도 <span class="num">0.19</span>가 남습니다(6년째 차이 <span class="num">0.34</span>, 90% 구간 <span class="num">[0.17, 0.50]</span>).</p>
+  <p>두 부문저축 자체의 지속성도 비슷합니다(6년 뒤 잔존 비율 기업 <span class="num">0.20</span>, 가계 <span class="num">0.11</span>). 국가별로 보면 기업저축 변화의 변동성이 가계보다 큰 나라는 39개국 중 34%에 그쳐, “기업이익은 변동성이 크다”는 전제도 집계 자료에서는 확인되지 않습니다.</p>
+  <figure>
+    <div class="panel-title">충격 시점 부문저축 1%p 증가당 경상수지 반응 (GNI 대비 %p)</div>
+    {{FIG1}}
+    <div class="legend"><span><i class="sw corp"></i>기업(비금융법인) 저축 충격</span><span><i class="sw hh"></i>가계 저축 충격</span></div>
+    <figcaption><b>그림 1.</b> 결합 LP, 아일랜드·룩셈부르크 제외 39개국. 음영은 90% 신뢰구간. 두 충격을 같은 회귀식에 넣어 서로를 통제.</figcaption>
+  </figure>
+  <figure>
+    <div class="panel-title">누적 전가율: 0~h년 누적 경상수지 증가 / 누적 부문저축 증가</div>
+    {{FIG1B}}
+    <div class="legend"><span><i class="sw corp"></i>기업저축</span><span><i class="sw hh"></i>가계저축</span></div>
+    <figcaption><b>그림 2.</b> 문서의 “시점별 전가율”에 대응. 남아 있는 부문저축 1%p 중 경상수지로 나타나는 비율은 두 부문 모두 0.6~1.0으로 구분되지 않음.</figcaption>
+  </figure>
+  <h3>단기→중기 전가율 하락폭 비교 (부트스트랩 90% 구간)</h3>
+  <p>문서가 맞다면 “하락폭 차이(기업−가계)”가 양(+)이어야 합니다. 일곱 사양 모두 음(−)이거나 0과 구분되지 않습니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>사양</th><th>기업: 단기 → 중기</th><th>가계: 단기 → 중기</th><th>하락폭 차이 (기업−가계)</th><th>중기 누적 전가율 기업 / 가계</th><th>누적 하락폭 차이</th></tr></thead>
+    <tbody>
+{{TABLE}}
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>4. 부문 전체 비교: 대규모 에피소드</h2>
+  <p>기업저축이 급증한 해에는 같은 해 가계저축이 <span class="num">2.3%p</span> 함께 줄어(소득이 가계에서 기업으로 이동, 에피소드 선정 기준의 영향도 일부 포함) 경상수지는 <span class="num">0.2~0.5%p</span>만 오르고 5년 뒤 0으로 돌아갑니다. 가계저축 급증 뒤에는 경상수지가 6년에 걸쳐 약 <span class="num">1%p</span>까지 오릅니다.</p>
+  <p>다만 가계 에피소드 직전에 경상수지가 하락하던 추세(경기 저점 반등 성격)가 있고, 두 경로의 90% 구간이 전 구간에서 겹칩니다. 직전 추세를 통제한 에피소드 LP에서는 두 부문 사이에 체계적 차이가 나타나지 않습니다. 한국에서는 1999년과 2010년이 기업저축 급증 에피소드로 잡힙니다.</p>
+  <div class="pair">
+    <figure>
+      <div class="panel-title">경상수지 (GNI 대비 %p)</div>
+      {{FIG2A}}
+      <div class="legend"><span><i class="sw corp"></i>기업저축 급증</span><span><i class="sw hh"></i>가계저축 급증</span></div>
+    </figure>
+    <figure>
+      <div class="panel-title">부문저축 (GNI 대비 %p)</div>
+      {{FIG2B}}
+      <div class="legend"><span><i class="sw corp"></i>기업 에피소드: 기업저축</span><span><i class="sw corpalt"></i>기업 에피소드: 가계저축</span><span><i class="sw hh"></i>가계 에피소드: 가계저축</span><span><i class="sw hhalt"></i>가계 에피소드: 기업저축</span></div>
+    </figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)"><b style="color:var(--ink)">그림 3.</b> 에피소드 시작 전년(t−1) 대비 변화, 연도별 국가평균 제거. 아일랜드·룩셈부르크 제외. 음영은 90% 구간.</p>
+</section>
+
+<section>
+  <h2>5. 기업이익의 배분 경로: 시차 배분은 확인된다</h2>
+  <p>비금융법인 영업잉여가 GNI 대비 1%p 늘면 그해 기업저축은 <span class="num">0.51%p</span>만 늘고 나머지는 이자·배당·세금으로 나갑니다. 배당 지급은 <span class="num">0.19 → 0.29%p</span>(1년 후)로, 법인세 등은 <span class="num">0.04 → 0.08%p</span>로 이익보다 늦게 정점에 이릅니다. 정부 순대출은 첫해 <span class="num">−0.18</span>에서 2년째부터 <span class="num">+0.14~0.20</span>으로 돌아섭니다. 기업이익 자체는 4년 뒤 1/3 수준으로 평균회귀합니다.</p>
+  <p>반면 기업투자는 이익 증가에 반응하지 않았습니다. “증설 투자가 수년에 걸쳐 집행”된다는 경로는 집계 패널에서 확인되지 않으며, 반도체처럼 특정 산업에 집중된 경우에 한정해 주장하는 편이 안전합니다.</p>
+  <div class="pair">
+    <figure>
+      <div class="panel-title">이익·기업저축·경상수지</div>
+      {{FIG3A}}
+      <div class="legend"><span><i class="sw prof"></i>기업이익</span><span><i class="sw corp"></i>기업저축</span><span><i class="sw ca"></i>경상수지</span></div>
+    </figure>
+    <figure>
+      <div class="panel-title">배분: 배당·세금·정부수지</div>
+      {{FIG3B}}
+      <div class="legend"><span><i class="sw div"></i>배당 지급</span><span><i class="sw tax"></i>법인세 등 지급</span><span><i class="sw gov"></i>정부 순대출</span></div>
+    </figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)"><b style="color:var(--ink)">그림 4.</b> 기업이익(영업잉여) GNI 대비 1%p 충격에 대한 반응, 가계 저축률 충격을 함께 통제. 아일랜드·룩셈부르크 제외.</p>
+</section>
+
+<section>
+  <h2>6. 부문 전체 비교: 구조가 다른 국가를 빼면</h2>
+  <p>부문계정 구조가 다른 국가군을 차례로 빼고 같은 검정을 반복했습니다. 표의 “하락폭 차이”가 양(+)이어야 문서 주장과 맞습니다. 어떤 표본에서도 양(+)으로 유의한 경우는 없고, 선진 핵심국 표본에서는 음(−)으로 유의합니다. 이 표본에서 기업이익 충격의 경상수지 효과는 중기까지 줄지 않고(0.66 → 0.81), 가계 저축률 충격의 효과는 4–6년 뒤 음(−)으로 돌아섭니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>표본</th><th>국가 수</th><th>기업저축: 단기 → 중기</th><th>가계저축: 단기 → 중기</th><th>하락폭 차이 (부문저축)</th><th>하락폭 차이 (기업이익 vs 가계저축률)</th></tr></thead>
+    <tbody>
+{{SAMPLES}}
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">국가를 하나씩 빼 보면 하락폭 차이는 부문저축 기준 <span class="num">{{LOO_B}}</span>, 기업이익·저축률 기준 <span class="num">{{LOO_P}}</span> 범위에 머뭅니다. 결론을 좌우하는 단일 국가는 없습니다.</p>
+  <p>에피소드 결과는 표본에 민감합니다. 체제전환국을 빼면 기업저축 급증 뒤 경상수지가 0.7~1.8%p 높게 유지되고 가계저축 급증 뒤에는 오히려 낮아집니다. 선진 핵심국에서는 두 경로가 구분되지 않습니다. 문서와 같은 방향의 에피소드 결과는 변동성이 큰 동유럽 국가들에서 나온 것입니다.</p>
+  <p class="ci" style="font-size:13px">구분: MNE 허브 = 아일랜드·룩셈부르크·네덜란드. 체제전환국 = 동유럽 11개국. 신흥·원자재국 = 칠레·콜롬비아·멕시코·남아공·러시아·브라질·중국·튀르키예·코스타리카. 고변동 = 부문저축·순대출·경상수지 변화의 표준편차 중 하나가 국가 간 중위수의 2배를 넘는 국가. 부트스트랩 299회.</p>
+</section>
+
+<section>
+  <h2>7. 문서에 대한 제안</h2>
+  <p>현재 문장은 “가계저축과 달리”라는 대비에 기대고 있습니다. 원천별로 보면 넓은 패널에서는 이 대비가 성립하지만, 선진국 표본에서는 뒤집힙니다. IMF가 선진국 표본으로 반박할 수 있으므로, 대비는 보조 근거로 두고 중심 근거는 지지가 일관된 쪽(배분의 시차, 이익의 평균회귀)에 두기를 권합니다. 대비를 쓴다면 “국가 패널 평균으로는” 같은 한정어를 붙이는 편이 안전합니다.</p>
+  <div class="rewrite">
+    <div class="lab">현재</div>
+    <div>따라서 이번 흑자는 저축 성향의 변화에 따른 가계저축 증가와 달리 별도의 정책 대응 없이도 배분·지출 과정에서 축소될 것이므로, …</div>
+    <div class="lab">수정안</div>
+    <div class="new">따라서 이번 흑자는 일시적 가격 프리미엄에서 비롯된 기업이익이 기업저축으로 우선 유보된 결과로, 배당·법인세 등을 통한 배분이 이익 발생에 1년가량 후행하고(OECD 패널 기준) 이 중 외국인 배당은 본원소득 지급으로 경상수지를 직접 축소하므로, 별도의 정책 대응 없이도 시차를 두고 축소될 것이므로, …</div>
+  </div>
+  <p style="margin-top:12px">이렇게 쓰면 이번 분석에서 지지되는 사실(배분의 시차, 이익의 평균회귀)만 근거로 삼고, 지지되지 않는 사실(부문별 지속성 차이)은 피할 수 있습니다. 에피소드 결과는 “대규모 기업저축 급증 시 경상수지 반응이 작고 단기에 그쳤다”는 보조 근거로만 쓰기를 권합니다.</p>
+</section>
+
+<section>
+  <h2>8. LP-AIPW (Jordà &amp; Taylor, 2016) 확장</h2>
+  <p>원천별 에피소드를 처치로 두고, 사전결정 변수(직전 연도 원천별 저축, 경상수지 변화, 성장률, 부문저축·이익·저축률 수준)로 처치 확률을 로짓 추정한 뒤 회귀조정을 결합한 이중강건 추정(AIPW)으로 평균처치효과를 구했습니다. 결과변수는 y<sub>t+h</sub>−y<sub>t−1</sub>에서 연도·국가 평균을 뺀 값이고, 처치 시점 원천 저축 1%p당으로 정규화했습니다. 대조군은 두 원천 모두 급증하지 않은 해입니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>표본</th><th>이익 원천: CA 단기</th><th>이익 원천: CA 중기</th><th>성향 원천: CA 단기</th><th>성향 원천: CA 중기</th><th>중기 차이 (성향−이익)</th></tr></thead>
+    <tbody>
+{{IPW_TABLE}}
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">모든 구간이 0을 넓게 포함해 두 원천을 구분하지 못합니다. 처치 사례가 표본당 20~56건뿐이고, 에피소드 해에는 다른 저축 성분이 함께 움직여 국민저축이 처치 시점에 0.1~0.5%p밖에 늘지 않기 때문입니다. 기준을 상위 20%로 낮춰 사례를 늘려도(65~102건) 표준오차가 0.4~1%p로 결론은 같습니다. 이 방법을 살리려면 분기 부문계정으로 관측치를 늘리거나, 수출 횡재(Bakker, 2026의 자국통화 실질 수출소득)처럼 외생성이 분명한 처치를 정의해야 합니다.</p>
+</section>
+
+<section>
+  <h2>9. LP 이외의 방법 (41개국 전체)</h2>
+  <p>세 가지 방법으로 “경상수지가 기업저축과 가계저축에 다르게 반응하는가”를 다시 봤습니다. 계수는 해당 저축 1%p당 경상수지 변화이고, 괄호는 국가 군집 표준오차입니다. 원천 기준은 기업이익에 국가 평균 유보율을, 가계저축률에 국가 평균 가처분소득 비중을 곱해 GNI 대비 %p로 맞췄습니다.</p>
+  <dl class="spec">
+    <dt>장기차분</dt><dd>k년 경상수지 변화를 같은 기간 두 저축 변화에 회귀(연도 고정효과). 문서가 맞다면 k가 길어질수록 기업 계수만 떨어져야 합니다.</dd>
+    <dt>HP 분해</dt><dd>국가별로 순환·추세 성분을 나눈 뒤 성분끼리 회귀(국가·연도 고정효과). 문서가 맞다면 추세 성분에서 기업 계수가 가계보다 작아야 합니다.</dd>
+    <dt>패널 ECM</dt><dd>Δ경상수지를 두 저축의 당해 변화(단기)와 전년 수준(장기 관계)에 회귀. 문서가 맞다면 기업은 장기 계수가 단기보다 작아야 합니다.</dd>
+  </dl>
+  <div class="tablewrap" style="margin-top:12px"><table>
+    <thead><tr><th>방법</th><th>비교 기준</th><th>기업</th><th>가계</th><th>차이 (가계−기업)</th></tr></thead>
+    <tbody>
+{{ALT_TABLE}}
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">세 방법 모두 기업과 가계의 차이가 0과 구분되지 않습니다(24개 비교 중 유의한 것 없음). 두 부문 모두 순환 성분은 경상수지로 0.4~0.7 전가되고, 추세 성분은 0.2~0.45로 낮아집니다. 즉 “장기적으로 흡수되는” 현상은 있지만 기업과 가계에 공통이며, 기업에만 고유하지 않습니다.</p>
+</section>
+
+<section>
+  <h2>10. 외생적 원천으로 식별: 교역조건과 고령화</h2>
+  <p>이익과 저축률 변화 자체가 다른 요인에 대한 내생적 반응일 수 있으므로, 외부에서 주어진 원천만 쓰는 방식을 시도했습니다. 기업이익은 교역조건 변화로, 가계 성향은 노년부양비로 움직인 부분입니다.</p>
+  <ul class="key">
+    <li><b>도구의 강도가 약합니다.</b> 교역조건 → 기업이익의 1단계 F는 5.1, 노년부양비 → 가계저축률은 5.4(수준), 2.8(변화)입니다. 통상 기준인 10에 못 미쳐, 경상수지를 1로 정규화하는 IV 추정은 믿기 어렵습니다(정규화 시 F 3.8).</li>
+    <li><b>고령화는 방향이 맞지 않습니다.</b> 노년부양비가 오르면 가계저축률은 떨어지지만(생애주기 가설과 일치) 경상수지는 오히려 오르는 방향(유의하지 않음)이라, 성향 경로로 쓰기 어렵습니다. 또한 IMF EBA는 인구구조를 이미 적정 경상수지(CA norm)의 펀더멘털로 반영하므로, 고령화로 생긴 가계저축은 갭이 아니라 규범 쪽에 들어갑니다.</li>
+    <li><b>교역조건 횡재의 축약형 반응(아래 그림)</b>: 교역조건 10% 개선 시 기업이익은 2년간 GNI 대비 0.4%p 높다가 사라집니다. 경상수지는 2년간 +0.4%p 뒤 2~4년차에 −0.2~−0.4%p로 반전합니다. 그 사이 기업 순자금운용이 −0.8%p(2년차)로 줄고 기업투자가 늘어 흡수가 일어납니다. 횡재의 상당 부분은 정부저축(+0.8%p, 1년차)으로 갑니다. 구간이 넓지만 “일시적 횡재 → 투자로 흡수”라는 문서의 서술과 같은 방향입니다. 다만 이익 자체가 2년 만에 사라지므로 “이익은 지속되는데 경상수지만 사라진다”를 보여주지는 않습니다.</li>
+  </ul>
+  <div class="pair">
+    <figure><div class="panel-title">교역조건 +10%: 이익·경상수지·국민저축</div>{{TOT_A}}
+      <div class="legend"><span><i class="sw prof"></i>기업이익</span><span><i class="sw ca"></i>경상수지</span><span><i class="sw gov"></i>국민총저축</span></div></figure>
+    <figure><div class="panel-title">교역조건 +10%: 흡수 경로</div>{{TOT_B}}
+      <div class="legend"><span><i class="sw corp"></i>기업 순자금운용</span><span><i class="sw gov"></i>정부 순자금운용</span><span><i class="sw prof"></i>기업투자</span></div></figure>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)">GNI 대비 %p, 국가·연도 고정효과, 90% 구간. 교역조건 자료(WDI)가 있는 관측치 약 640개.</p>
+</section>
+
+<section>
+  <h2>한계</h2>
+  <ul class="key">
+    <li>축약형 식별입니다. 부문저축 변화에는 경기·소득분배·회계 재분류가 섞여 있어 “저축성향의 외생적 변화”를 깨끗하게 분리하지 못합니다. 교역조건을 기업저축의 도구로 써 보았으나 도구가 약했습니다(1단계 F &lt; 1).</li>
+    <li>경상수지 대리변수(S1 B9)에 자본수지가 포함되고, 분모가 GDP가 아닌 GNI입니다.</li>
+    <li>집계 비금융법인 자료라 반도체처럼 소수 기업에 집중된 가격 횡재와 성격이 다를 수 있습니다.</li>
+    <li>고정효과와 시차 종속변수를 함께 쓰는 동적 패널이라 지속성이 다소 과소추정될 수 있습니다(국가당 약 30년).</li>
+  </ul>
+</section>
+
+<footer>
+  자료: OECD Table 14A(DSD_NASEC10@DF_TABLE14), World Bank WDI. 코드: <code>research/sector_saving_ca/</code> (build_panel.py → run_analysis.py → make_report.py). 결과표: <code>output/joint_lp.csv</code>, <code>output/passthrough.csv</code>, <code>output/summary.json</code>.
+</footer>
+</main>
