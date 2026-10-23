@@ -1,0 +1,33 @@
+base,shift,source,endog,F,n,countries
+first 3 years,profit growth,LOO,dprof,1.3270787152496102,703,34
+first 3 years,profit growth,LOO,dsv,2.0093817259941873,703,34
+first 3 years,profit growth,US,dprof,0.5455836917739745,634,33
+first 3 years,profit growth,US,dsv,0.0008943342142199912,634,33
+first 3 years,margin change,LOO,dprof,0.017200054173494364,703,34
+first 3 years,margin change,LOO,dsv,0.32234964753336154,703,34
+first 3 years,margin change,US,dprof,0.48211843246109604,634,33
+first 3 years,margin change,US,dsv,0.004010906500257205,634,33
+first 3 years,value-added growth,LOO,dprof,10.33448965899418,703,34
+first 3 years,value-added growth,LOO,dsv,8.740144921566086,703,34
+first 3 years,value-added growth,US,dprof,0.8373627287646397,634,33
+first 3 years,value-added growth,US,dsv,0.004217618525666322,634,33
+first 3 years,profit change/GVA,LOO,dprof,0.014466552575977851,703,34
+first 3 years,profit change/GVA,LOO,dsv,0.4514442333974225,703,34
+first 3 years,profit change/GVA,US,dprof,0.03056541995412137,634,33
+first 3 years,profit change/GVA,US,dsv,0.11744163451629853,634,33
+1995-99,profit growth,LOO,dprof,4.827598567362523,588,31
+1995-99,profit growth,LOO,dsv,7.901144554080543,588,31
+1995-99,profit growth,US,dprof,1.944747128496661,569,30
+1995-99,profit growth,US,dsv,3.455003922546231,569,30
+1995-99,margin change,LOO,dprof,1.4498807941255258,588,31
+1995-99,margin change,LOO,dsv,4.562269923365964,588,31
+1995-99,margin change,US,dprof,1.5649674859695504,569,30
+1995-99,margin change,US,dsv,2.259813357991508,569,30
+1995-99,value-added growth,LOO,dprof,8.10358190947664,588,31
+1995-99,value-added growth,LOO,dsv,8.309516966319357,588,31
+1995-99,value-added growth,US,dprof,1.2790933930617252,569,30
+1995-99,value-added growth,US,dsv,2.7135524971461162,569,30
+1995-99,profit change/GVA,LOO,dprof,2.107815984552942,588,31
+1995-99,profit change/GVA,LOO,dsv,3.8608315229843098,588,31
+1995-99,profit change/GVA,US,dprof,2.5375881081969123,569,30
+1995-99,profit change/GVA,US,dsv,2.64944858539296,569,30
