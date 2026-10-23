@@ -88,7 +88,7 @@ def figures(r):
     for ax, horizon, title in ((axes[0], "short", "(a) Years 1–2"), (axes[1], "medium", "(b) Years 3–6")):
         for j, x in enumerate(c.SRC):
             v = s[s.source == x].set_index("spec").loc[specs, horizon].to_numpy()
-            ax.scatter(v, y + (j - 1.5) * 0.15, color=col[x], s=18, marker="o" if ls[x] == "-" else "D", label=LAB[x], zorder=3)
+            ax.scatter(v, y + (j - 1.5) * 0.15, color=col[x], s=18, marker="o" if x in ("x_P", "x_Y") else "D", label=LAB[x], zorder=3)
         ax.axvline(0, color=".3", lw=.6)
         ax.set_title(title, loc="left", fontsize=9.5)
         ax.set_xlabel("Average response (impact = 1)")
