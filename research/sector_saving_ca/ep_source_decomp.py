@@ -95,7 +95,7 @@ def figures(r):
              fontsize=7, wrap=True, va="top")
     fp.save(fig, "fig_source_decomp", sfx="")
 
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.6))
+    fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.6), sharey="col")   # 기업끼리(왼쪽), 가계끼리(오른쪽) 같은 축
     for ax, s in zip(axes.ravel(), ["x_P", "x_Y", "x_R", "x_H"]):
         vs = [("reinv", "Reinvestment ratio", "#b5541c", "-"), ("payout", "Net payout ratio", "#7a6aa8", "--")] \
             if GROUPS[s] == "nl_corp" else [("hh_rate", "Household saving rate", "#1f3b73", "-")]
