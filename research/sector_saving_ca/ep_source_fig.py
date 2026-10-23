@@ -54,11 +54,12 @@ def run(reps=499):
 def figures(r):
     import fig_paper as fp
     plt = fp.plt
-    col = {"x_P": fp.CO, "x_R": "#e0a070", "x_H": fp.HH, "x_Y": "#8aa0c8"}
-    ls = {"x_P": "-", "x_R": "--", "x_H": "-", "x_Y": "--"}
+    col = {"x_P": fp.CO, "x_R": fp.CO, "x_H": fp.HH, "x_Y": fp.HH}   # 색 = 부문, 패널 = 성분 유형
+    ls = {"x_P": "-", "x_R": "-", "x_H": "--", "x_Y": "--"}
     n, k = int(r.n.iloc[0]), int(r.countries.iloc[0])
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.3), sharey=True)
-    for ax, srcs, title in ((axes[0], ["x_P", "x_R"], "(a) Corporations"), (axes[1], ["x_H", "x_Y"], "(b) Households")):
+    for ax, srcs, title in ((axes[0], ["x_P", "x_Y"], "(a) Saving from higher income or profits"),
+                            (axes[1], ["x_R", "x_H"], "(b) Saving from a change in behavior")):
         for x in srcs:
             q = r[r.source == x].sort_values("h")
             ax.fill_between(q.h, q.lo68, q.hi68, color=col[x], alpha=0.15, lw=0)
