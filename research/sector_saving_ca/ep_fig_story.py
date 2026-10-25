@@ -109,7 +109,109 @@ def figure():
     fp.save(fig, "fig_story", sfx="")
 
 
+def figure2():
+    """2×2: (a) 에피소드 (b) 순대출 반응 + 반감기 (c) 누적 순대출 (d) 기업 조정. 누적·반감기는 ep_cum.csv."""
+    import fig_paper as fp
+    plt = fp.plt
+    cat, p, dp, now, dn = episodes()
+    r = pd.read_csv(OUT / "ep_final.csv")
+    cu = pd.read_csv(OUT / "ep_cum.csv")
+    g = lambda key: r[r.key == key].sort_values("h")
+    H = ef.H
+    fig, axes = plt.subplots(2, 2, figsize=(10.2, 8.0))
+    axa, axb, axc, axd = axes.flat
+    # (a)
+    pal = {"Household saving rate": fp.HH, "Household income": "#7f9cc9", "Corporate profits": fp.CO, "Corporate retention": "#7a5195",
+           "Government revenue": "#6a8f3c", "Government spending": "#b3cf8f", "Financial corporations and other": "0.6", "Residual": "0.88"}
+    lab = {"Household saving rate": "Household saving rate", "Household income": "Household income", "Corporate profits": "Corporate profits",
+           "Corporate retention": "Corporate retention", "Government revenue": "Government disposable income",
+           "Government spending": "Government consumption (−)", "Financial corporations and other": "Financial corporations, other",
+           "Residual": "Residual (real–financial discrepancy)"}
+    est = {"Corporate profits", "Corporate retention", "Government revenue", "Financial corporations and other"}
+    for x, (c, d) in enumerate(((p, dp), (now, dn))):
+        pos = neg = 0.0
+        for kk in cat:
+            v = c[kk]
+            if abs(v) < 1e-9:
+                continue
+            hatch = "xx" if kk == "Residual" else ("////" if (x == 1 and kk in est) else None)
+            axa.bar(x, v, bottom=pos if v >= 0 else neg, color=pal[kk], width=0.55, edgecolor="white", lw=0.3, hatch=hatch, label=lab[kk])
+            pos, neg = (pos + v, neg) if v >= 0 else (pos, neg + v)
+        axa.scatter(x, d, color="k", s=24, zorder=5, label="Change in national saving" if x == 0 else None)
+        axa.text(x + 0.31, d, f"{d:+.1f}", ha="left", va="center", fontsize=7.5)
+    axa.axhline(0, color=".3", lw=.6)
+    axa.set_xticks([0, 1])
+    axa.set_xticklabels(["2012→2015\n(annual)", "H1 2025→H1 2026\n(half-year, estimated)"], fontsize=8)
+    axa.set_xlim(-0.5, 2.7)
+    axa.set_ylim(-3, 12.5)
+    axa.set_ylabel("Percentage points of GNI")
+    seen = {}
+    for hh, ll in zip(*axa.get_legend_handles_labels()):
+        seen.setdefault(ll, hh)
+    axa.legend(seen.values(), seen.keys(), loc="center right", fontsize=6.2, frameon=False)
+    axa.set_title("(a) Korea: sources of the rise in national saving", loc="left", fontsize=9.2)
+    # (b)
+    hl = cu[cu.stat == "half_life"].set_index("sector")
+    for s, cl, l in (("hh", fp.HH, "Households: shift in the saving rate"), ("corp", fp.CO, "Corporations: profit windfall")):
+        q = g(s)
+        axb.fill_between(q.h, q.lo90, q.hi90, color=cl, alpha=0.08, lw=0)
+        axb.fill_between(q.h, q.lo68, q.hi68, color=cl, alpha=0.18, lw=0)
+        axb.plot(q.h, q.b, color=cl, lw=2.0, marker="o", ms=3.4, label=l)
+        b_, lo, hi = hl.loc[s, ["b", "lo90", "hi90"]]
+        axb.errorbar(b_, 0.5, xerr=[[b_ - lo], [hi - b_]], fmt="D", color=cl, ms=5, capsize=3, lw=1.2, zorder=6)
+        axb.text(b_ + (0.12 if s == "hh" else -0.1), 0.56 if s == "hh" else 0.42, f"half-life {b_:.1f} yr", color=cl, fontsize=7.4,
+                 ha="left" if s == "hh" else "right")
+    axb.axhline(0.5, color="0.6", lw=0.6, ls=":")
+    fp.finish(axb, "Net lending (impact = 1)", h0=0)
+    axb.set_xlabel("Years after the saving change ($h$)")
+    axb.set_xlim(-0.3, H - 0.7)
+    axb.set_xticks(range(H))
+    axb.set_ylim(-0.75, 1.1)
+    axb.legend(loc="upper right", fontsize=7, frameon=False)
+    axb.set_title("(b) OECD panel: response of sector net lending", loc="left", fontsize=9.2)
+    # (c)
+    for s, cl, l in (("hh", fp.HH, "Households: shift in the saving rate"), ("corp", fp.CO, "Corporations: profit windfall")):
+        q = cu[(cu.sector == s) & cu.stat.str.startswith("cum")].copy()
+        q["h"] = q.stat.str[3:].astype(int)
+        axc.fill_between(q.h, q.lo90, q.hi90, color=cl, alpha=0.08, lw=0)
+        axc.fill_between(q.h, q.lo68, q.hi68, color=cl, alpha=0.18, lw=0)
+        axc.plot(q.h, q.b, color=cl, lw=2.0, marker="o", ms=3.4, label=l)
+        axc.text(H - 1 + 0.12, q.b.iloc[-1], f"{q.b.iloc[-1]:.1f}", color=cl, fontsize=8, va="center")
+    fp.finish(axc, "Cumulative net lending (impact = 1)", h0=0)
+    axc.set_xlabel("Years after the saving change ($h$)")
+    axc.set_xlim(-0.3, H - 0.4)
+    axc.set_xticks(range(H))
+    axc.set_ylim(-0.8, 4.0)
+    axc.legend(loc="upper left", fontsize=7, frameon=False)
+    axc.set_title("(c) OECD panel: net lending accumulated to year $h$", loc="left", fontsize=9.2)
+    # (d)
+    ef.bars(axd, g, "corp")
+    fp.finish(axd, "Contribution (impact net lending = 1)", h0=0)
+    axd.set_xlabel("Years after the profit windfall ($h$)")
+    axd.set_xlim(-0.5, H - 0.5)
+    axd.set_xticks(range(H))
+    axd.legend(loc="upper right", fontsize=6.6, frameon=False, ncol=2)
+    axd.set_ylim(-3.2, 3.2)
+    axd.set_title("(d) OECD panel: how corporate net lending adjusts", loc="left", fontsize=9.2)
+    fig.suptitle("Korea's saving surge then and now, and what the panel says about persistence", x=0.0, ha="left", fontweight="bold", y=1.0)
+    fig.tight_layout()
+    fig.text(0.0, -0.005,
+             "Notes: (a) Gross saving, percent of GNI. Corporate saving splits into a profit component (change in operating surplus at the earlier "
+             "retention ratio) and a retention component; household saving into a saving-rate and an income component; government saving into "
+             "disposable income and minus final consumption. 2012→2015: OECD annual sector accounts, cumulated over the years. H1 2026: Bank of "
+             "Korea quarterly accounts; hatched components are estimated (sector saving = investment + flow-of-funds net lending + the gap between "
+             "the two accounts at its H1 2025 share of GNI; households: published saving); the unattributed widening of that gap is a residual. "
+             "(b)–(d) " + ef.note(r) + " Local projections with lags of own net lending, both saving components, GDP growth and government net "
+             "lending, and country and year fixed effects; normalized by the impact response. Bands: 68 and 90 percent, country-cluster bootstrap "
+             "(999 replications). (b) Diamonds: half-life, the first year the response falls below one half (linear interpolation), with 90 "
+             "percent intervals. (c) Sum of the responses from year 0 to year h: the net lending, and hence the current-account surplus, that a "
+             "unit saving change generates over that span. (d) Cumulative changes in the items of the corporate account; outlays enter with a "
+             "negative sign; 'Other' is the remainder. Sources: OECD; Bank of Korea; authors' calculations.", fontsize=6.7, wrap=True, va="top")
+    fp.save(fig, "fig_story2", sfx="")
+
+
 if __name__ == "__main__":
     cat, p, dp, now, dn = episodes()
     print(pd.DataFrame({"2012-2015": p, "H1 2026": now}).round(2).to_string(), "\nnational", round(dp, 2), round(dn, 2))
     figure()
+    figure2()
