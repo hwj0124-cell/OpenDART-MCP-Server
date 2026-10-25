@@ -10,7 +10,7 @@
   A1 정부 D_G의 GNI 대비 비중 고정 → S_G = NL_G^FoF + I_G + D_G,   정부 처분가능소득 = S_G + C_G
   A2 금융법인 저축의 GNI 대비 비중 고정
   A3 비금융법인 영업잉여 = 총영업잉여 − 비기업 영업잉여(전년 증가율로 연장)
-  A4 (경로 II만) 민간 총자본형성 중 비금융법인·금융법인·가계 비중을 전년 연간값으로 고정, D_NFC의 GNI 대비 비중 고정
+  A4 (경로 II만) (총자본형성 − 정부 총고정자본형성) 중 비금융법인·금융법인·가계 비중을 전년 연간값으로 고정, D_NFC의 GNI 대비 비중 고정
 경로 I (기준, 소득 측 잔차):   S_NFC = S − S_HH − S_G − S_FC
 경로 II (동료 방식, 자본계정): S_NFC = NL_NFC^FoF + I_NFC + D_NFC
 두 경로의 차이 = 비금융법인에 배분되지 않은 통계 불일치 변화 + 가정 오차. 관측된 총 불일치 변화 ΔD를 함께 보고.
@@ -63,8 +63,8 @@ def estimate(q, a, base, new, prev):
     # 경로 I
     e["nfc_I"] = n.nat_saving - e["hh"] - e["gov"] - e["fc"]
     # 경로 II (A4)
-    w = a.loc[yb, ["i_nfc", "i_fc", "i_hh"]]
-    w = w / w.sum()
+    yq = q[q.index.str.startswith(str(yb))]
+    w = a.loc[yb, ["i_nfc", "i_fc", "i_hh"]] / (yq.gcf.sum() - yq.gov_gfcf.sum())   # 분기 기준과 같은 정의(총투자 − 정부 GFCF)의 연간 비율
     i_priv_b, i_priv_n = b.gcf - b.gov_gfcf, n.gcf - n.gov_gfcf
     d_nfc = b.nfc_saving - b.nl_nfc - w.i_nfc * i_priv_b
     e["nfc_II"] = n.nl_nfc + w.i_nfc * i_priv_n + sh(d_nfc, b.gni)

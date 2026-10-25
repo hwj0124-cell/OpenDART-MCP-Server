@@ -3,10 +3,11 @@
 부문 j(GNI 대비 %p 변화):  ΔS_j = Δ(I_j + NL_j^FoF) + ΔD_j,   Σ_j ΔD_j = ΔD (국민저축 − 총투자 − 국내 순자금운용, 관측)
 가계: S_HH 공표 → ΔD_HH는 공표치에 맞춰 정해짐(가계 투자는 민간 총자본형성의 2025년 연간 비중, 가정 A4).
 나머지 R = ΔD − ΔD_HH를 비금융법인·금융법인·정부에 배분하는 규칙:
+  none    : (기준) 세 부문의 D를 2025 상반기 GNI 비중으로 고정, R은 잔차(통계 불일치)로 남김
+  exp2025 : 부문 저축이 공표된 2024→2025 두 반기에서 실제로 R이 나뉜 비율(합산)
   equal   : 1/3씩
-  history : 연간 2011–2025 ΔD_j를 ΔD에 회귀한 적재치(원점 통과)를 세 부문 안에서 재정규화
-  all_nfc : 전부 비금융법인(이전 경로 I과 같은 귀속 방향)
-  none    : 배분하지 않음(ΔD_j = 0, 순자금운용만 신뢰) → 국민저축과 R만큼 어긋남
+  all_nfc : 전부 비금융법인
+  (연간 2011–2025 회귀 적재치는 표준오차가 커서(기업 0.14 ± 0.40) 쓰지 않음; loadings()로 보고만 함)
 D_j의 수준은 부문마다 크므로(비금융법인 GNI의 약 5%, 가계 약 −6%) D=0을 수준으로 둘 수는 없고, 변화만 0으로 둘 수 있음(none).
 분해: 이익 성분 = 2025 상반기 유보율 × Δ(영업잉여/GNI) (모든 규칙 공통), 유보 성분 = ΔS_NFC − 이익 성분.
 → output/ep_korea_2026_alloc.csv, output/paper/fig_korea_2026_alloc.(png|pdf)
@@ -17,7 +18,7 @@ import pandas as pd
 import ep_korea_2026 as k
 from make_report import OUT
 
-RULES = {"equal": "Equal thirds", "history": "Historical loadings", "all_nfc": "All to corporations", "none": "Not allocated"}
+RULES = {"none": "Held at H1 2025 share", "exp2025": "As in 2025 half-years", "equal": "Equal thirds", "all_nfc": "All to corporations"}
 
 
 def loadings(a, fa):
@@ -32,8 +33,8 @@ def loadings(a, fa):
 def pieces(q, a):
     b, n, e = k.estimate(q, a, ["2025Q1", "2025Q2"], ["2026Q1", "2026Q2"], ["2024Q1", "2024Q2"])
     S = lambda x, g: 100 * x / g
-    w = a.loc[2025, ["i_nfc", "i_fc", "i_hh"]]
-    w = w / w.sum()
+    yq = q[q.index.str.startswith(str(2025))]
+    w = a.loc[2025, ["i_nfc", "i_fc", "i_hh"]] / (yq.gcf.sum() - yq.gov_gfcf.sum())   # 분기 기준과 같은 정의(총투자 − 정부 GFCF)의 연간 비율
     ipb, ipn = b.gcf - b.gov_gfcf, n.gcf - n.gov_gfcf
     inv = {"nfc": (w.i_nfc * ipb, w.i_nfc * ipn), "fc": (w.i_fc * ipb, w.i_fc * ipn), "hh": (w.i_hh * ipb, w.i_hh * ipn),
            "gov": (b.gov_gfcf, n.gov_gfcf)}
@@ -44,11 +45,29 @@ def pieces(q, a):
     return b, n, e, pd.Series(dIN), dD, dD_hh
 
 
+def exp2025(q, a):
+    """2024→2025 상반기·하반기: R과 그 실제 귀속(공표된 부문 저축으로 계산)."""
+    S = lambda x, g: 100 * x / g
+    tot = pd.Series(0.0, index=["nfc", "fc", "gov"])
+    for base, new in ((["2024Q1", "2024Q2"], ["2025Q1", "2025Q2"]), (["2024Q3", "2024Q4"], ["2025Q3", "2025Q4"])):
+        b, n = q.loc[base].sum(), q.loc[new].sum()
+        yq = q[q.index.str.startswith("2024")]
+        w = a.loc[2024, ["i_nfc", "i_fc", "i_hh"]] / (yq.gcf.sum() - yq.gov_gfcf.sum())
+        inv = lambda x, s: x.gov_gfcf if s == "gov" else w[f"i_{s}"] * (x.gcf - x.gov_gfcf)
+        for s in tot.index:
+            tot[s] += (S(n[f"{s}_saving"], n.gni) - S(b[f"{s}_saving"], b.gni)) - (S(n[f"nl_{s}"] + inv(n, s), n.gni) - S(b[f"nl_{s}"] + inv(b, s), b.gni))
+    return tot / tot.sum()
+
+
+EXP = None
+
+
 def allocate(rule, R, beta):
-    if rule == "equal":
+    global EXP
+    if rule == "exp2025":
+        w = EXP
+    elif rule == "equal":
         w = pd.Series(1 / 3, index=["nfc", "fc", "gov"])
-    elif rule == "history":
-        w = beta[["nfc", "fc", "gov"]] / beta[["nfc", "fc", "gov"]].sum()
     elif rule == "all_nfc":
         w = pd.Series({"nfc": 1.0, "fc": 0.0, "gov": 0.0})
     else:
@@ -79,6 +98,7 @@ def figure(res, alloc, dD, dD_hh, beta):
     plt = fp.plt
     pal = {"Corporate profits": fp.CO, "Corporate retention": "#7a5195", "Household saving rate": fp.HH, "Household income": "#7f9cc9",
            "Government revenue": "#6a8f3c", "Government spending": "#b3cf8f", "Financial corporations": "0.55", "Unallocated": "0.85"}
+    lab_u = "Residual (statistical discrepancy)"
     lab = {"Government revenue": "Government disposable income", "Government spending": "Government consumption (−)"}
     fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.2), gridspec_kw=dict(width_ratios=[1.3, 1]))
     ax = axes[0]
@@ -88,7 +108,7 @@ def figure(res, alloc, dD, dD_hh, beta):
             if abs(v) < 1e-9:
                 continue
             ax.bar(x, v, bottom=pos if v >= 0 else neg, color=pal[kk], width=0.58, edgecolor="white", lw=0.3,
-                   label=lab.get(kk, kk) if x == 0 or (kk == "Unallocated" and r == "none") else None)
+                   label=(lab_u if kk == "Unallocated" else lab.get(kk, kk)) if x == 0 else None, hatch="xx" if kk == "Unallocated" else None)
             pos, neg = (pos + v, neg) if v >= 0 else (pos, neg + v)
         ax.scatter(x, dnat, color="k", s=22, zorder=5, label="Change in national saving" if x == 0 else None)
     ax.axhline(0, color=".3", lw=.6)
@@ -109,6 +129,8 @@ def figure(res, alloc, dD, dD_hh, beta):
                 continue
             ax.bar(x, v, bottom=pos, color=cols[s], width=0.58, edgecolor="white", lw=0.3, label=names[s] if r == "equal" else None)
             pos += v
+            if r == "none" and s == "hh":
+                ax.bar(x, dD - dD_hh, bottom=pos, color="0.85", hatch="xx", width=0.58, edgecolor="white", lw=0.3, label="Residual")
     ax.axhline(dD, color="k", lw=0.9, ls="--", label=f"Observed change in discrepancy ({dD:+.1f})")
     ax.set_xticks(range(len(alloc)))
     ax.set_xticklabels([RULES[r].replace(" ", "\n", 1) for r in alloc], fontsize=7.8)
@@ -121,9 +143,9 @@ def figure(res, alloc, dD, dD_hh, beta):
              "Notes: Each sector's saving = its investment + its flow-of-funds net lending + D, where D collects capital transfers, non-produced "
              "assets and the gap between the real and financial accounts. The total change in D is published (national saving − investment − "
              "domestic net lending). Households' share follows from their published saving (their investment is private investment at its 2025 "
-             "share). The rest is split across nonfinancial corporations, financial corporations and government: equally; by historical loadings "
-             f"(regression of each sector's annual change in D on the total, 2011–2025: corporations {beta['nfc']:.2f}, financial "
-             f"{beta['fc']:.2f}, government {beta['gov']:.2f}, households {beta['hh']:.2f}); entirely to corporations; or not at all. Profit "
+             "share of total less government fixed investment). Baseline: the other sectors' D held at its H1 2025 share of GNI, leaving the rest as a "
+             "residual. Alternatives split the rest as it actually split in the 2024→2025 half-years, for which sector saving is published "
+             f"(corporations {EXP['nfc']:.2f}, financial {EXP['fc']:.2f}, government {EXP['gov']:.2f}), equally, or entirely to corporations. Profit "
              "component = change in operating surplus at the H1 2025 retention ratio, common to all rules; retention component = the rest of the "
              "change in corporate saving. Source: Bank of Korea; authors' calculations.", fontsize=6.6, wrap=True, va="top")
     fp.save(fig, "fig_korea_2026_alloc", sfx="")
@@ -132,6 +154,8 @@ def figure(res, alloc, dD, dD_hh, beta):
 if __name__ == "__main__":
     q, a, fa = k.load()
     beta = loadings(a, fa)
+    EXP = exp2025(q, a)
+    print("2025 half-year shares of R", EXP.round(2).to_dict())
     b, n, e, dIN, dD, dD_hh = pieces(q, a)
     R = dD - dD_hh
     res, alloc, rows = {}, {}, {}
