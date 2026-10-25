@@ -210,7 +210,7 @@ def figure2():
     fp.save(fig, "fig_story2", sfx="")
 
 
-def figure3(hmax=5):
+def figure3(hmax=5, name="fig_story3"):
     """2×2: (a) 에피소드 (b) 순대출 반응 (c) 기업 분해 (d) 가계 분해, h = 0…hmax."""
     import fig_paper as fp
     plt = fp.plt
@@ -300,7 +300,48 @@ def figure3(hmax=5):
              "country-cluster bootstrap (999 replications). (c)–(d) Cumulative changes in the items of each sector's account, percent of GNI; "
              "outlays (dividends, taxes, interest, consumption, investment) enter with a negative sign, so a fall in consumption is a positive "
              "contribution; 'Other' is the remainder. Sources: OECD; Bank of Korea; authors' calculations.", fontsize=6.7, wrap=True, va="top")
-    fp.save(fig, "fig_story3", sfx="")
+    if name:
+        fp.save(fig, name, sfx="")
+
+
+def figure4(hmax=5):
+    """fig_story3과 같되 (c)(d)를 항목별 선(수준 변화, 자연 부호, 68% 구간)으로."""
+    import fig_paper as fp
+    plt = fp.plt
+    figure3(hmax, name=None)
+    fig = plt.gcf()
+    axc, axd = fig.axes[2], fig.axes[3]
+    r = pd.read_csv(OUT / "ep_final.csv")
+    r = r[r.h <= hmax]
+    g = lambda key: r[r.key == key].sort_values("h")
+    H = hmax + 1
+    for ax, s, items, ttl, xl in ((axc, "corp", ["prof", "gcf_corp", "div_net"], "(c) OECD panel: corporations after a profit windfall",
+                                   "Years after the profit windfall ($h$)"),
+                                  (axd, "hh", ["yd_hh", "cons_hh", "gcf_hh"], "(d) OECD panel: households after a saving-rate shift",
+                                   "Years after the shift in the saving rate ($h$)")):
+        ax.clear()
+        for v in items:
+            q = g(f"{s}_{v}")
+            sg = ef.SIGN[v]
+            lo, hi = sorted([sg * q.lo68.to_numpy(), sg * q.hi68.to_numpy()], key=lambda a: a.mean())
+            ax.fill_between(q.h, np.minimum(sg * q.lo68, sg * q.hi68), np.maximum(sg * q.lo68, sg * q.hi68), color=ef.PAL[v], alpha=0.16, lw=0)
+            ax.plot(q.h, sg * q.b, color=ef.PAL[v], lw=1.9, marker="o", ms=3.2, label=ef.LAB[v].replace(" (−)", ""))
+        q = g(f"{s}_nl")
+        ax.plot(q.h, q.b, color="k", lw=1.6, ls="--", marker="s", ms=3, label="Net lending")
+        fp.finish(ax, "Cumulative change, percent of GNI\n(impact net lending = 1)" if s == "corp" else "", h0=0)
+        ax.set_xlim(-0.3, H - 0.7)
+        ax.set_xticks(range(H))
+        ax.set_xlabel(xl)
+        ax.set_title(ttl, loc="left", fontsize=9.2)
+        ax.legend(loc="upper right", fontsize=7, frameon=False)
+    axc.set_ylim(-0.6, 2.4)
+    axd.set_ylim(-0.8, 1.15)
+    fig.texts[-1].set_text(fig.texts[-1].get_text().replace(
+        "(c)–(d) Cumulative changes in the items of each sector's account, percent of GNI; outlays (dividends, taxes, interest, consumption, "
+        "investment) enter with a negative sign, so a fall in consumption is a positive contribution; 'Other' is the remainder.",
+        "(c)–(d) Cumulative changes from year −1 in items of each sector's account, percent of GNI, scaled by the impact response of the "
+        "sector's net lending; shaded: 68 percent bands. Corporate taxes and interest, small, are not shown."))
+    fp.save(fig, "fig_story4", sfx="")
 
 
 if __name__ == "__main__":
@@ -309,3 +350,4 @@ if __name__ == "__main__":
     figure()
     figure2()
     figure3()
+    figure4()
