@@ -13,6 +13,7 @@ import ep_final as ef
 import ep_korea_2026 as k
 import ep_korea_2026_alloc as al
 import ep_korea_sources as ks
+import source_shocks as ss
 from make_report import OUT
 
 
@@ -344,6 +345,120 @@ def figure4(hmax=5):
     fp.save(fig, "fig_story4", sfx="")
 
 
+CAT_G = ["Household saving rate", "Household income", "Corporate profits", "Corporate retention", "Government saving",
+         "Financial corporations and other", "Residual"]
+
+
+def episodes_gdp():
+    """GDP 대비, 정부는 저축 합계. 2012→2015: OECD 패널(이미 GDP 대비), H1 2026: 한국은행 분기, 분모를 명목 GDP로."""
+    d = ss.prepare(pd.read_csv(OUT.parent / "data" / "panel.csv"))
+    kr = d[d.country == "KOR"].set_index("year").sort_index()
+    a, b = 2012, 2015
+    yrs = range(a + 1, b + 1)
+    past = {"Corporate profits": kr.loc[yrs, "x_P"].sum(), "Corporate retention": kr.loc[yrs, "x_R"].sum(),
+            "Household saving rate": kr.loc[yrs, "x_H"].sum(), "Household income": kr.loc[yrs, "x_Y"].sum(),
+            "Government saving": kr.loc[b, "sv_gov"] - kr.loc[a, "sv_gov"]}
+    dpast = kr.loc[b, "sv_nat"] - kr.loc[a, "sv_nat"]
+    past["Financial corporations and other"] = dpast - sum(past.values())
+    q, a_, fa = k.load()
+    g = pd.read_csv(k.RAW / "bok_gdp_exp.csv", comment="#").set_index("period")
+    qs = [x for x in q.index if x in g.index]
+    q.loc[qs, "gni"] = g.loc[qs, "gdp"]              # 분모를 명목 GDP로 교체(열 이름만 gni)
+    bq, n, e, dIN, dD, dD_hh = al.pieces(q, a_)
+    c, dS, dnow, _, _ = al.decompose(bq, n, e, dIN, al.allocate("none", dD - dD_hh, None), dD_hh)
+    now = {"Corporate profits": c["Corporate profits"], "Corporate retention": c["Corporate retention"],
+           "Household saving rate": c["Household saving rate"], "Household income": c["Household income"],
+           "Government saving": c["Government revenue"] + c["Government spending"],
+           "Financial corporations and other": c["Financial corporations"], "Residual": c["Unallocated"]}
+    return pd.Series(past).reindex(CAT_G).fillna(0.0), dpast, pd.Series(now).reindex(CAT_G), dnow
+
+
+def figure5(hmax=5):
+    """fig_story4의 GDP판: (a) 정부 합계, 모든 수치 GDP 대비."""
+    import fig_paper as fp
+    plt = fp.plt
+    p, dp, now, dn = episodes_gdp()
+    r = pd.read_csv(OUT / "ep_final.csv")
+    r = r[r.h <= hmax]
+    g = lambda key: r[r.key == key].sort_values("h")
+    H = hmax + 1
+    fig, axes = plt.subplots(2, 2, figsize=(10.2, 8.0))
+    axa, axb, axc, axd = axes.flat
+    pal = {"Household saving rate": fp.HH, "Household income": "#7f9cc9", "Corporate profits": fp.CO, "Corporate retention": "#7a5195",
+           "Government saving": "#6a8f3c", "Financial corporations and other": "0.6", "Residual": "0.88"}
+    lab = {"Financial corporations and other": "Financial corporations, other", "Residual": "Residual (real–financial discrepancy)"}
+    est = {"Corporate profits", "Corporate retention", "Government saving", "Financial corporations and other"}
+    for x, (c, d) in enumerate(((p, dp), (now, dn))):
+        pos = neg = 0.0
+        for kk_ in CAT_G:
+            v = c[kk_]
+            if abs(v) < 1e-9:
+                continue
+            hatch = "xx" if kk_ == "Residual" else ("////" if (x == 1 and kk_ in est) else None)
+            axa.bar(x, v, bottom=pos if v >= 0 else neg, color=pal[kk_], width=0.55, edgecolor="white", lw=0.3, hatch=hatch,
+                    label=lab.get(kk_, kk_))
+            pos, neg = (pos + v, neg) if v >= 0 else (pos, neg + v)
+        axa.scatter(x, d, color="k", s=24, zorder=5, label="Change in national saving" if x == 0 else None)
+        axa.text(x + 0.31, d, f"{d:+.1f}", ha="left", va="center", fontsize=7.5)
+    axa.axhline(0, color=".3", lw=.6)
+    axa.set_xticks([0, 1])
+    axa.set_xticklabels(["2012→2015\n(annual)", "H1 2025→H1 2026\n(half-year, estimated)"], fontsize=8)
+    axa.set_xlim(-0.5, 2.7)
+    axa.set_ylim(-3, 12.5)
+    axa.set_ylabel("Percentage points of GDP")
+    seen = {}
+    for hh, ll in zip(*axa.get_legend_handles_labels()):
+        seen.setdefault(ll, hh)
+    axa.legend(seen.values(), seen.keys(), loc="center right", fontsize=6.4, frameon=False)
+    axa.set_title("(a) Korea: sources of the rise in national saving", loc="left", fontsize=9.2)
+    for s, cl, l in (("hh", fp.HH, "Households: shift in the saving rate"), ("corp", fp.CO, "Corporations: profit windfall")):
+        q = g(s)
+        axb.fill_between(q.h, q.lo90, q.hi90, color=cl, alpha=0.08, lw=0)
+        axb.fill_between(q.h, q.lo68, q.hi68, color=cl, alpha=0.18, lw=0)
+        axb.plot(q.h, q.b, color=cl, lw=2.0, marker="o", ms=3.4, label=l)
+    fp.finish(axb, "Net lending (impact = 1)", h0=0)
+    axb.set_xlabel("Years after the saving change ($h$)")
+    axb.set_xlim(-0.3, H - 0.7)
+    axb.set_xticks(range(H))
+    axb.set_ylim(-0.6, 1.1)
+    axb.legend(loc="upper right", fontsize=7, frameon=False)
+    axb.set_title("(b) OECD panel: response of sector net lending", loc="left", fontsize=9.2)
+    for ax, s, items, ttl, xl in ((axc, "corp", ["prof", "gcf_corp", "div_net"], "(c) OECD panel: corporations after a profit windfall",
+                                   "Years after the profit windfall ($h$)"),
+                                  (axd, "hh", ["yd_hh", "cons_hh", "gcf_hh"], "(d) OECD panel: households after a saving-rate shift",
+                                   "Years after the shift in the saving rate ($h$)")):
+        for v in items:
+            q = g(f"{s}_{v}")
+            sg = ef.SIGN[v]
+            ax.fill_between(q.h, np.minimum(sg * q.lo68, sg * q.hi68), np.maximum(sg * q.lo68, sg * q.hi68), color=ef.PAL[v], alpha=0.16, lw=0)
+            ax.plot(q.h, sg * q.b, color=ef.PAL[v], lw=1.9, marker="o", ms=3.2, label=ef.LAB[v].replace(" (−)", ""))
+        q = g(f"{s}_nl")
+        ax.plot(q.h, q.b, color="k", lw=1.6, ls="--", marker="s", ms=3, label="Net lending")
+        fp.finish(ax, "Cumulative change, percent of GDP\n(impact net lending = 1)" if s == "corp" else "", h0=0)
+        ax.set_xlim(-0.3, H - 0.7)
+        ax.set_xticks(range(H))
+        ax.set_xlabel(xl)
+        ax.set_title(ttl, loc="left", fontsize=9.2)
+        ax.legend(loc="upper right", fontsize=7, frameon=False)
+    axc.set_ylim(-0.6, 2.4)
+    axd.set_ylim(-0.8, 1.15)
+    fig.suptitle("Korea's saving surge then and now, and how each kind of saving fades", x=0.0, ha="left", fontweight="bold", y=1.0)
+    fig.tight_layout()
+    fig.text(0.0, -0.005,
+             "Notes: All shares are percent of nominal GDP. (a) Corporate saving splits into a profit component (change in operating surplus at the "
+             "earlier retention ratio) and a retention component, household saving into a saving-rate and an income component; government saving "
+             "is shown as a total. 2012→2015: OECD annual sector accounts, cumulated over the years. H1 2026: Bank of Korea quarterly accounts; "
+             "hatched components are estimated (sector saving = investment + flow-of-funds net lending + the gap between the two accounts at its "
+             "H1 2025 share of GDP; households: published saving); the unattributed widening of that gap is a residual. (b)–(d) " + ef.note(r) +
+             " Local projections with lags of own net lending, both saving components, GDP growth and government net lending, and country and "
+             "year fixed effects; normalized by the impact response of the sector's net lending. (b) 68 and 90 percent bands, country-cluster "
+             "bootstrap (999 replications). (c)–(d) Cumulative changes from year −1 in items of each sector's account; shaded: 68 percent bands. "
+             "Corporate taxes and interest, small, are not shown. Sources: OECD; Bank of Korea; authors' calculations.",
+             fontsize=6.7, wrap=True, va="top")
+    fp.save(fig, "fig_story5", sfx="")
+    return p, dp, now, dn
+
+
 if __name__ == "__main__":
     cat, p, dp, now, dn = episodes()
     print(pd.DataFrame({"2012-2015": p, "H1 2026": now}).round(2).to_string(), "\nnational", round(dp, 2), round(dn, 2))
@@ -351,3 +466,5 @@ if __name__ == "__main__":
     figure2()
     figure3()
     figure4()
+    p5, dp5, n5, dn5 = figure5()
+    print(pd.DataFrame({'2012-2015 (GDP)': p5, 'H1 2026 (GDP)': n5}).round(2).to_string(), '\nnational', round(dp5, 2), round(dn5, 2))
