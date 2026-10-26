@@ -114,6 +114,22 @@ def figure(r):
              f"a = {a:.3f}, b = φ_m = {b:.3f}, φ_s = {phis:.2f}. Differences are second order in ε.", fontsize=7, wrap=True, va="top")
     fp.save(fig, "fig_model_check", sfx="")
 
+def single_baseline(eps=0.1, rho=0.5, p=P0):
+    """도출 노트 v2(9절): 기준 경로 B 하나(붐 없을 때 제약은 한계, A1)와 여유 S가 있는 경우."""
+    I0 = (p["TT"] * p["A2"] / (2 * p["R"])) ** 2
+    C0 = frictionless(0, 1.0, p)["C1"]
+    a, b, phis, kappa = coefs(p)
+    rows = []
+    for lab, Ib, bb in (("at limit", I0, C0 - p["Dbar"]), ("slack", 1.03 * I0, C0 - p["Dbar"] + 0.004)):
+        q = dict(p, Ibar=Ib, bbar=bb)
+        B = frictionless(0, rho, q)["CA"]
+        assert abs(constrained(0, rho, q)["CA"] - B) < 1e-9          # 붐이 없으면 제약 경제 = B
+        S = (Ib - I0) + (p["Dbar"] + bb - C0)
+        eS, eM = constrained(eps, rho, q)["CA"] - B, frictionless(rho * eps, 1.0, q)["CA"] - B
+        rows.append(dict(case=lab, S=S, eS_exact=eS, eS_formula=(1 - p["theta"]) * eps * p["Q"] - S,
+                         eM_exact=eM, eM_formula=b * rho * eps * p["Q"], transitory_exact=eS - eM))
+    return pd.DataFrame(rows)
+
 
 if __name__ == "__main__":
     pd.set_option("display.width", 220)
@@ -132,3 +148,4 @@ if __name__ == "__main__":
     print(r[(r.eps == 0.1) & r.rho.isin([0.0, 0.5, 1.0])][["rho", "T", "P", "dCAc_exact", "med_exact", "trans_exact", "trans_formula"]]
           .round(5).to_string(index=False))
     figure(r)
+    print(single_baseline().round(5).to_string(index=False))
