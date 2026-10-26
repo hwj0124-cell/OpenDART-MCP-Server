@@ -1,0 +1,65 @@
+spec,group,source,short,medium,n,countries
+"Baseline (own S–I in levels, 2 lags)","Baseline (own S–I in levels, 2 lags)",x_P,0.3470802957394642,0.02983977277580952,795,38
+"Baseline (own S–I in levels, 2 lags)","Baseline (own S–I in levels, 2 lags)",x_R,0.6359018992099648,0.2118938782744513,795,38
+"Baseline (own S–I in levels, 2 lags)","Baseline (own S–I in levels, 2 lags)",x_H,0.6591769046603062,0.31795607300828127,795,38
+"Baseline (own S–I in levels, 2 lags)","Baseline (own S–I in levels, 2 lags)",x_Y,0.7013093105222623,0.1349904308997406,795,38
+"Baseline, 1 lag","Baseline, 1 lag",x_P,0.3117038823019975,-0.040965595701742075,795,38
+"Baseline, 1 lag","Baseline, 1 lag",x_R,0.6475632432064063,0.2019547348912421,795,38
+"Baseline, 1 lag","Baseline, 1 lag",x_H,0.6747669846283033,0.298177733941413,795,38
+"Baseline, 1 lag","Baseline, 1 lag",x_Y,0.729078077511676,0.17430039811897055,795,38
+"Baseline, 3 lags","Baseline, 3 lags",x_P,0.3121228554323327,-0.00016452531100933214,795,38
+"Baseline, 3 lags","Baseline, 3 lags",x_R,0.6237255228469204,0.19260480241740582,795,38
+"Baseline, 3 lags","Baseline, 3 lags",x_H,0.6403085079979768,0.3194814993783131,795,38
+"Baseline, 3 lags","Baseline, 3 lags",x_Y,0.7578613350279683,0.10727188326794221,795,38
+"Baseline, 4 lags","Baseline, 4 lags",x_P,0.28389126779929275,-0.003903163546395964,795,38
+"Baseline, 4 lags","Baseline, 4 lags",x_R,0.6131230542194136,0.17805145255800223,795,38
+"Baseline, 4 lags","Baseline, 4 lags",x_H,0.6809122268483077,0.32043406441618705,795,38
+"Baseline, 4 lags","Baseline, 4 lags",x_Y,0.8433177225276477,0.15958610477151866,795,38
++ ΔCA,+ ΔCA,x_P,0.32753739501264667,-0.02131776144171793,795,38
++ ΔCA,+ ΔCA,x_R,0.6480181364668366,0.2082016657278048,795,38
++ ΔCA,+ ΔCA,x_H,0.6574937555491296,0.3200893442840907,795,38
++ ΔCA,+ ΔCA,x_Y,0.7065067932721834,0.13247214295638687,795,38
++ other-sector S–I (Δ),+ other-sector S–I (Δ),x_P,0.3288715896151456,-0.005990254765250661,795,38
++ other-sector S–I (Δ),+ other-sector S–I (Δ),x_R,0.6182507854448184,0.21901233846388973,795,38
++ other-sector S–I (Δ),+ other-sector S–I (Δ),x_H,0.6635413765870337,0.3438266050170253,795,38
++ other-sector S–I (Δ),+ other-sector S–I (Δ),x_Y,0.7188058463227831,0.1372645295442822,795,38
+"+ Δoperating surplus, Δsaving rate, Δdisposable income","+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,0.3278181620719094,0.062384200863906294,795,38
+"+ Δoperating surplus, Δsaving rate, Δdisposable income","+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,0.6567298972985613,0.20871603755395712,795,38
+"+ Δoperating surplus, Δsaving rate, Δdisposable income","+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,0.6622036486145924,0.31151462357372234,795,38
+"+ Δoperating surplus, Δsaving rate, Δdisposable income","+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,0.6693847685010564,0.2180732744293596,795,38
++ Δold-age dependency,+ Δold-age dependency,x_P,0.2834516495864362,0.11971620690094814,715,38
++ Δold-age dependency,+ Δold-age dependency,x_R,0.6242177521519997,0.2244906386999612,715,38
++ Δold-age dependency,+ Δold-age dependency,x_H,0.6101781130334447,0.25680855980901196,715,38
++ Δold-age dependency,+ Δold-age dependency,x_Y,0.7064932024116709,0.03235272878674984,715,38
++ all of the above,+ all of the above,x_P,0.26311532926957376,0.11657243687298927,715,38
++ all of the above,+ all of the above,x_R,0.6571598314706446,0.23078867853126772,715,38
++ all of the above,+ all of the above,x_H,0.6246439407995003,0.2705692340296203,715,38
++ all of the above,+ all of the above,x_Y,0.8570664180818922,0.3973957517919193,715,38
+Baseline on ToT growth sample,+ ToT growth,x_P,0.47118335334302747,0.14785584938523547,727,34
+Baseline on ToT growth sample,+ ToT growth,x_R,0.6604363344588379,0.2101996616979945,727,34
++ ToT growth,+ ToT growth,x_P,0.4792447847698015,0.15073371335273453,727,34
++ ToT growth,+ ToT growth,x_R,0.6388180839074469,0.19012477030502478,727,34
+Baseline on ToT growth sample,+ ToT growth,x_H,0.6902535763505068,0.28495377986841064,727,34
+Baseline on ToT growth sample,+ ToT growth,x_Y,0.7233557917125738,0.2369745473754692,727,34
++ ToT growth,+ ToT growth,x_H,0.6886108609634249,0.26718378936175974,727,34
++ ToT growth,+ ToT growth,x_Y,0.7069873102604148,0.3560625641890126,727,34
+Baseline on real rate sample,+ real rate,x_P,0.07515108193344854,0.15812652532401975,339,20
+Baseline on real rate sample,+ real rate,x_R,0.7168831811989191,-0.034309333689850834,339,20
++ real rate,+ real rate,x_P,0.13198312780620253,0.14870466920061706,339,20
++ real rate,+ real rate,x_R,0.7158876396844197,-0.04014475120792927,339,20
+Baseline on real rate sample,+ real rate,x_H,0.4766306886914849,0.08496009926986228,339,20
+Baseline on real rate sample,+ real rate,x_Y,0.8089997752857365,0.027906646108872293,339,20
++ real rate,+ real rate,x_H,0.4857463129852019,0.07990985616566246,339,20
++ real rate,+ real rate,x_Y,0.6810752196869828,0.038081154104365626,339,20
+Ref.: state variables in levels,Ref.: state variables in levels,x_P,0.27436584712419465,0.09962545123463654,795,38
+Ref.: state variables in levels,Ref.: state variables in levels,x_R,0.561303576032949,0.16852831004329286,795,38
+Ref.: state variables in levels,Ref.: state variables in levels,x_H,0.6381557477438506,0.29732869665833656,795,38
+Ref.: state variables in levels,Ref.: state variables in levels,x_Y,0.7819742170846924,0.07540578570327121,795,38
+Ref.: other sector's components at t,Ref.: other sector's components at t,x_P,0.4848836194050399,0.13840986036155525,795,38
+Ref.: other sector's components at t,Ref.: other sector's components at t,x_R,0.6702351347574506,0.22999302950541722,795,38
+Ref.: other sector's components at t,Ref.: other sector's components at t,x_H,0.6539216327975557,0.29741174002832965,795,38
+Ref.: other sector's components at t,Ref.: other sector's components at t,x_Y,1.045344188274438,0.08256128859283769,795,38
+Ref.: own S–I in changes (first draft),Ref.: own S–I in changes (first draft),x_P,0.4422485662175952,0.29439775148444464,795,38
+Ref.: own S–I in changes (first draft),Ref.: own S–I in changes (first draft),x_R,0.7415892419226152,0.4551953100467008,795,38
+Ref.: own S–I in changes (first draft),Ref.: own S–I in changes (first draft),x_H,0.806244248697494,0.6416858655616359,795,38
+Ref.: own S–I in changes (first draft),Ref.: own S–I in changes (first draft),x_Y,0.9824006351779232,0.5921285229989051,795,38

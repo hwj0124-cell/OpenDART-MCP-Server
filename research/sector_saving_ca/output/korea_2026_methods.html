@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 저축 분해 방법</title>
+<style>
+:root{
+  --bg:#fbfaf7; --fg:#1d1d1f; --mute:#5f6368; --line:#d9d6cf; --card:#ffffff;
+  --pub:#dbe7f6; --pub-b:#3b6fb6; --fof:#dcefd9; --fof-b:#3f8a3a; --asm:#fde6cf; --asm-b:#c46a17;
+  --res:#eadff3; --res-b:#7a5195; --na:#f0efec; --na-b:#a8a59e; --bad:#c0392b; --good:#2e7d32;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --fg:#ececec; --mute:#a3a7ad; --line:#3a3c41; --card:#1f2125;
+    --pub:#1d2f47; --pub-b:#7aa7e6; --fof:#1f3a1f; --fof-b:#7cc274; --asm:#45301b; --asm-b:#f0a35a;
+    --res:#33263e; --res-b:#c39be0; --na:#26272b; --na-b:#6d6f74; --bad:#ff7b6b; --good:#7bd389;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a; --fg:#ececec; --mute:#a3a7ad; --line:#3a3c41; --card:#1f2125;
+  --pub:#1d2f47; --pub-b:#7aa7e6; --fof:#1f3a1f; --fof-b:#7cc274; --asm:#45301b; --asm-b:#f0a35a;
+  --res:#33263e; --res-b:#c39be0; --na:#26272b; --na-b:#6d6f74; --bad:#ff7b6b; --good:#7bd389;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.45rem;margin:0 0 4px}
+h2{font-size:1.1rem;margin:34px 0 10px;padding-top:10px;border-top:1px solid var(--line)}
+p.sub{color:var(--mute);margin:0 0 14px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:.82rem;border:1.5px solid}
+.pub{background:var(--pub);border-color:var(--pub-b)} .fof{background:var(--fof);border-color:var(--fof-b)}
+.asm{background:var(--asm);border-color:var(--asm-b)} .res{background:var(--res);border-color:var(--res-b)}
+.na{background:var(--na);border-color:var(--na-b);color:var(--mute)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+.box{border:1.5px solid;border-radius:10px;padding:10px 12px;min-width:0;flex:1 1 160px}
+.box b{display:block;font-size:.95rem}
+.box .v{font-size:1.35rem;font-weight:700;font-variant-numeric:tabular-nums}
+.box small{color:var(--mute);display:block;line-height:1.35}
+.op{display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:var(--mute);flex:0 0 26px}
+.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+@media (max-width:720px){.row{grid-template-columns:repeat(2,minmax(0,1fr))} .op{flex-basis:100%;font-size:1.2rem} .bars{grid-template-columns:1fr} .flow .box{flex-basis:100%}}
+.note{font-size:.86rem;color:var(--mute);margin-top:8px}
+.key{border-left:4px solid var(--res-b);background:var(--card);padding:10px 14px;border-radius:6px;margin-top:12px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:separate;border-spacing:4px;width:100%;min-width:900px;font-size:.84rem}
+th{text-align:left;padding:8px;vertical-align:bottom}
+th.m{font-size:.92rem}
+th.m small{display:block;font-weight:400;color:var(--mute)}
+td{padding:7px 8px;border-radius:7px;border:1.5px solid;vertical-align:top}
+td.h{border:none;font-weight:600;white-space:nowrap;padding-right:4px}
+td .n{font-weight:700;font-variant-numeric:tabular-nums;font-size:.98rem;display:block}
+td.verdict{border:none;font-size:.82rem}
+.bad{color:var(--bad);font-weight:700} .good{color:var(--good);font-weight:700}
+.bars{display:grid;grid-template-columns:150px 1fr;gap:6px 10px;align-items:center;margin-top:8px;font-size:.88rem}
+.track{position:relative;height:22px;background:linear-gradient(to right,transparent calc(60% - 1px),var(--line) calc(60% - 1px),var(--line) 60%,transparent 60%)}
+.bar{position:absolute;top:3px;height:16px;border-radius:3px}
+.bar span{position:absolute;top:-1px;font-size:.78rem;font-weight:700;white-space:nowrap}
+footer{margin-top:30px;font-size:.78rem;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>2026 상반기 국민저축 증가: 무엇을 보고, 무엇을 가정하고, 무엇이 남나</h1>
+<p class="sub">2025 상반기 → 2026 상반기, 모두 GNI 대비 %p 변화. 상자 색은 그 숫자의 출처입니다.</p>
+<div class="legend">
+  <span class="chip pub">공표(관측)</span>
+  <span class="chip fof">자금순환 순자금운용 기반</span>
+  <span class="chip asm">가정</span>
+  <span class="chip res">잔차(나머지)</span>
+  <span class="chip na">추정하지 않음</span>
+</div>
+
+<h2>① 모든 방법이 공유하는 회계 구조</h2>
+<div class="flow">
+  <div class="box pub"><b>국민저축 변화</b><span class="v">+9.20</span><small>총저축(DT_200Y156)</small></div>
+  <div class="op">=</div>
+  <div class="box pub"><b>투자 + 순자금운용 (국내 4부문 합)</b><span class="v">+6.47</span><small>총자본형성 + 자금순환 차액. 자금순환만 믿으면 국민저축은 이만큼 늘어난 셈</small></div>
+  <div class="op">+</div>
+  <div class="box pub"><b>실물–금융 불일치 D</b><span class="v">+2.74</span><small>총량은 공표치로 계산됨. 자본이전·비생산자산·통계 불일치의 묶음</small></div>
+</div>
+<div class="note">부문마다: <b>저축 변화 = (투자 + 순자금운용) 변화 + D 변화</b>. 투자+순자금운용은 부문별로 다 관측(단, 총투자 − 정부투자의 부문 구성은 2025년 연간 비율로 가정):</div>
+<div class="row">
+  <div class="box fof"><b>비금융법인</b><span class="v">+5.35</span></div>
+  <div class="box fof"><b>금융법인</b><span class="v">+1.16</span></div>
+  <div class="box fof"><b>정부</b><span class="v">+1.93</span><small>투자 공표 + 순자금운용</small></div>
+  <div class="box fof"><b>가계</b><span class="v">−1.97</span></div>
+</div>
+<div class="note">불일치 +2.74는 누가 가져가나:</div>
+<div class="flow">
+  <div class="box pub"><b>가계 몫</b><span class="v">+1.55</span><small>가계 저축이 공표(−0.42)돼 있으므로 자동으로 정해짐: −0.42 − (−1.97)</small></div>
+  <div class="op">+</div>
+  <div class="box asm"><b>나머지: 기업·금융법인·정부에 배분</b><span class="v">+1.19</span><small>여기만이 진짜 판단의 영역. 배분 규칙이 방법을 가름</small></div>
+</div>
+
+<h2>② 기업 저축 → 이익 성분 / 유보 성분</h2>
+<div class="flow">
+  <div class="box pub"><b>총영업잉여</b><span class="v">+39.7%</span><small>공표 전년동기비로 계산</small></div>
+  <div class="op">−</div>
+  <div class="box asm"><b>비기업 영업잉여</b><span class="v">+0.3%</span><small>전년 증가율로 연장(가정 A3)</small></div>
+  <div class="op">=</div>
+  <div class="box asm"><b>비금융법인 영업잉여 / GNI</b><span class="v">29.6 → 38.3</span><small>Δπ = +8.74</small></div>
+</div>
+<div class="flow" style="margin-top:8px">
+  <div class="box pub"><b>2025 상반기 유보율 ρ₀</b><span class="v">0.717</span><small>기업저축 276.8 ÷ 영업잉여 386.0 (둘 다 공표). "행태가 안 바뀌었다면"의 기준</small></div>
+  <div class="op">×</div>
+  <div class="box asm"><b>Δπ</b><span class="v">+8.74</span></div>
+  <div class="op">=</div>
+  <div class="box asm" style="border-width:3px"><b>이익 성분 (모든 방법 공통)</b><span class="v">+6.27</span><small>비기업 증가율 0~10%로 바꾸면 6.3~5.5</small></div>
+</div>
+<div class="flow" style="margin-top:8px">
+  <div class="box res"><b>기업 저축 변화 (방법마다 다름)</b><span class="v">+5.35 ~ +6.54</span><small>= 5.35 + 기업에 배분된 D (폐기한 경로 I은 7.70)</small></div>
+  <div class="op">−</div>
+  <div class="box asm"><b>이익 성분</b><span class="v">+6.27</span></div>
+  <div class="op">=</div>
+  <div class="box res" style="border-width:3px"><b>유보 성분</b><span class="v">−0.9 ~ +0.3</span><small>잔차. 기업에 D를 얼마나 주느냐가 그대로 여기로 감</small></div>
+</div>
+<div class="key"><b>핵심:</b> 배분 규칙이 바꾸는 것은 <b>기업 유보 성분</b>과 <b>정부·금융법인 저축</b>, 그리고 남는 잔차뿐입니다. 이익 성분(+6.27)과 가계 성분(저축률 +0.70, 소득 −1.12), 정부 소비(−) 성분(+2.45)은 어떤 방법에서도 같습니다.</div>
+
+<h2>③ 방법별 비교</h2>
+<div class="scroll">
+<table>
+<thead><tr>
+  <th></th>
+  <th class="m">경로 I <small>이전 기준안 · 폐기</small></th>
+  <th class="m">동료 방식 C <small>1023 각주 7</small></th>
+  <th class="m">기준안 <small>D 비중 고정 + 잔차</small></th>
+  <th class="m">민감도 ① <small>2025 실적 비율로 배분</small></th>
+  <th class="m">민감도 ② <small>1/3씩</small></th>
+</tr></thead>
+<tbody>
+<tr><td class="h">가계 저축</td>
+  <td class="pub">공표<span class="n">−0.42</span></td>
+  <td class="na">추정 안 함</td>
+  <td class="pub">공표<span class="n">−0.42</span></td>
+  <td class="pub">공표<span class="n">−0.42</span></td>
+  <td class="pub">공표<span class="n">−0.42</span></td></tr>
+<tr><td class="h">정부 저축</td>
+  <td class="fof">순자금운용 + 투자 + D 고정<span class="n">+1.93</span></td>
+  <td class="na">추정 안 함</td>
+  <td class="fof">순자금운용 + 투자 + D 고정<span class="n">+1.93</span></td>
+  <td class="fof">… + D 0.10<span class="n">+2.03</span></td>
+  <td class="fof">… + D 0.40<span class="n">+2.33</span></td></tr>
+<tr><td class="h">금융법인 저축</td>
+  <td class="asm">GNI 비중 고정<span class="n">0.00</span></td>
+  <td class="na">추정 안 함</td>
+  <td class="fof">순자금운용 + 투자 + D 고정<span class="n">+1.16</span></td>
+  <td class="fof">… + D 0.31<span class="n">+1.47</span></td>
+  <td class="fof">… + D 0.40<span class="n">+1.56</span></td></tr>
+<tr><td class="h">비금융법인 저축</td>
+  <td class="res">국민저축 − 나머지 (잔차)<span class="n">+7.70</span></td>
+  <td class="fof">(총투자 − 정부투자)×0.787 + 순자금운용 + D(2025 <b>연간</b> GDP 비중)<span class="n">+5.81</span></td>
+  <td class="fof">(총투자 − 정부투자)×0.787 + 순자금운용 + D(2025 <b>상반기</b> GNI 비중)<span class="n">+5.35</span></td>
+  <td class="fof">… + D 0.79<span class="n">+6.14</span></td>
+  <td class="fof">… + D 0.40<span class="n">+5.75</span></td></tr>
+<tr><td class="h">불일치 +2.74의 귀속</td>
+  <td class="asm">가계 1.55 · <b>기업 2.36</b> · 금융 −1.16 (의도치 않게 암묵적)</td>
+  <td class="na">기업 0. 나머지는 묻지 않음</td>
+  <td class="asm">가계 1.55 (공표로 결정) · <b>잔차 1.19</b> (통계 불일치로 명시)</td>
+  <td class="asm">가계 1.55 · 기업 0.79 · 금융 0.31 · 정부 0.10 (2025 두 반기 실제 비율 .66/.26/.08)</td>
+  <td class="asm">가계 1.55 · 기업 0.40 · 금융 0.40 · 정부 0.40</td></tr>
+<tr><td class="h">이익 성분</td>
+  <td class="asm">공통<span class="n">+6.27</span></td>
+  <td class="asm">영업잉여 추정을 붙이면<span class="n">+6.27</span></td>
+  <td class="asm">공통<span class="n">+6.27</span></td>
+  <td class="asm">공통<span class="n">+6.27</span></td>
+  <td class="asm">공통<span class="n">+6.27</span></td></tr>
+<tr><td class="h">유보 성분</td>
+  <td class="res"><span class="n">+1.42</span></td>
+  <td class="res"><span class="n">−0.46</span></td>
+  <td class="res"><span class="n">−0.92</span></td>
+  <td class="res"><span class="n">−0.13</span></td>
+  <td class="res"><span class="n">−0.52</span></td></tr>
+<tr><td class="h">국민저축 +9.20과 맞나</td>
+  <td class="verdict">예 (잔차라서 자동)</td>
+  <td class="verdict">확인 안 함</td>
+  <td class="verdict">잔차 1.19를 명시해 맞춤</td>
+  <td class="verdict">예</td>
+  <td class="verdict">예</td></tr>
+<tr><td class="h">평가</td>
+  <td class="verdict"><span class="bad">폐기</span> — D를 기업 유보로 몰아넣고, 금융법인 비중 고정이 금융법인 개선분까지 기업으로 밀어냄</td>
+  <td class="verdict">드래프트 24.9·29.5% 정확히 재현. 연간 D를 반기에 적용해 계절성이 섞임</td>
+  <td class="verdict"><span class="good">기준안</span> — 자의적 배분 없음. 동료 식에서 D 시점만 같은 반기로 맞춤. 2025엔 잔차의 2/3가 기업 몫이었으므로 유보는 하한 쪽</td>
+  <td class="verdict">실제 공표치로 확인된 배분 비율(관측 2개뿐)</td>
+  <td class="verdict">기계적 동일 가중</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>④ 결국 갈리는 것은 유보 성분 하나</h2>
+<div class="bars" id="bars"></div>
+<div class="note">막대: 기업 저축 변화를 이익(주황)과 유보(보라)로 나눈 것. 세로선 = 0. 이익 성분은 모든 방법에서 같고, 유보 성분은 기준안 −0.9, 민감도 −0.5 ~ −0.1 (폐기한 경로 I만 +1.4). 연간 회귀 적재치는 표준오차가 커서(기업 0.14 ± 0.40) 제외. → <b>기업 저축 증가는 이익 횡재로 설명되며, 유보 행태는 그대로이거나 조금 낮아짐.</b></div>
+
+<footer>출처: 한국은행 「국민계정」(DT_200Y156 총저축과 총투자, DT_200Y162 제도부문별 소득계정, DT_200Y102 주요지표, DT_200Y109 국내총생산에 대한 지출), 「자금순환표」(DT_281Y001 금융거래표), 국가통계포털 KOSIS. 서로 다른 통계표를 연결한 계산이며 2026년 값은 잠정·추정. 코드: research/sector_saving_ca/ep_korea_2026*.py</footer>
+</main>
+<script>
+const rows=[["경로 I (폐기)",6.27,1.42,7.70],["동료 방식 C",6.27,-0.46,5.81],["기준안 (D 고정+잔차)",6.27,-0.92,5.35],["민감도 ① 2025 비율",6.27,-0.13,6.14],["민감도 ② 1/3씩",6.27,-0.52,5.75]];
+const lo=-1.5,hi=18,pct=v=>(v-lo)/(hi-lo)*100,box=document.getElementById("bars");
+const css=getComputedStyle(document.documentElement);
+rows.forEach(([n,p,r,tot])=>{
+  const l=document.createElement("div");l.textContent=n;box.appendChild(l);
+  const t=document.createElement("div");t.className="track";
+  t.style.background=`linear-gradient(to right,transparent calc(${pct(0)}% - 1px),var(--line) calc(${pct(0)}% - 1px),var(--line) ${pct(0)}%,transparent ${pct(0)}%)`;
+  const add=(a,b,c,txt,right)=>{const d=document.createElement("div");d.className="bar";d.style.left=pct(Math.min(a,b))+"%";d.style.width=(pct(Math.max(a,b))-pct(Math.min(a,b)))+"%";d.style.background=c;
+    const s=document.createElement("span");s.textContent=txt;s.style[right?"left":"right"]="calc(100% + 4px)";d.appendChild(s);t.appendChild(d)};
+  add(0,p,"#c46a17","",true);
+  if(r>=0) add(p,p+r,"#7a5195",`유보 +${r.toFixed(2)} → +${tot.toFixed(2)}`,true);
+  else add(p+r,p,"#7a5195",`유보 ${r.toFixed(2)} → +${tot.toFixed(2)}`,true);
+  box.appendChild(t);
+});
+</script>
+</body>
+</html>

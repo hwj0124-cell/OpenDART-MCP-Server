@@ -1,0 +1,113 @@
+kind,spec,sector,n,t0,h,ratio
+selection,main,hh,36.0,7.312830691259043,0,1.0
+selection,main,hh,36.0,7.312830691259043,1,0.8220383173771209
+selection,main,hh,36.0,7.312830691259043,2,0.5637105628033746
+selection,main,hh,36.0,7.312830691259043,3,0.6631919192692081
+selection,main,hh,36.0,7.312830691259043,4,0.8088889663566392
+selection,main,hh,36.0,7.312830691259043,5,0.9154675590405067
+selection,main,hh,36.0,7.312830691259043,6,0.7042059004371558
+selection,main,corp,52.0,5.977681665890973,0,1.0
+selection,main,corp,52.0,5.977681665890973,1,0.39832535900614346
+selection,main,corp,52.0,5.977681665890973,2,0.27037545113818745
+selection,main,corp,52.0,5.977681665890973,3,0.3409778202950618
+selection,main,corp,52.0,5.977681665890973,4,0.34333961671488095
+selection,main,corp,52.0,5.977681665890973,5,0.25339240378555
+selection,main,corp,52.0,5.977681665890973,6,0.15356293009782565
+selection,no S-I direction filter,hh,37.0,7.240294636007965,0,1.0
+selection,no S-I direction filter,hh,37.0,7.240294636007965,1,0.8133311289853745
+selection,no S-I direction filter,hh,37.0,7.240294636007965,2,0.5813294437258617
+selection,no S-I direction filter,hh,37.0,7.240294636007965,3,0.7163710636237682
+selection,no S-I direction filter,hh,37.0,7.240294636007965,4,0.839405471472469
+selection,no S-I direction filter,hh,37.0,7.240294636007965,5,0.9353558244746377
+selection,no S-I direction filter,hh,37.0,7.240294636007965,6,0.6898955116250267
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,0,1.0
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,1,-0.05187445326796317
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,2,-0.17533475669290935
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,3,-0.4567292968619381
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,4,-0.26359941857437
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,5,-0.12051473036157602
+selection,no S-I direction filter,corp,82.0,3.6291156706418044,6,-0.3571773072211137
+selection,no profit condition,hh,36.0,7.312830691259043,0,1.0
+selection,no profit condition,hh,36.0,7.312830691259043,1,0.8220383173771209
+selection,no profit condition,hh,36.0,7.312830691259043,2,0.5637105628033746
+selection,no profit condition,hh,36.0,7.312830691259043,3,0.6631919192692081
+selection,no profit condition,hh,36.0,7.312830691259043,4,0.8088889663566392
+selection,no profit condition,hh,36.0,7.312830691259043,5,0.9154675590405067
+selection,no profit condition,hh,36.0,7.312830691259043,6,0.7042059004371558
+selection,no profit condition,corp,68.0,6.960030459312559,0,1.0
+selection,no profit condition,corp,68.0,6.960030459312559,1,0.39093303381227335
+selection,no profit condition,corp,68.0,6.960030459312559,2,0.34591204723165614
+selection,no profit condition,corp,68.0,6.960030459312559,3,0.27619968631381814
+selection,no profit condition,corp,68.0,6.960030459312559,4,0.10465044710944589
+selection,no profit condition,corp,68.0,6.960030459312559,5,0.054098315207705604
+selection,no profit condition,corp,68.0,6.960030459312559,6,-0.11500633996587367
+selection,neither corporate filter,hh,37.0,7.240294636007965,0,1.0
+selection,neither corporate filter,hh,37.0,7.240294636007965,1,0.8133311289853745
+selection,neither corporate filter,hh,37.0,7.240294636007965,2,0.5813294437258617
+selection,neither corporate filter,hh,37.0,7.240294636007965,3,0.7163710636237682
+selection,neither corporate filter,hh,37.0,7.240294636007965,4,0.839405471472469
+selection,neither corporate filter,hh,37.0,7.240294636007965,5,0.9353558244746377
+selection,neither corporate filter,hh,37.0,7.240294636007965,6,0.6898955116250267
+selection,neither corporate filter,corp,116.0,2.0399065570350516,0,1.0
+selection,neither corporate filter,corp,116.0,2.0399065570350516,1,-0.46774701818335396
+selection,neither corporate filter,corp,116.0,2.0399065570350516,2,-0.46067088886953833
+selection,neither corporate filter,corp,116.0,2.0399065570350516,3,-0.6637821881147504
+selection,neither corporate filter,corp,116.0,2.0399065570350516,4,-0.9713677256308471
+selection,neither corporate filter,corp,116.0,2.0399065570350516,5,-0.7399321756349027
+selection,neither corporate filter,corp,116.0,2.0399065570350516,6,-1.1084339837280939
+selection,no consumption-led condition,hh,99.0,11.666474144048365,0,1.0
+selection,no consumption-led condition,hh,99.0,11.666474144048365,1,0.9825255784584253
+selection,no consumption-led condition,hh,99.0,11.666474144048365,2,0.75163177121134
+selection,no consumption-led condition,hh,99.0,11.666474144048365,3,0.6946905349498225
+selection,no consumption-led condition,hh,99.0,11.666474144048365,4,0.6914912647538674
+selection,no consumption-led condition,hh,99.0,11.666474144048365,5,0.8284223527315585
+selection,no consumption-led condition,hh,99.0,11.666474144048365,6,0.8537005777561578
+selection,no consumption-led condition,corp,52.0,5.977681665890973,0,1.0
+selection,no consumption-led condition,corp,52.0,5.977681665890973,1,0.39832535900614346
+selection,no consumption-led condition,corp,52.0,5.977681665890973,2,0.27037545113818745
+selection,no consumption-led condition,corp,52.0,5.977681665890973,3,0.3409778202950618
+selection,no consumption-led condition,corp,52.0,5.977681665890973,4,0.34333961671488095
+selection,no consumption-led condition,corp,52.0,5.977681665890973,5,0.25339240378555
+selection,no consumption-led condition,corp,52.0,5.977681665890973,6,0.15356293009782565
+selection,minimal rule,hh,101.0,11.657590758239277,0,1.0
+selection,minimal rule,hh,101.0,11.657590758239277,1,0.9945245732070368
+selection,minimal rule,hh,101.0,11.657590758239277,2,0.7648866197488936
+selection,minimal rule,hh,101.0,11.657590758239277,3,0.7133877561919154
+selection,minimal rule,hh,101.0,11.657590758239277,4,0.6997102200529327
+selection,minimal rule,hh,101.0,11.657590758239277,5,0.8505430868601372
+selection,minimal rule,hh,101.0,11.657590758239277,6,0.8566372904924031
+selection,minimal rule,corp,116.0,2.0399065570350516,0,1.0
+selection,minimal rule,corp,116.0,2.0399065570350516,1,-0.46774701818335396
+selection,minimal rule,corp,116.0,2.0399065570350516,2,-0.46067088886953833
+selection,minimal rule,corp,116.0,2.0399065570350516,3,-0.6637821881147504
+selection,minimal rule,corp,116.0,2.0399065570350516,4,-0.9713677256308471
+selection,minimal rule,corp,116.0,2.0399065570350516,5,-0.7399321756349027
+selection,minimal rule,corp,116.0,2.0399065570350516,6,-1.1084339837280939
+unconditional,nl_hh,hh,,,0,0.9999999999999988
+unconditional,nl_hh,hh,,,1,0.6571302432437732
+unconditional,nl_hh,hh,,,2,0.5049747162807422
+unconditional,nl_hh,hh,,,3,0.6040445987837215
+unconditional,nl_hh,hh,,,4,0.39220354444889804
+unconditional,nl_hh,hh,,,5,0.506747368889561
+unconditional,nl_hh,hh,,,6,0.39047080711188464
+unconditional,nl_corp,corp,,,0,1.0000000000000009
+unconditional,nl_corp,corp,,,1,0.8029323012361005
+unconditional,nl_corp,corp,,,2,0.6205136717530094
+unconditional,nl_corp,corp,,,3,0.6967746049578593
+unconditional,nl_corp,corp,,,4,0.5025756001419999
+unconditional,nl_corp,corp,,,5,0.39643351353487466
+unconditional,nl_corp,corp,,,6,0.4437162297894564
+unconditional,sv_hh,hh,,,0,0.9999999999999992
+unconditional,sv_hh,hh,,,1,0.8448903631908773
+unconditional,sv_hh,hh,,,2,0.6993043339283138
+unconditional,sv_hh,hh,,,3,0.5755020445322304
+unconditional,sv_hh,hh,,,4,0.5329692219778277
+unconditional,sv_hh,hh,,,5,0.5832391108573023
+unconditional,sv_hh,hh,,,6,0.5493679173911508
+unconditional,sv_corp,corp,,,0,1.0
+unconditional,sv_corp,corp,,,1,0.8273976797323078
+unconditional,sv_corp,corp,,,2,0.6978451585300318
+unconditional,sv_corp,corp,,,3,0.6951023229753627
+unconditional,sv_corp,corp,,,4,0.664734249346788
+unconditional,sv_corp,corp,,,5,0.6253011987920906
+unconditional,sv_corp,corp,,,6,0.6209181068451919

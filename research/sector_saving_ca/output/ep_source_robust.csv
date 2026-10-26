@@ -1,0 +1,421 @@
+spec,source,h,ratio,n
+Baseline,x_P,0,1.0,795
+Baseline,x_P,1,0.4888570777634723,795
+Baseline,x_P,2,0.20530351371545608,795
+Baseline,x_P,3,0.07842522996141776,795
+Baseline,x_P,4,-0.0026434978164683065,795
+Baseline,x_P,5,-0.04239566731254859,795
+Baseline,x_P,6,0.08597302627083721,795
+Baseline,x_R,0,1.0,795
+Baseline,x_R,1,0.7432906526763072,795
+Baseline,x_R,2,0.5285131457436225,795
+Baseline,x_R,3,0.3422007633239835,795
+Baseline,x_R,4,0.20183151284747206,795
+Baseline,x_R,5,0.18600060043491953,795
+Baseline,x_R,6,0.11754263649143017,795
+Baseline,x_H,0,1.0,795
+Baseline,x_H,1,0.745991399365984,795
+Baseline,x_H,2,0.5723624099546284,795
+Baseline,x_H,3,0.4101321969345199,795
+Baseline,x_H,4,0.18724757323719649,795
+Baseline,x_H,5,0.36408255875001394,795
+Baseline,x_H,6,0.3103619631113948,795
+Baseline,x_Y,0,1.0,795
+Baseline,x_Y,1,0.7757951678473037,795
+Baseline,x_Y,2,0.6268234531972209,795
+Baseline,x_Y,3,0.14104200681469567,795
+Baseline,x_Y,4,-0.05334588628563084,795
+Baseline,x_Y,5,0.23522487138357878,795
+Baseline,x_Y,6,0.2170407316863189,795
+Unweighted,x_P,0,1.0,795
+Unweighted,x_P,1,0.19284709246899312,795
+Unweighted,x_P,2,-0.1554364465948332,795
+Unweighted,x_P,3,-0.2174782095822307,795
+Unweighted,x_P,4,-0.39411965586421777,795
+Unweighted,x_P,5,-0.4111191033303849,795
+Unweighted,x_P,6,0.05972292261922918,795
+Unweighted,x_R,0,1.0,795
+Unweighted,x_R,1,0.9121631422840496,795
+Unweighted,x_R,2,0.6316297735409626,795
+Unweighted,x_R,3,0.2083309669225718,795
+Unweighted,x_R,4,0.08186225572130405,795
+Unweighted,x_R,5,0.04789225432770142,795
+Unweighted,x_R,6,0.010062779103958185,795
+Unweighted,x_H,0,1.0,795
+Unweighted,x_H,1,0.7494365278127143,795
+Unweighted,x_H,2,0.5742673819660629,795
+Unweighted,x_H,3,0.4006516586038596,795
+Unweighted,x_H,4,0.29419920597529603,795
+Unweighted,x_H,5,0.2869666714228094,795
+Unweighted,x_H,6,0.1669245150882294,795
+Unweighted,x_Y,0,1.0,795
+Unweighted,x_Y,1,1.1394541878963964,795
+Unweighted,x_Y,2,0.828899675321149,795
+Unweighted,x_Y,3,0.2964057947581617,795
+Unweighted,x_Y,4,0.2253446915061695,795
+Unweighted,x_Y,5,0.12406292127451268,795
+Unweighted,x_Y,6,0.6585050649930368,795
+Windows ending before 2020,x_P,0,1.0,599
+Windows ending before 2020,x_P,1,0.5040084727954385,599
+Windows ending before 2020,x_P,2,0.24887461221840884,599
+Windows ending before 2020,x_P,3,0.2702732226513201,599
+Windows ending before 2020,x_P,4,0.2409488154983696,599
+Windows ending before 2020,x_P,5,0.17504951630113239,599
+Windows ending before 2020,x_P,6,0.05858091089395726,599
+Windows ending before 2020,x_R,0,1.0,599
+Windows ending before 2020,x_R,1,0.7578692673140845,599
+Windows ending before 2020,x_R,2,0.5506594992513063,599
+Windows ending before 2020,x_R,3,0.31976017307992755,599
+Windows ending before 2020,x_R,4,0.08632274818700551,599
+Windows ending before 2020,x_R,5,0.07759720105573863,599
+Windows ending before 2020,x_R,6,0.05662093667618522,599
+Windows ending before 2020,x_H,0,1.0,599
+Windows ending before 2020,x_H,1,0.7918519101084008,599
+Windows ending before 2020,x_H,2,0.6002335148207205,599
+Windows ending before 2020,x_H,3,0.41191654431155905,599
+Windows ending before 2020,x_H,4,0.264329633830847,599
+Windows ending before 2020,x_H,5,0.27688211739207635,599
+Windows ending before 2020,x_H,6,0.1935841136689559,599
+Windows ending before 2020,x_Y,0,1.0,599
+Windows ending before 2020,x_Y,1,1.2876636038936995,599
+Windows ending before 2020,x_Y,2,0.9091736170823674,599
+Windows ending before 2020,x_Y,3,0.4809694255171291,599
+Windows ending before 2020,x_Y,4,0.37917257248143066,599
+Windows ending before 2020,x_Y,5,-0.001701842036289535,599
+Windows ending before 2020,x_Y,6,0.6466503395989979,599
+Outcome years 2020–21 dropped,x_P,0,1.0,795
+Outcome years 2020–21 dropped,x_P,1,0.47892636395500515,795
+Outcome years 2020–21 dropped,x_P,2,0.21155774615122233,795
+Outcome years 2020–21 dropped,x_P,3,0.11649242563813161,795
+Outcome years 2020–21 dropped,x_P,4,-0.01942488033707749,795
+Outcome years 2020–21 dropped,x_P,5,0.054447290748575766,795
+Outcome years 2020–21 dropped,x_P,6,0.021818181603260083,795
+Outcome years 2020–21 dropped,x_R,0,1.0,795
+Outcome years 2020–21 dropped,x_R,1,0.750434835308435,795
+Outcome years 2020–21 dropped,x_R,2,0.5401918273725376,795
+Outcome years 2020–21 dropped,x_R,3,0.37546180790648354,795
+Outcome years 2020–21 dropped,x_R,4,0.2446971461882902,795
+Outcome years 2020–21 dropped,x_R,5,0.13717012351466862,795
+Outcome years 2020–21 dropped,x_R,6,0.13596834003203484,795
+Outcome years 2020–21 dropped,x_H,0,1.0,795
+Outcome years 2020–21 dropped,x_H,1,0.7681752301565085,795
+Outcome years 2020–21 dropped,x_H,2,0.6289854185934223,795
+Outcome years 2020–21 dropped,x_H,3,0.4937289282379804,795
+Outcome years 2020–21 dropped,x_H,4,0.33641839474856183,795
+Outcome years 2020–21 dropped,x_H,5,0.3693329222347351,795
+Outcome years 2020–21 dropped,x_H,6,0.30582814267958613,795
+Outcome years 2020–21 dropped,x_Y,0,1.0,795
+Outcome years 2020–21 dropped,x_Y,1,0.7941738658609941,795
+Outcome years 2020–21 dropped,x_Y,2,0.5930170501813536,795
+Outcome years 2020–21 dropped,x_Y,3,0.09705544572277917,795
+Outcome years 2020–21 dropped,x_Y,4,0.01815677282430606,795
+Outcome years 2020–21 dropped,x_Y,5,-0.029158015554703032,795
+Outcome years 2020–21 dropped,x_Y,6,0.7177647482291171,795
+"Pre-2020 windows, unweighted",x_P,0,1.0,599
+"Pre-2020 windows, unweighted",x_P,1,0.20567655164768453,599
+"Pre-2020 windows, unweighted",x_P,2,0.09186165749505594,599
+"Pre-2020 windows, unweighted",x_P,3,0.08309067698266305,599
+"Pre-2020 windows, unweighted",x_P,4,0.028550665716862895,599
+"Pre-2020 windows, unweighted",x_P,5,-0.2259311729303096,599
+"Pre-2020 windows, unweighted",x_P,6,-0.12836417300935446,599
+"Pre-2020 windows, unweighted",x_R,0,1.0,599
+"Pre-2020 windows, unweighted",x_R,1,0.8773851733731669,599
+"Pre-2020 windows, unweighted",x_R,2,0.6694763682541491,599
+"Pre-2020 windows, unweighted",x_R,3,0.27888043473987306,599
+"Pre-2020 windows, unweighted",x_R,4,0.05158641062879234,599
+"Pre-2020 windows, unweighted",x_R,5,-0.01247811562701279,599
+"Pre-2020 windows, unweighted",x_R,6,-0.024246654599943105,599
+"Pre-2020 windows, unweighted",x_H,0,1.0,599
+"Pre-2020 windows, unweighted",x_H,1,0.7937999578668573,599
+"Pre-2020 windows, unweighted",x_H,2,0.6392381801774208,599
+"Pre-2020 windows, unweighted",x_H,3,0.4360739815456737,599
+"Pre-2020 windows, unweighted",x_H,4,0.34094221777178263,599
+"Pre-2020 windows, unweighted",x_H,5,0.2979673239966789,599
+"Pre-2020 windows, unweighted",x_H,6,0.18218416131169146,599
+"Pre-2020 windows, unweighted",x_Y,0,1.0,599
+"Pre-2020 windows, unweighted",x_Y,1,1.0826927791925365,599
+"Pre-2020 windows, unweighted",x_Y,2,0.7169063119003924,599
+"Pre-2020 windows, unweighted",x_Y,3,0.08093878839672246,599
+"Pre-2020 windows, unweighted",x_Y,4,0.22948507348469982,599
+"Pre-2020 windows, unweighted",x_Y,5,-0.0016168130250691468,599
+"Pre-2020 windows, unweighted",x_Y,6,0.5408146902086879,599
+"Baseline, 1 lag",x_P,0,1.0,795
+"Baseline, 1 lag",x_P,1,0.43672759334778094,795
+"Baseline, 1 lag",x_P,2,0.18668017125621414,795
+"Baseline, 1 lag",x_P,3,0.028668942808671855,795
+"Baseline, 1 lag",x_P,4,-0.07158800403273123,795
+"Baseline, 1 lag",x_P,5,-0.13397811965857548,795
+"Baseline, 1 lag",x_P,6,0.013034798075666565,795
+"Baseline, 1 lag",x_R,0,1.0,795
+"Baseline, 1 lag",x_R,1,0.7600574566434699,795
+"Baseline, 1 lag",x_R,2,0.5350690297693428,795
+"Baseline, 1 lag",x_R,3,0.33853204374609636,795
+"Baseline, 1 lag",x_R,4,0.19029705788940732,795
+"Baseline, 1 lag",x_R,5,0.17346876584077167,795
+"Baseline, 1 lag",x_R,6,0.10552107208869313,795
+"Baseline, 1 lag",x_H,0,1.0,795
+"Baseline, 1 lag",x_H,1,0.7631932885153845,795
+"Baseline, 1 lag",x_H,2,0.5863406807412221,795
+"Baseline, 1 lag",x_H,3,0.4043308647738352,795
+"Baseline, 1 lag",x_H,4,0.17987704664747636,795
+"Baseline, 1 lag",x_H,5,0.33523700016978397,795
+"Baseline, 1 lag",x_H,6,0.2732660241745566,795
+"Baseline, 1 lag",x_Y,0,1.0,795
+"Baseline, 1 lag",x_Y,1,0.842294447385803,795
+"Baseline, 1 lag",x_Y,2,0.6158617076375491,795
+"Baseline, 1 lag",x_Y,3,0.1870917128921179,795
+"Baseline, 1 lag",x_Y,4,0.08861198613433247,795
+"Baseline, 1 lag",x_Y,5,0.2493680546452921,795
+"Baseline, 1 lag",x_Y,6,0.17212983880413976,795
+"Baseline, 3 lags",x_P,0,1.0,795
+"Baseline, 3 lags",x_P,1,0.462249587426733,795
+"Baseline, 3 lags",x_P,2,0.16199612343793243,795
+"Baseline, 3 lags",x_P,3,0.06053737098659208,795
+"Baseline, 3 lags",x_P,4,-0.04264296288644453,795
+"Baseline, 3 lags",x_P,5,-0.0892108571712907,795
+"Baseline, 3 lags",x_P,6,0.07065834782710581,795
+"Baseline, 3 lags",x_R,0,1.0,795
+"Baseline, 3 lags",x_R,1,0.728317148262119,795
+"Baseline, 3 lags",x_R,2,0.5191338974317219,795
+"Baseline, 3 lags",x_R,3,0.31097449178684494,795
+"Baseline, 3 lags",x_R,4,0.1738183525760767,795
+"Baseline, 3 lags",x_R,5,0.1774143586253854,795
+"Baseline, 3 lags",x_R,6,0.10821200668131611,795
+"Baseline, 3 lags",x_H,0,1.0,795
+"Baseline, 3 lags",x_H,1,0.7368279345890288,795
+"Baseline, 3 lags",x_H,2,0.5437890814069245,795
+"Baseline, 3 lags",x_H,3,0.37912728803173473,795
+"Baseline, 3 lags",x_H,4,0.19023825702845082,795
+"Baseline, 3 lags",x_H,5,0.37866274851269943,795
+"Baseline, 3 lags",x_H,6,0.32989770394036744,795
+"Baseline, 3 lags",x_Y,0,1.0,795
+"Baseline, 3 lags",x_Y,1,0.7743552911699546,795
+"Baseline, 3 lags",x_Y,2,0.7413673788859819,795
+"Baseline, 3 lags",x_Y,3,0.1272591585324269,795
+"Baseline, 3 lags",x_Y,4,-0.05209746603876488,795
+"Baseline, 3 lags",x_Y,5,0.252690402892873,795
+"Baseline, 3 lags",x_Y,6,0.10123543768523383,795
+"Baseline, 4 lags",x_P,0,1.0,795
+"Baseline, 4 lags",x_P,1,0.4183002513852165,795
+"Baseline, 4 lags",x_P,2,0.14948228421336898,795
+"Baseline, 4 lags",x_P,3,0.0708365239544397,795
+"Baseline, 4 lags",x_P,4,-0.0834376693900508,795
+"Baseline, 4 lags",x_P,5,-0.10761738124472223,795
+"Baseline, 4 lags",x_P,6,0.10460587249474948,795
+"Baseline, 4 lags",x_R,0,1.0,795
+"Baseline, 4 lags",x_R,1,0.727676637585774,795
+"Baseline, 4 lags",x_R,2,0.49856947085305314,795
+"Baseline, 4 lags",x_R,3,0.27635894110312303,795
+"Baseline, 4 lags",x_R,4,0.1619330201642556,795
+"Baseline, 4 lags",x_R,5,0.16923569383775186,795
+"Baseline, 4 lags",x_R,6,0.10467815512687842,795
+"Baseline, 4 lags",x_H,0,1.0,795
+"Baseline, 4 lags",x_H,1,0.7739826058579474,795
+"Baseline, 4 lags",x_H,2,0.5878418478386679,795
+"Baseline, 4 lags",x_H,3,0.4123289647512816,795
+"Baseline, 4 lags",x_H,4,0.21703327131675643,795
+"Baseline, 4 lags",x_H,5,0.354574334860516,795
+"Baseline, 4 lags",x_H,6,0.29779968673619406,795
+"Baseline, 4 lags",x_Y,0,1.0,795
+"Baseline, 4 lags",x_Y,1,0.893919962191752,795
+"Baseline, 4 lags",x_Y,2,0.7927154828635434,795
+"Baseline, 4 lags",x_Y,3,0.1304393250925012,795
+"Baseline, 4 lags",x_Y,4,-0.07247543487848132,795
+"Baseline, 4 lags",x_Y,5,0.17546476489175347,795
+"Baseline, 4 lags",x_Y,6,0.40491576398030127,795
++ ΔCA,x_P,0,1.0,795
++ ΔCA,x_P,1,0.4800475071641456,795
++ ΔCA,x_P,2,0.17502728286114777,795
++ ΔCA,x_P,3,0.04338793711425983,795
++ ΔCA,x_P,4,-0.06845210529051386,795
++ ΔCA,x_P,5,-0.09554567929339002,795
++ ΔCA,x_P,6,0.035338801702772316,795
++ ΔCA,x_R,0,1.0,795
++ ΔCA,x_R,1,0.7517313476686969,795
++ ΔCA,x_R,2,0.5443049252649764,795
++ ΔCA,x_R,3,0.341127107500258,795
++ ΔCA,x_R,4,0.199884956561568,795
++ ΔCA,x_R,5,0.1824338404011762,795
++ ΔCA,x_R,6,0.1093607584482171,795
++ ΔCA,x_H,0,1.0,795
++ ΔCA,x_H,1,0.7444678720795562,795
++ ΔCA,x_H,2,0.5705196390187031,795
++ ΔCA,x_H,3,0.4130358583459442,795
++ ΔCA,x_H,4,0.18851240841574307,795
++ ΔCA,x_H,5,0.36743672097513225,795
++ ΔCA,x_H,6,0.31137238939954315,795
++ ΔCA,x_Y,0,1.0,795
++ ΔCA,x_Y,1,0.7749317697525414,795
++ ΔCA,x_Y,2,0.6380818167918253,795
++ ΔCA,x_Y,3,0.135013245480976,795
++ ΔCA,x_Y,4,-0.05160465898690377,795
++ ΔCA,x_Y,5,0.23216786683159135,795
++ ΔCA,x_Y,6,0.21431211849988388,795
++ other-sector S–I (Δ),x_P,0,1.0,795
++ other-sector S–I (Δ),x_P,1,0.46687020005083196,795
++ other-sector S–I (Δ),x_P,2,0.19087297917945928,795
++ other-sector S–I (Δ),x_P,3,0.05478400079395543,795
++ other-sector S–I (Δ),x_P,4,-0.026722326167265217,795
++ other-sector S–I (Δ),x_P,5,-0.0871369593560191,795
++ other-sector S–I (Δ),x_P,6,0.03511426566832625,795
++ other-sector S–I (Δ),x_R,0,1.0,795
++ other-sector S–I (Δ),x_R,1,0.7283078473565717,795
++ other-sector S–I (Δ),x_R,2,0.5081937235330649,795
++ other-sector S–I (Δ),x_R,3,0.35379889255501235,795
++ other-sector S–I (Δ),x_R,4,0.21556000560851354,795
++ other-sector S–I (Δ),x_R,5,0.1912892097307506,795
++ other-sector S–I (Δ),x_R,6,0.11540124596128243,795
++ other-sector S–I (Δ),x_H,0,1.0,795
++ other-sector S–I (Δ),x_H,1,0.7358173167286405,795
++ other-sector S–I (Δ),x_H,2,0.5912654364454271,795
++ other-sector S–I (Δ),x_H,3,0.4417562003502333,795
++ other-sector S–I (Δ),x_H,4,0.21598379516006597,795
++ other-sector S–I (Δ),x_H,5,0.38926920784702795,795
++ other-sector S–I (Δ),x_H,6,0.32829721671077383,795
++ other-sector S–I (Δ),x_Y,0,1.0,795
++ other-sector S–I (Δ),x_Y,1,0.8514588588935365,795
++ other-sector S–I (Δ),x_Y,2,0.5861528337520295,795
++ other-sector S–I (Δ),x_Y,3,0.04641685651966118,795
++ other-sector S–I (Δ),x_Y,4,-0.07301833881445927,795
++ other-sector S–I (Δ),x_Y,5,0.19865092452330618,795
++ other-sector S–I (Δ),x_Y,6,0.3770086759486207,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,0,1.0,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,1,0.47376296506825477,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,2,0.18187335907556404,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,3,0.07850389023451866,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,4,0.05423591392263427,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,5,-0.019723589559151638,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_P,6,0.1365205888576239,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,0,1.0,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,1,0.7619725546194687,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,2,0.5514872399776543,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,3,0.35141797226491106,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,4,0.19322707874799175,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,5,0.18279780505929114,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_R,6,0.10742129414363463,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,0,1.0,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,1,0.7572345111026781,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,2,0.5671727861265063,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,3,0.4014822692673498,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,4,0.20056671506118667,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,5,0.36487361832615944,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_H,6,0.2791358916401935,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,0,1.0,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,1,0.738667296945685,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,2,0.600102240056428,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,3,0.15222317821148643,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,4,-0.0381102043439327,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,5,0.37262719685666185,795
+"+ Δoperating surplus, Δsaving rate, Δdisposable income",x_Y,6,0.3855529269932229,795
++ Δold-age dependency,x_P,0,1.0,715
++ Δold-age dependency,x_P,1,0.38184546851645557,715
++ Δold-age dependency,x_P,2,0.18505783065641682,715
++ Δold-age dependency,x_P,3,0.1386180111064422,715
++ Δold-age dependency,x_P,4,0.05791016435395232,715
++ Δold-age dependency,x_P,5,0.04773016403303287,715
++ Δold-age dependency,x_P,6,0.2346064881103652,715
++ Δold-age dependency,x_R,0,1.0,715
++ Δold-age dependency,x_R,1,0.7294220717449719,715
++ Δold-age dependency,x_R,2,0.5190134325590278,715
++ Δold-age dependency,x_R,3,0.3440526971121353,715
++ Δold-age dependency,x_R,4,0.20888967054612173,715
++ Δold-age dependency,x_R,5,0.2110631440492662,715
++ Δold-age dependency,x_R,6,0.13395704309232156,715
++ Δold-age dependency,x_H,0,1.0,715
++ Δold-age dependency,x_H,1,0.7045986207956938,715
++ Δold-age dependency,x_H,2,0.5157576052711957,715
++ Δold-age dependency,x_H,3,0.33617207027291596,715
++ Δold-age dependency,x_H,4,0.11169183728499708,715
++ Δold-age dependency,x_H,5,0.31825551182268824,715
++ Δold-age dependency,x_H,6,0.2611148198554465,715
++ Δold-age dependency,x_Y,0,1.0,715
++ Δold-age dependency,x_Y,1,0.6863228177742537,715
++ Δold-age dependency,x_Y,2,0.726663587049088,715
++ Δold-age dependency,x_Y,3,0.2667284457367771,715
++ Δold-age dependency,x_Y,4,-0.22636401205458195,715
++ Δold-age dependency,x_Y,5,0.22224231293859487,715
++ Δold-age dependency,x_Y,6,-0.13319583147379063,715
++ all of the above,x_P,0,1.0,715
++ all of the above,x_P,1,0.36967367683630553,715
++ all of the above,x_P,2,0.15655698170284194,715
++ all of the above,x_P,3,0.13388885102770381,715
++ all of the above,x_P,4,0.10218433272824796,715
++ all of the above,x_P,5,0.01873911678182855,715
++ all of the above,x_P,6,0.21147744695417675,715
++ all of the above,x_R,0,1.0,715
++ all of the above,x_R,1,0.7532485680039899,715
++ all of the above,x_R,2,0.5610710949372995,715
++ all of the above,x_R,3,0.3774034316078337,715
++ all of the above,x_R,4,0.22187265295057804,715
++ all of the above,x_R,5,0.2105333377285626,715
++ all of the above,x_R,6,0.11334529183809655,715
++ all of the above,x_H,0,1.0,715
++ all of the above,x_H,1,0.7178018223315099,715
++ all of the above,x_H,2,0.5314860592674906,715
++ all of the above,x_H,3,0.3438120054372526,715
++ all of the above,x_H,4,0.20171862622629752,715
++ all of the above,x_H,5,0.3366777692006487,715
++ all of the above,x_H,6,0.20006853525428245,715
++ all of the above,x_Y,0,1.0,715
++ all of the above,x_Y,1,0.7690311465829898,715
++ all of the above,x_Y,2,0.9451016895807948,715
++ all of the above,x_Y,3,0.3268841101504476,715
++ all of the above,x_Y,4,-0.07581103702951943,715
++ all of the above,x_Y,5,0.5856473257902649,715
++ all of the above,x_Y,6,0.7528626082564843,715
++ ToT growth,x_P,0,1.0,727
++ ToT growth,x_P,1,0.6260614624716266,727
++ ToT growth,x_P,2,0.3324281070679763,727
++ ToT growth,x_P,3,0.18406344805968394,727
++ ToT growth,x_P,4,0.12961460645156508,727
++ ToT growth,x_P,5,0.11038661055430342,727
++ ToT growth,x_P,6,0.17887018834538562,727
++ ToT growth,x_R,0,1.0,727
++ ToT growth,x_R,1,0.7393606084030282,727
++ ToT growth,x_R,2,0.5382755594118656,727
++ ToT growth,x_R,3,0.3233029864812182,727
++ ToT growth,x_R,4,0.18825253183168036,727
++ ToT growth,x_R,5,0.15574633225261061,727
++ ToT growth,x_R,6,0.09319723065458983,727
++ ToT growth,x_H,0,1.0,727
++ ToT growth,x_H,1,0.7750696616478683,727
++ ToT growth,x_H,2,0.6021520602789816,727
++ ToT growth,x_H,3,0.39689027124202453,727
++ ToT growth,x_H,4,0.2563738699701406,727
++ ToT growth,x_H,5,0.24887086409765907,727
++ ToT growth,x_H,6,0.16660015213721494,727
++ ToT growth,x_Y,0,1.0,727
++ ToT growth,x_Y,1,0.8408782333549849,727
++ ToT growth,x_Y,2,0.5730963871658449,727
++ ToT growth,x_Y,3,0.08390608305151048,727
++ ToT growth,x_Y,4,0.23269951058054533,727
++ ToT growth,x_Y,5,0.5321733164058647,727
++ ToT growth,x_Y,6,0.5754713467181297,727
+Ref.: other sector's components at t,x_P,0,1.0,795
+Ref.: other sector's components at t,x_P,1,0.608501423009037,795
+Ref.: other sector's components at t,x_P,2,0.3612658158010427,795
+Ref.: other sector's components at t,x_P,3,0.23391355498651784,795
+Ref.: other sector's components at t,x_P,4,0.16194526852393304,795
+Ref.: other sector's components at t,x_P,5,0.046277698874195396,795
+Ref.: other sector's components at t,x_P,6,0.11150291906157475,795
+Ref.: other sector's components at t,x_R,0,1.0,795
+Ref.: other sector's components at t,x_R,1,0.7758676555850532,795
+Ref.: other sector's components at t,x_R,2,0.564602613929848,795
+Ref.: other sector's components at t,x_R,3,0.37509490428022363,795
+Ref.: other sector's components at t,x_R,4,0.23318640075302347,795
+Ref.: other sector's components at t,x_R,5,0.19443960355650286,795
+Ref.: other sector's components at t,x_R,6,0.11725120943191901,795
+Ref.: other sector's components at t,x_H,0,1.0,795
+Ref.: other sector's components at t,x_H,1,0.7486786593690075,795
+Ref.: other sector's components at t,x_H,2,0.5591646062261038,795
+Ref.: other sector's components at t,x_H,3,0.404980977278541,795
+Ref.: other sector's components at t,x_H,4,0.19281143082437233,795
+Ref.: other sector's components at t,x_H,5,0.32408078423481507,795
+Ref.: other sector's components at t,x_H,6,0.26777376777559014,795
+Ref.: other sector's components at t,x_Y,0,1.0,795
+Ref.: other sector's components at t,x_Y,1,1.2090666214803103,795
+Ref.: other sector's components at t,x_Y,2,0.881621755068566,795
+Ref.: other sector's components at t,x_Y,3,0.030386270244862342,795
+Ref.: other sector's components at t,x_Y,4,-0.09765996365396311,795
+Ref.: other sector's components at t,x_Y,5,0.029839289433049577,795
+Ref.: other sector's components at t,x_Y,6,0.36767955834740196,795
