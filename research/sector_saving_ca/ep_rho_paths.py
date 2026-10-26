@@ -18,10 +18,10 @@ if __name__ == "__main__":
     rho = np.linspace(0, 1, 101)
     p = parts(rho)
     fig, ax = plt.subplots(figsize=(6.4, 3.8))
-    ax.plot(rho, p["price"], color=fp.CO, lw=1.8, label="Price reversal  φ_s(1−ρ)X₀")
-    ax.plot(rho, p["absorb"], color="#7a5195", lw=1.8, label="Absorption  (φ_s−φ_m)ρX₀")
-    ax.plot(rho, p["price"] + p["absorb"], color="k", lw=2.2, label="Transitory, total  (φ_s−φ_m ρ)X₀")
-    ax.plot(rho, p["under"], color=fp.HH, lw=1.8, ls="--", label="Underlying  φ_m ρ X₀")
+    ax.plot(rho, p["price"], color=fp.CO, lw=1.8, label=r"Price reversal  $\varphi_s(1-\rho)X_0$")
+    ax.plot(rho, p["absorb"], color="#7a5195", lw=1.8, label=r"Absorption  $(\varphi_s-\varphi_m)\rho X_0$")
+    ax.plot(rho, p["price"] + p["absorb"], color="k", lw=2.2, label=r"Transitory, total  $(\varphi_s-\varphi_m\rho)X_0$")
+    ax.plot(rho, p["under"], color=fp.HH, lw=1.8, ls="--", label=r"Underlying  $\varphi_m\rho X_0$")
     for name, P in SCEN.items():
         r = P / X0
         q = parts(r)
@@ -30,12 +30,12 @@ if __name__ == "__main__":
         ax.axvline(r, color="0.8", lw=0.6, ls=":")
         ax.text(r, 16.6, f"{name}\nρ={r:.2f}", ha="center", fontsize=6.8, color="0.35")
         print(name, f"rho={r:.3f}", {k: round(float(v), 2) for k, v in q.items()}, "total", round(float(q['price'] + q['absorb']), 2))
-    ax.set_xlabel("Share of the 2026 chip balance still present in 2031, ρ = P / X₀")
+    ax.set_xlabel(r"Share of the 2026 chip balance still present in 2031, $\rho = P/X_0$")
     ax.set_ylabel("Points of GDP")
     ax.set_ylim(0, 18)
     ax.legend(loc="center left", fontsize=7, frameon=False, bbox_to_anchor=(0.0, 0.45))
     ax.set_title("Equation (1) in terms of persistence", loc="left", fontsize=9.5, fontweight="bold")
     fig.tight_layout()
-    fig.text(0.0, -0.02, "Notes: X₀ = 17.2 points of GDP (chip balance above baseline in 2026); φ_s = 0.88 and φ_m = 0.26 (BVAR, scheme 1). Dots: "
+    fig.text(0.0, -0.02, "Notes: X0 = 17.2 points of GDP (chip balance above baseline in 2026); φ_s = 0.88 and φ_m = 0.26 (BVAR, scheme 1). Dots: "
              "the three price scenarios, whose 2031 chip balances (2.4, 4.5 and 9.6 points) imply ρ.", fontsize=6.8, wrap=True, va="top")
     fp.save(fig, "fig_rho_paths", sfx="")
